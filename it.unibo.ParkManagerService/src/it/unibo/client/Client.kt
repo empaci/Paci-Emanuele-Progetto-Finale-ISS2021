@@ -16,7 +16,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var TOKEIND = ""  
+		 var TOKENID = ""  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -29,23 +29,33 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						println("Client request to park.")
 						request("clientRequest", "clientRequest(in)" ,"park_manager_service" )  
 					}
-					 transition(edgeName="slotnumReceived1",targetState="handleSlotnum",cond=whenReply("replySlotnum"))
+					 transition(edgeName="slotnumReceived2",targetState="handleSlotnum",cond=whenReply("replySlotnum"))
 				}	 
 				state("handleSlotnum") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						println("Client SLOTNUM received.")
+						if( checkMsgContent( Term.createTerm("replySlotum(X)"), Term.createTerm("replySlotnum(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val SLOTNUM = payloadArg(0)  
+								println("received slotnum: $SLOTNUM")
+						}
 					}
-					 transition(edgeName="tokenidReceived2",targetState="handleTokenid",cond=whenDispatch("replyTokenid"))
+					 transition(edgeName="tokenidReceived3",targetState="handleTokenid",cond=whenDispatch("replyTokenid"))
 				}	 
 				state("handleTokenid") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						println("Client TOKENID received.")
 						if( checkMsgContent( Term.createTerm("replyTokenid(X)"), Term.createTerm("replyTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 TOKENID = "${payloadArg(0)}"  
+								println("received tokenid: $TOKENID")
 						}
+						stateTimer = TimerActor("timer_handleTokenid", 
+							scope, context!!, "local_tout_client_handleTokenid", 1000.toLong() )
 					}
-					 transition( edgeName="goto",targetState="requestOut", cond=doswitch() )
+					 transition(edgeName="out4",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
 				}	 
 				state("requestOut") { //this:State
 					action { //it:State

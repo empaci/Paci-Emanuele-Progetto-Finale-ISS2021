@@ -32,11 +32,41 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 					action { //it:State
 						println("ParkManagerServing accepting client requests...")
 					}
-					 transition(edgeName="clientIn0",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					 transition(edgeName="clientMsg0",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="clientMsg1",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
 				}	 
 				state("handleClientRequest") { //this:State
 					action { //it:State
 						println("ParkManagerService handeling client request")
+						if( checkMsgContent( Term.createTerm("clientRequest(X)"), Term.createTerm("clientRequest(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val requestType = "${payloadArg(0)}"  
+								if(  requestType == "in"  
+								 ){println("ParkManagerServing Request to park received.")
+								solve("getFreeSlot(S)","") //set resVar	
+								 val SLOTNUM = getCurSol("S")  
+								solve("occupySlot($SLOTNUM)","") //set resVar	
+								answer("clientRequest", "replySlotnum", "replySlotnum($SLOTNUM)"   )  
+								if(  "${SLOTNUM}" != "0"  
+								 ){ val TOKENID = "$SLOTNUM,$counter"  
+								 counter++  
+								forward("replyTokenid", "replyTokenid($TOKENID)" ,"client" ) 
+								}
+								}
+						}
+					}
+					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
+				}	 
+				state("handleClientOut") { //this:State
+					action { //it:State
+						println("ParkManagerServing out.")
+						if( checkMsgContent( Term.createTerm("outTokenid(X)"), Term.createTerm("outTokenid(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val TOKENID = "${payloadArg(0)}"  
+								 val SLOTNUM =  TOKENID.split(",")[0]  
+								solve("unoccupySlot($SLOTNUM)","") //set resVar	
+								println("$SLOTNUM")
+						}
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 

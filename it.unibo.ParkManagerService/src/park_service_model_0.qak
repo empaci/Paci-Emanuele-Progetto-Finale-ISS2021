@@ -1,13 +1,13 @@
-System -msglog demo
+System -msglog model
 
 Request clientRequest : clientRequest(X) // X = in/out
 Reply replySlotnum : replySlotum(X) // X=0/1/2/3/4/5/6
 Dispatch replyTokenid : replyTokenid(X) 
-Dispatch outTokenid : outTokenid(X) 
+Dispatch outTokenid : outTokenid(X)
+Dispatch weightData : weightData(X) 
 
 
 Context ctxParkManagerService ip [host="localhost" port=8070]
-
 
 QActor park_manager_service context ctxParkManagerService {
 	[# var counter=0 #]
@@ -23,12 +23,12 @@ QActor park_manager_service context ctxParkManagerService {
 	State accept {
 		println("ParkManagerServing accepting client requests...")	
 	}
-	Transition clientIn whenRequest clientRequest -> handleClientRequest
+	Transition clientMsg whenRequest clientRequest -> handleClientRequest
+						 whenMsg outTokenid -> handleClientOut
 	
 	State handleClientRequest {
 		println("ParkManagerService handeling client request")
-		/*
-		onMsg(clientRequest : clientRequest(X)) {
+		onMsg( clientRequest : clientRequest(X)) {
 			[# val requestType = "${payloadArg(0)}" #]
 			if [# requestType == "in" #] {
 				println("ParkManagerServing Request to park received.")
@@ -41,40 +41,39 @@ QActor park_manager_service context ctxParkManagerService {
 				
 				replyTo clientRequest with  replySlotnum :  replySlotnum( $SLOTNUM )
 				
-				if [# SLOTNUM != 0 #] {
+				if [# "${SLOTNUM}" != "0" #] {
 				
 					//muovi trolley
 					
-					[# val TOKENID = "$SLOTNUM$-counter" #]
+					[# val TOKENID = "$SLOTNUM,$counter" #]
 					[# counter++ #]
 					
 					forward client -m  replyTokenid :  replyTokenid( $TOKENID )
 				}
-			} else {
-				if [# requestType == "out" #]{
-					println("ParkManagerServing out.")
-					
-					onMsg(outTokenid : outTokenid(X)) {
-						[# val TOKENID = "${payloadArg(0)}" #]
-						[# val SLOTNUM =  TOKENID.split("-")[0] #]
-						
-						solve( unoccupySlot( $SLOTNUM ) ) 
-						
-						//muovi trolley
-					}
-					
-					
-				}
 			}
 		}
-		* */
+	}
+	Goto accept
+	
+	State handleClientOut {
+		println("ParkManagerServing out.")
+					
+		onMsg( outTokenid : outTokenid(X)) {
+			[# val TOKENID = "${payloadArg(0)}" #]
+			[# val SLOTNUM =  TOKENID.split(",")[0] #]
+						
+			solve( unoccupySlot( $SLOTNUM ) ) 
+			
+			println("$SLOTNUM")	
+			//muovi trolley
+		}
 	}
 	Goto accept
 	 
 }
 
 QActor client context ctxParkManagerService {
-	[# var TOKEIND = "" #]
+	[# var TOKENID = "" #]
 	State s0 initial {
 		println("Starting Client.")
 	}
@@ -87,23 +86,24 @@ QActor client context ctxParkManagerService {
 	Transition slotnumReceived whenReply replySlotnum -> handleSlotnum
 		
 	State handleSlotnum {
+		printCurrentMessage
 		println("Client SLOTNUM received.")
-		/* 
-		onMsg(replySlotnum : replySlotnum(X)) {
-			[# val SLOTNUM = "${payloadArg(0)}" #]
-			println(SLOTNUM)
-		} */
+		onMsg( replySlotnum : replySlotnum(X)) {
+			[# val SLOTNUM = payloadArg(0) #]
+			println("received slotnum: $SLOTNUM")
+		} 
 	}
 	Transition tokenidReceived whenMsg replyTokenid -> handleTokenid
 	
 	State handleTokenid {
+		printCurrentMessage
 		println("Client TOKENID received.")
-		onMsg(replyTokenid : replyTokenid(X)) {
+		onMsg( replyTokenid : replyTokenid(X)) {
 			[# TOKENID = "${payloadArg(0)}" #]
+			println("received tokenid: $TOKENID")
 		}
 	}
-	Goto requestOut
-	//Transition out whenTime 1000 -> requestOut
+	Transition out whenTime 1000 -> requestOut
 	
 	State requestOut {
 		println("Client request to exit sent.")
@@ -114,8 +114,65 @@ QActor client context ctxParkManagerService {
 
 
 QActor weight_sensor context ctxParkManagerService {
+	[#   
+		var prevWeight=0f
+		
+		fun resourceInfo(weight: Float, preWeight: Float) : String {
+			if (Math.abs(weight - prevWeight) > 10) {
+				if (weight.toInt() == 0) {
+					return "free"
+				}
+ 			}
+ 			return "occupied"
+ 		}
+	#]
+	
 	State s0 initial {
 		println("Starting Weight sensor.")
+	}
+	Goto wait
+	
+	State wait {
+		println("Weightsensor waiting for data...")
+	}
+	Transition data whenMsg weightData -> handleData
+	
+	State handleData {
+		println("Weightsensor received data")
+		onMsg(weightData : weightData(X)) {
+			[# var weight = "${payloadArg(0)}" #]
+			println("weight: $weight")
+			updateResource [# resourceInfo(weight.toFloat(), prevWeight.toFloat()) #]
+			[# prevWeight = weight.toFloat() #]
+		}
+	}
+	Goto wait
+	
+}
+
+QActor weight_mock context ctxParkManagerService {
+	State s0 initial {
+		println("Starting WeightMopck")
+	} Goto sendData
+	
+	State sendData {
+		forward weight_sensor -m weightData : weightData(50)
+		
+		delay 5000
+		
+		forward weight_sensor -m weightData : weightData(45)
+		
+		delay 5000
+		
+		forward weight_sensor -m weightData : weightData(0)
+		
+		delay 5000
+		
+		forward weight_sensor -m weightData : weightData(80)
+		
+		delay 5000
+		
+		forward weight_sensor -m weightData : weightData(0)
 	}
 }
 
