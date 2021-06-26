@@ -1,9 +1,0 @@
-System -msglog demo
-
-Context ctxDemo ip [host="localhost" port=8053]
-
-QActor demo context ctxDemo {
-	State s0 initial {
-		println("demo working")
-	}
-}

@@ -27,8 +27,3 @@ gradlew.bat
 docker/
 /.metadata/
 /src-gen/
-
-docker_password.txt
-userDocs/template2021.html
-userDocs/workplan.txt
-

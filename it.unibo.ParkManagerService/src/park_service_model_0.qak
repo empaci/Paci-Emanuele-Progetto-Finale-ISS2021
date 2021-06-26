@@ -1,0 +1,126 @@
+System -msglog demo
+
+Request clientRequest : clientRequest(X) // X = in/out
+Reply replySlotnum : replySlotum(X) // X=0/1/2/3/4/5/6
+Dispatch replyTokenid : replyTokenid(X) 
+Dispatch outTokenid : outTokenid(X) 
+
+
+Context ctxParkManagerService ip [host="localhost" port=8070]
+
+
+QActor park_manager_service context ctxParkManagerService {
+	[# var counter=0 #]
+	State s0 initial {
+		discardMsg Off
+		solve( consult("parking.pl"))
+		solve( dynamic("freeSlot/1") )
+		solve(unoccupySlot(1))
+		println("Starting ParkManagerService.")
+	}
+	Goto accept
+	
+	State accept {
+		println("ParkManagerServing accepting client requests...")	
+	}
+	Transition clientIn whenRequest clientRequest -> handleClientRequest
+	
+	State handleClientRequest {
+		println("ParkManagerService handeling client request")
+		/*
+		onMsg(clientRequest : clientRequest(X)) {
+			[# val requestType = "${payloadArg(0)}" #]
+			if [# requestType == "in" #] {
+				println("ParkManagerServing Request to park received.")
+				
+				//verifica se INDOOR è libero
+				
+				solve( getFreeSlot( S ) )
+				[# val SLOTNUM = getCurSol("S") #] 
+				solve( occupySlot( $SLOTNUM ) ) 
+				
+				replyTo clientRequest with  replySlotnum :  replySlotnum( $SLOTNUM )
+				
+				if [# SLOTNUM != 0 #] {
+				
+					//muovi trolley
+					
+					[# val TOKENID = "$SLOTNUM$-counter" #]
+					[# counter++ #]
+					
+					forward client -m  replyTokenid :  replyTokenid( $TOKENID )
+				}
+			} else {
+				if [# requestType == "out" #]{
+					println("ParkManagerServing out.")
+					
+					onMsg(outTokenid : outTokenid(X)) {
+						[# val TOKENID = "${payloadArg(0)}" #]
+						[# val SLOTNUM =  TOKENID.split("-")[0] #]
+						
+						solve( unoccupySlot( $SLOTNUM ) ) 
+						
+						//muovi trolley
+					}
+					
+					
+				}
+			}
+		}
+		* */
+	}
+	Goto accept
+	 
+}
+
+QActor client context ctxParkManagerService {
+	[# var TOKEIND = "" #]
+	State s0 initial {
+		println("Starting Client.")
+	}
+	Goto requestIn
+	
+	State requestIn {
+		println("Client request to park.")
+		request park_manager_service -m clientRequest : clientRequest(in)
+	}
+	Transition slotnumReceived whenReply replySlotnum -> handleSlotnum
+		
+	State handleSlotnum {
+		println("Client SLOTNUM received.")
+		/* 
+		onMsg(replySlotnum : replySlotnum(X)) {
+			[# val SLOTNUM = "${payloadArg(0)}" #]
+			println(SLOTNUM)
+		} */
+	}
+	Transition tokenidReceived whenMsg replyTokenid -> handleTokenid
+	
+	State handleTokenid {
+		println("Client TOKENID received.")
+		onMsg(replyTokenid : replyTokenid(X)) {
+			[# TOKENID = "${payloadArg(0)}" #]
+		}
+	}
+	Goto requestOut
+	//Transition out whenTime 1000 -> requestOut
+	
+	State requestOut {
+		println("Client request to exit sent.")
+		forward park_manager_service -m outTokenid : outTokenid($TOKENID) 
+	}	
+} 
+
+
+
+QActor weight_sensor context ctxParkManagerService {
+	State s0 initial {
+		println("Starting Weight sensor.")
+	}
+}
+
+QActor transport_trolley context ctxParkManagerService {
+	State s0 initial {
+		println("Starting Transport trolley.")
+	}
+}
