@@ -16,7 +16,8 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var TOKENID = ""  
+		 var TOKENID = ""
+			 var SLOTNUM = 0   
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -29,25 +30,31 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						println("Client request to park.")
 						request("clientRequest", "clientRequest(in)" ,"park_manager_service" )  
 					}
-					 transition(edgeName="slotnumReceived2",targetState="handleSlotnum",cond=whenReply("replySlotnum"))
+					 transition(edgeName="t00",targetState="handleSlotnum",cond=whenReply("enter"))
 				}	 
 				state("handleSlotnum") { //this:State
 					action { //it:State
-						println("$name in ${currentState.stateName} | $currentMsg")
-						println("Client SLOTNUM received.")
-						if( checkMsgContent( Term.createTerm("replySlotum(X)"), Term.createTerm("replySlotnum(X)"), 
+						if( checkMsgContent( Term.createTerm("enter(SLOTNUM)"), Term.createTerm("enter(SLOTNUM)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val SLOTNUM = payloadArg(0)  
+								 SLOTNUM = payloadArg(0).toInt()  
 								println("received slotnum: $SLOTNUM")
 						}
 					}
-					 transition(edgeName="tokenidReceived3",targetState="handleTokenid",cond=whenDispatch("replyTokenid"))
+					 transition( edgeName="goto",targetState="end", cond=doswitchGuarded({ SLOTNUM==0  
+					}) )
+					transition( edgeName="goto",targetState="moveIndoor", cond=doswitchGuarded({! ( SLOTNUM==0  
+					) }) )
+				}	 
+				state("moveIndoor") { //this:State
+					action { //it:State
+						request("carenter", "carenter($SLOTNUM)" ,"park_manager_service" )  
+					}
+					 transition(edgeName="t01",targetState="handleTokenid",cond=whenReply("replyTokenid"))
 				}	 
 				state("handleTokenid") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						println("Client TOKENID received.")
-						if( checkMsgContent( Term.createTerm("replyTokenid(X)"), Term.createTerm("replyTokenid(X)"), 
+						if( checkMsgContent( Term.createTerm("replyTokenid(TOKENID)"), Term.createTerm("replyTokenid(TOKEN)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 TOKENID = "${payloadArg(0)}"  
 								println("received tokenid: $TOKENID")
@@ -55,12 +62,18 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						stateTimer = TimerActor("timer_handleTokenid", 
 							scope, context!!, "local_tout_client_handleTokenid", 1000.toLong() )
 					}
-					 transition(edgeName="out4",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
+					 transition(edgeName="out2",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
 				}	 
 				state("requestOut") { //this:State
 					action { //it:State
 						println("Client request to exit sent.")
 						forward("outTokenid", "outTokenid($TOKENID)" ,"park_manager_service" ) 
+					}
+					 transition( edgeName="goto",targetState="end", cond=doswitch() )
+				}	 
+				state("end") { //this:State
+					action { //it:State
+						println("Client finished")
 					}
 				}	 
 			}

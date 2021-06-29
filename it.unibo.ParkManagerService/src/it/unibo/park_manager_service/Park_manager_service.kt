@@ -32,8 +32,9 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 					action { //it:State
 						println("ParkManagerServing accepting client requests...")
 					}
-					 transition(edgeName="clientMsg0",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
-					transition(edgeName="clientMsg1",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
+					 transition(edgeName="clientMsg3",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="clientMsg4",targetState="handleCarEnter",cond=whenRequest("carenter"))
+					transition(edgeName="clientMsg5",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
 				}	 
 				state("handleClientRequest") { //this:State
 					action { //it:State
@@ -46,13 +47,25 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 								solve("getFreeSlot(S)","") //set resVar	
 								 val SLOTNUM = getCurSol("S")  
 								solve("occupySlot($SLOTNUM)","") //set resVar	
-								answer("clientRequest", "replySlotnum", "replySlotnum($SLOTNUM)"   )  
-								if(  "${SLOTNUM}" != "0"  
-								 ){ val TOKENID = "$SLOTNUM,$counter"  
+								answer("clientRequest", "enter", "enter($SLOTNUM)"   )  
+								}
+						}
+					}
+					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
+				}	 
+				state("handleCarEnter") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						if( checkMsgContent( Term.createTerm("carenter(SLOTNUM)"), Term.createTerm("carenter(SLOTNUM)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val SLOTNUM = payloadArg(0).toInt()  
+								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
+								 val x = getCurSol("X")  
+								 val y = getCurSol("Y")  
+								println("x: $x, y: $y")
+								 val TOKENID = "$SLOTNUM,$counter"  
 								 counter++  
-								forward("replyTokenid", "replyTokenid($TOKENID)" ,"client" ) 
-								}
-								}
+								answer("carenter", "replyTokenid", "replyTokenid($TOKENID)"   )  
 						}
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
@@ -60,10 +73,14 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 				state("handleClientOut") { //this:State
 					action { //it:State
 						println("ParkManagerServing out.")
-						if( checkMsgContent( Term.createTerm("outTokenid(X)"), Term.createTerm("outTokenid(X)"), 
+						if( checkMsgContent( Term.createTerm("outTokenid(TOKENID)"), Term.createTerm("outTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TOKENID = "${payloadArg(0)}"  
 								 val SLOTNUM =  TOKENID.split(",")[0]  
+								solve("outdoor(X,Y)","") //set resVar	
+								 val x = getCurSol("X")  
+								 val y = getCurSol("Y")  
+								println("x: $x, y: $y")
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
 								println("$SLOTNUM")
 						}

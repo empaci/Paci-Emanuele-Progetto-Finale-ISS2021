@@ -1,15 +1,68 @@
 System -msglog model
 
 Request clientRequest : clientRequest(X) // X = in/out
-Reply replySlotnum : replySlotum(X) // X=0/1/2/3/4/5/6
-Dispatch replyTokenid : replyTokenid(X) 
-Dispatch outTokenid : outTokenid(X)
-Dispatch weightData : weightData(X) 
+Reply enter : enter(SLOTNUM) // X=0/1/2/3/4/5/6 
 
+Request carenter : carenter(SLOTNUM)
+Reply replyTokenid : replyTokenid(TOKENID)
 
-Context ctxParkManagerService ip [host="localhost" port=8070]
+Dispatch outTokenid : outTokenid(TOKENID)
+Dispatch weightData : weightData(W) 
 
-QActor park_manager_service context ctxParkManagerService {
+Dispatch move : move(X,Y)
+Dispatch moveok   : move( MOVESHORT )
+
+Context ctxparkmanager ip [host="localhost" port=8070]
+//Context ctxtrolley ip[host="127.0.0.1" port=8052]
+
+QActor client context ctxparkmanager {
+	[# var TOKENID = ""
+	 var SLOTNUM = 0  #]
+	State s0 initial {
+		println("Starting Client.")
+	}
+	Goto requestIn
+	
+	State requestIn {
+		println("Client request to park.")
+		request park_manager_service -m clientRequest : clientRequest(in)
+	}
+	Transition t0 whenReply enter -> handleSlotnum
+		
+	State handleSlotnum {
+		onMsg( enter : enter(SLOTNUM)) {
+			[# SLOTNUM = payloadArg(0).toInt() #]
+			println("received slotnum: $SLOTNUM")
+		} 
+	}
+	Goto end if [# SLOTNUM==0 #] else moveIndoor
+	
+	State moveIndoor {
+		request park_manager_service -m carenter : carenter($SLOTNUM)	
+	}
+	Transition t0 whenReply replyTokenid -> handleTokenid
+	
+	State handleTokenid {
+		printCurrentMessage
+		onMsg( replyTokenid : replyTokenid(TOKEN)) {
+			[# TOKENID = "${payloadArg(0)}" #]
+			println("received tokenid: $TOKENID")
+		}
+	}
+	Transition out whenTime 1000 -> requestOut
+	
+	State requestOut {
+		println("Client request to exit sent.")
+		forward park_manager_service -m outTokenid : outTokenid($TOKENID) 
+	}
+	Goto end
+
+	State end {
+		println("Client finished")
+	}
+} 
+
+QActor park_manager_service context ctxparkmanager {
 	[# var counter=0 #]
 	State s0 initial {
 		discardMsg Off
@@ -24,6 +77,7 @@ QActor park_manager_service context ctxParkManagerService {
 		println("ParkManagerServing accepting client requests...")	
 	}
 	Transition clientMsg whenRequest clientRequest -> handleClientRequest
+						 whenRequest carenter -> handleCarEnter
 						 whenMsg outTokenid -> handleClientOut
 	
 	State handleClientRequest {
@@ -34,34 +88,56 @@ QActor park_manager_service context ctxParkManagerService {
 				println("ParkManagerServing Request to park received.")
 				
 				//verifica se INDOOR è libero
+				//verifica stato del robot
 				
 				solve( getFreeSlot( S ) )
 				[# val SLOTNUM = getCurSol("S") #] 
-				solve( occupySlot( $SLOTNUM ) ) 
+				solve( occupySlot( $SLOTNUM ) ) //se poi non fa carenter? occuparlo dopo? se poi lo do ad un altra macchina?
 				
-				replyTo clientRequest with  replySlotnum :  replySlotnum( $SLOTNUM )
-				
-				if [# "${SLOTNUM}" != "0" #] {
-				
-					//muovi trolley
-					
-					[# val TOKENID = "$SLOTNUM,$counter" #]
-					[# counter++ #]
-					
-					forward client -m  replyTokenid :  replyTokenid( $TOKENID )
-				}
+				replyTo clientRequest with  enter :  enter( $SLOTNUM )
 			}
+		}
+	}
+	Goto accept
+	
+	State handleCarEnter {
+		printCurrentMessage
+		onMsg(carenter : carenter(SLOTNUM)) {
+			[# val SLOTNUM = payloadArg(0).toInt() #]
+			
+			//muovi trolley
+			
+			solve( getCoordinates($SLOTNUM,X,Y) )
+			[# val x = getCurSol("X") #]
+			[# val y = getCurSol("Y") #]
+			println("x: $x, y: $y")
+			//forward mytrolley -m move : move(x,y)
+					
+			[# val TOKENID = "$SLOTNUM,$counter" #]
+			[# counter++ #]
+					
+			replyTo carenter with  replyTokenid :  replyTokenid( $TOKENID )
 		}
 	}
 	Goto accept
 	
 	State handleClientOut {
 		println("ParkManagerServing out.")
-					
+		
+		//verifica OUTDOOR free
+		//verifica stato trolley
+		
 		onMsg( outTokenid : outTokenid(X)) {
 			[# val TOKENID = "${payloadArg(0)}" #]
 			[# val SLOTNUM =  TOKENID.split(",")[0] #]
-						
+			
+			solve( outdoor(X,Y) )
+			[# val x = getCurSol("X") #]
+			[# val y = getCurSol("Y") #]
+			println("x: $x, y: $y")
+			
+			//forward mytrolley -m move : move(x,y)
+			
 			solve( unoccupySlot( $SLOTNUM ) ) 
 			
 			println("$SLOTNUM")	
@@ -72,47 +148,8 @@ QActor park_manager_service context ctxParkManagerService {
 	 
 }
 
-QActor client context ctxParkManagerService {
-	[# var TOKENID = "" #]
-	State s0 initial {
-		println("Starting Client.")
-	}
-	Goto requestIn
-	
-	State requestIn {
-		println("Client request to park.")
-		request park_manager_service -m clientRequest : clientRequest(in)
-	}
-	Transition slotnumReceived whenReply replySlotnum -> handleSlotnum
-		
-	State handleSlotnum {
-		printCurrentMessage
-		println("Client SLOTNUM received.")
-		onMsg( replySlotnum : replySlotnum(X)) {
-			[# val SLOTNUM = payloadArg(0) #]
-			println("received slotnum: $SLOTNUM")
-		} 
-	}
-	Transition tokenidReceived whenMsg replyTokenid -> handleTokenid
-	
-	State handleTokenid {
-		printCurrentMessage
-		println("Client TOKENID received.")
-		onMsg( replyTokenid : replyTokenid(X)) {
-			[# TOKENID = "${payloadArg(0)}" #]
-			println("received tokenid: $TOKENID")
-		}
-	}
-	Transition out whenTime 1000 -> requestOut
-	
-	State requestOut {
-		println("Client request to exit sent.")
-		forward park_manager_service -m outTokenid : outTokenid($TOKENID) 
-	}	
-} 
 
-
-
+/* 
 QActor weight_sensor context ctxParkManagerService {
 	[#   
 		var prevWeight=0f
@@ -139,7 +176,7 @@ QActor weight_sensor context ctxParkManagerService {
 	
 	State handleData {
 		println("Weightsensor received data")
-		onMsg(weightData : weightData(X)) {
+		onMsg(weightData : weightData(W)) {
 			[# var weight = "${payloadArg(0)}" #]
 			println("weight: $weight")
 			updateResource [# resourceInfo(weight.toFloat(), prevWeight.toFloat()) #]
@@ -152,7 +189,7 @@ QActor weight_sensor context ctxParkManagerService {
 
 QActor weight_mock context ctxParkManagerService {
 	State s0 initial {
-		println("Starting WeightMopck")
+		println("Starting WeightMock")
 	} Goto sendData
 	
 	State sendData {
@@ -177,7 +214,94 @@ QActor weight_mock context ctxParkManagerService {
 }
 
 QActor transport_trolley context ctxParkManagerService {
+	
+	[#
+		val mapname     = "parkingMap"  		 
+		var Myself      = myself   
+		var CurrentPlannedMove = "" 
+		var x = ""
+		var y = ""
+	#]
+	
 	State s0 initial {
-		println("Starting Transport trolley.")
+		run itunibo.planner.plannerUtil.initAI()
+		run itunibo.planner.plannerUtil.loadRoomMap("$mapname") 
+		run itunibo.planner.plannerUtil.showMap( )   
+     	run itunibo.planner.plannerUtil.showCurrentRobotState()
+     	
+     	run pathexecutil.register( Myself )
 	}
+	Goto wait
+	
+	State wait {
+		println("Waiting messages...")
+	}
+	Transition t0 whenMsg move -> handle
+	
+	State handle {
+		printCurrentMessage
+		onMsg(move : move(X,Y)) {
+			[# 
+				x = payloadArg(0)
+				y = payloadArg(1)
+			#]
+			println("x: $x, y: $y")
+			run itunibo.planner.plannerUtil.planForGoal(x,y)
+		}
+	}
+	Goto execPlannedMoves     
+    
+	State execPlannedMoves{   
+		delay 300
+ 		[#  CurrentPlannedMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+ 		println("+++++++++++++++++++++++++++++++ $CurrentPlannedMove")
+ 	}
+ 	Goto doMove if [# CurrentPlannedMove.length>0 #] else parkthecar
+ 
+ 	State doMove{ 		
+ 	}
+ 	Goto wMove if [# CurrentPlannedMove == "w" #] else turnMove
+ 	
+ 	State wMove {     
+ 		qrun pathexecutil.doMove(myself, "p" )  
+ 	}
+ 	Transition t0 whenMsg moveok   -> stepDone   
+  	
+ 	 State stepDone{  
+ 	 	printCurrentMessage
+ 		//updateResource [# itunibo.planner.plannerUtil.getMap() #]
+ 		run itunibo.planner.plannerUtil.updateMap(  "w" )
+ 		run itunibo.planner.plannerUtil.showCurrentRobotState( )
+ 		//updateResource [# "stepDone" # ]
+  	} 
+ 	Goto execPlannedMoves
+ 	
+ 	State turnMove{
+ 		println("-----qqqq-----------------dsaasds---------------sdaadssdasdassdadsd - -- -$CurrentPlannedMove")
+  		if [# CurrentPlannedMove == "l" || CurrentPlannedMove == "r"  #]{
+  			qrun pathexecutil.doMove(myself, "$CurrentPlannedMove")
+  		} 
+ 	}   
+  	Transition t0  whenMsg moveok   -> rotationDone
+
+
+ 	State rotationDone{
+ 		run itunibo.planner.plannerUtil.updateMap(  "$CurrentPlannedMove" )
+   		//run itunibo.planner.plannerUtil.showCurrentRobotState( )
+ 	} 
+ 	 Goto execPlannedMoves
+ 	
+ 	State parkthecar{
+ 		printCurrentMessage
+ 		run itunibo.planner.plannerUtil.showCurrentRobotState( )  
+ 		if [# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #]{
+ 			run itunibo.planner.plannerUtil.planForGoal(x,y)
+ 		}
+ 		else{
+ 			run itunibo.planner.plannerUtil.planForGoal("0","0")
+ 		}
+ 	}
+    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atHome() #] else  wait
+	
 }
+* */
