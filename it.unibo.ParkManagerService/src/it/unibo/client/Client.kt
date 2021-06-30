@@ -50,12 +50,12 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 					action { //it:State
 						request("carenter", "carenter($SLOTNUM)" ,"park_manager_service" )  
 					}
-					 transition(edgeName="t12",targetState="handleTokenid",cond=whenReply("replyTokenid"))
+					 transition(edgeName="t12",targetState="handleTokenid",cond=whenReply("receipt"))
 				}	 
 				state("handleTokenid") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("replyTokenid(TOKENID)"), Term.createTerm("replyTokenid(TOKEN)"), 
+						if( checkMsgContent( Term.createTerm("receipt(TOKENID)"), Term.createTerm("receipt(TOKENID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 TOKENID = "${payloadArg(0)}"  
 						}

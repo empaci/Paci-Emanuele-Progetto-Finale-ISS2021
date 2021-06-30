@@ -4,7 +4,7 @@ Request clientRequest : clientRequest(X) // X = in
 Reply enter : enter(SLOTNUM) // SLOTNUM=0/1/2/3/4/5/6 
 
 Request carenter : carenter(SLOTNUM) // SLOTNUM=1/2/3/4/5/6
-Reply replyTokenid : replyTokenid(TOKENID)
+Reply receipt : receipt(TOKENID)
 
 Dispatch outTokenid : outTokenid(TOKENID)
 Dispatch weightData : weightData(W) 
@@ -38,11 +38,11 @@ QActor client context ctxparkmanager {
 	State moveIndoor {
 		request park_manager_service -m carenter : carenter($SLOTNUM)	
 	}
-	Transition t1 whenReply replyTokenid -> handleTokenid
+	Transition t1 whenReply receipt -> handleTokenid
 	
 	State handleTokenid {
 		printCurrentMessage
-		onMsg( replyTokenid : replyTokenid(TOKEN)) {
+		onMsg( receipt : receipt(TOKENID)) {
 			[# TOKENID = "${payloadArg(0)}" #]
 		}
 	}
@@ -112,7 +112,7 @@ QActor park_manager_service context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			
 			solve( getCoordinates($SLOTNUM,X,Y) )
@@ -120,40 +120,42 @@ QActor park_manager_service context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 
 			//forward transport_trolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 					
-			[# val TOKENID = "$SLOTNUM,$counter" #]
+			[# val TOKENID = "$SLOTNUM"+"$counter" #]
 			[# counter++ #]
 					
-			replyTo carenter with  replyTokenid :  replyTokenid( $TOKENID )
+			replyTo carenter with  receipt :  receipt( $TOKENID )
 		}
 	}
 	Transition t3 whenTime 1000 -> moveTrolleyHome
 						 whenRequest clientRequest -> handleClientRequest
 						 whenRequest carenter -> handleCarEnter
+						 whenMsg outTokenid -> handleClientOut
 	
 	State handleClientOut {
 		println("ParkManagerServing out.")
 		
 		onMsg( outTokenid : outTokenid(X)) {
 			[# val TOKENID = "${payloadArg(0)}" #]
-			[# val SLOTNUM =  TOKENID.split(",")[0] #]
-			
-			updateResource [# TOKENID #]
+			[# val SLOTNUM =  TOKENID.first() #]
+
+			println("TOKENID $TOKENID")
+			updateResource [# ""+TOKENID #]
 			
 			solve( getCoordinates($SLOTNUM,X,Y) )
 			[# x = getCurSol("X").toString().toInt() #]
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			solve( outdoor(X,Y) )
 			[# x = getCurSol("X").toString().toInt() #]
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			solve( unoccupySlot( $SLOTNUM ) ) 
 			
@@ -163,13 +165,14 @@ QActor park_manager_service context ctxparkmanager {
 	Transition t4 whenTime 1000 -> moveTrolleyHome
 				  whenRequest clientRequest -> handleClientRequest
 				  whenRequest carenter -> handleCarEnter
+				  whenMsg outTokenid -> handleClientOut
 				  
 	State moveTrolleyHome {
 		solve( home(X,Y) )
 		[# x = getCurSol("X").toString().toInt() #]
 		[# y = getCurSol("Y").toString().toInt() #]
 		//forward transport_trolley -m move : move($x,$y)
-		[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+		//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 	}
 	Goto accept
 	 
@@ -213,6 +216,7 @@ QActor weight_sensor context ctxparkmanager {
 	
 }
 
+/* 
 
 QActor transport_trolley context ctxparkmanager {
 	
@@ -298,12 +302,16 @@ QActor transport_trolley context ctxparkmanager {
  		if [# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #]{
  			run itunibo.planner.plannerUtil.planForGoal(x,y)
  		}
+ 		else {
+ 			[# println(itunibo.planner.plannerUtil.get_curPos().toString()) #]
+ 			updateResource [# itunibo.planner.plannerUtil.get_curPos().toString() #]
+ 		}
  	}
     Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  wait
 	
 }
 
-/*
+
 QActor weight_mock context ctxparkmanager {
 	State s0 initial {
 		println("Starting WeightMock")

@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.Assert.assertTrue
 
  
-object actorQakCoapObserver2 {
+object actorQakCoapObserver3 {
 
     private val client = CoapClient()
 	
@@ -35,8 +35,10 @@ object actorQakCoapObserver2 {
                 println("actortQakCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
 				
 				when (testnum) {
-					0 -> testSlotIsZero(content)
-					1 -> testTokenidNotSet()
+					0 -> testTrolleyIndoor(content)
+					1 -> testTrolleyParking(content)
+					2 -> testTrolleyOutdoor(content)
+					3 -> testTrolleyHome(content)
 				}
 				testnum++
 				
@@ -53,16 +55,27 @@ object actorQakCoapObserver2 {
 
  }
 
+
 @Test
-fun testSlotIsZero(slotnum: String) {
-	assertTrue(slotnum.toInt()==0)
+fun testTrolleyIndoor(pos: String) {
+	assertTrue(pos=="(6, 0)")
 }
 
 @Test
-fun testTokenidNotSet() {
-	//Tokenid should not be updated, so the test should never arrive here
-	assertTrue(false)
+fun testTrolleyParking(pos: String) {
+	assertTrue(pos=="(1, 1)")
 }
+
+@Test
+fun testTrolleyOutdoor(pos: String) {
+	assertTrue(pos=="(6, 4)")
+}
+
+@Test
+fun testTrolleyHome(pos: String) {
+	assertTrue(pos=="(0, 0)")
+}
+
 
  
 @kotlinx.coroutines.ObsoleteCoroutinesApi

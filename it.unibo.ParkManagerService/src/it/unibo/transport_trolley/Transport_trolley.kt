@@ -37,7 +37,7 @@ class Transport_trolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					action { //it:State
 						println("Waiting messages...")
 					}
-					 transition(edgeName="t014",targetState="handle",cond=whenDispatch("move"))
+					 transition(edgeName="t016",targetState="handle",cond=whenDispatch("move"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -76,7 +76,7 @@ class Transport_trolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					action { //it:State
 						pathexecutil.doMove(myself ,"p" )
 					}
-					 transition(edgeName="t015",targetState="stepDone",cond=whenDispatch("moveok"))
+					 transition(edgeName="t017",targetState="stepDone",cond=whenDispatch("moveok"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
@@ -93,7 +93,7 @@ class Transport_trolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						 ){pathexecutil.doMove(myself ,"$CurrentPlannedMove" )
 						}
 					}
-					 transition(edgeName="t016",targetState="rotationDone",cond=whenDispatch("moveok"))
+					 transition(edgeName="t018",targetState="rotationDone",cond=whenDispatch("moveok"))
 				}	 
 				state("rotationDone") { //this:State
 					action { //it:State
@@ -108,6 +108,11 @@ class Transport_trolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						if(  ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt())  
 						 ){itunibo.planner.plannerUtil.planForGoal( x, y  )
 						}
+						else
+						 { println(itunibo.planner.plannerUtil.get_curPos().toString())  
+						 updateResourceRep( itunibo.planner.plannerUtil.get_curPos().toString()  
+						 )
+						 }
 					}
 					 transition( edgeName="goto",targetState="execPlannedMoves", cond=doswitchGuarded({ ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt())  
 					}) )

@@ -69,14 +69,12 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 								solve("indoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transport_trolley" )  
-								 val TOKENID = "$SLOTNUM,$counter"  
+								 val TOKENID = "$SLOTNUM"+"$counter"  
 								 counter++  
-								answer("carenter", "replyTokenid", "replyTokenid($TOKENID)"   )  
+								answer("carenter", "receipt", "receipt($TOKENID)"   )  
 						}
 						stateTimer = TimerActor("timer_handleCarEnter", 
 							scope, context!!, "local_tout_park_manager_service_handleCarEnter", 1000.toLong() )
@@ -84,6 +82,7 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 					 transition(edgeName="t37",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_park_manager_service_handleCarEnter"))   
 					transition(edgeName="t38",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
 					transition(edgeName="t39",targetState="handleCarEnter",cond=whenRequest("carenter"))
+					transition(edgeName="t310",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
 				}	 
 				state("handleClientOut") { //this:State
 					action { //it:State
@@ -91,17 +90,16 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						if( checkMsgContent( Term.createTerm("outTokenid(TOKENID)"), Term.createTerm("outTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TOKENID = "${payloadArg(0)}"  
-								 val SLOTNUM =  TOKENID.split(",")[0]  
-								updateResourceRep( TOKENID  
+								 val SLOTNUM =  TOKENID.first()  
+								println("TOKENID $TOKENID")
+								updateResourceRep( ""+TOKENID  
 								)
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("outdoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
 								updateResourceRep( ""+SLOTNUM  
 								)
@@ -109,16 +107,16 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						stateTimer = TimerActor("timer_handleClientOut", 
 							scope, context!!, "local_tout_park_manager_service_handleClientOut", 1000.toLong() )
 					}
-					 transition(edgeName="t410",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_park_manager_service_handleClientOut"))   
-					transition(edgeName="t411",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
-					transition(edgeName="t412",targetState="handleCarEnter",cond=whenRequest("carenter"))
+					 transition(edgeName="t411",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_park_manager_service_handleClientOut"))   
+					transition(edgeName="t412",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="t413",targetState="handleCarEnter",cond=whenRequest("carenter"))
+					transition(edgeName="t414",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
 				}	 
 				state("moveTrolleyHome") { //this:State
 					action { //it:State
 						solve("home(X,Y)","") //set resVar	
 						 x = getCurSol("X").toString().toInt()  
 						 y = getCurSol("Y").toString().toInt()  
-						 forward("move", "move($x,$y)" ,"transport_trolley" )  
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 

@@ -10,18 +10,51 @@ import org.eclipse.californium.core.CoapHandler
 import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch 
 import org.junit.Test
+import org.junit.Before
 import org.junit.Assert.assertTrue
+import it.unibo.park_manager_service.Park_manager_service
+import it.unibo.client.Client
+import it.unibo.weight_sensor.Weight_sensor
+import it.unibo.kactor.QakContext
 
 
-internal class TestUseCase1 {
-
-    @Test
-    fun testSum() {
-        val expected = 42
-        assertTrue(expected==42)
-    }
+internal class SampleTest {
+	
+	//lateinit var service : Park_manager_service
+	//lateinit var client : Client
+	lateinit var observer : actorQakCoapObserver
+	
+	@Test
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	fun systemUp() {
+		runBlocking{
+			launch {
+				observer = actorQakCoapObserver
+				observer.activate()
+			}
+			launch {
+				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
+			}
+			delay(1000)
+			
+			assertTrue(observer.tSlot=="1")
+			/*
+			launch {
+				service = Park_manager_service("parkmanager", this)
+				println("============== ParkManagerService activated")
+			}
+			launch {
+				client = Client("client", this)
+				println("============== Client activated")
+			}
+			*/
+		}
+	}
+	
 }
- 
+
+
 object actorQakCoapObserver {
 
     private val client = CoapClient()
@@ -31,6 +64,9 @@ object actorQakCoapObserver {
  	private val destactor   = "park_manager_service"
 	
 	private var testnum = 0
+	
+	public var tSlot = ""
+	public var tTokenid = ""
 
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +80,8 @@ object actorQakCoapObserver {
                 println("actortQakCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
 				
 				when (testnum) {
-					0 -> testSlot(content)
-					1 -> testTokenid(content)
+					0 -> tSlot = content
+					1 -> tTokenid = content
 				}
 				testnum++
 				
@@ -62,20 +98,11 @@ object actorQakCoapObserver {
 
  }
 
-@Test
-fun testSlot(slotnum: String) {
-	assertTrue(slotnum.toInt()==1)
-}
-
-@Test
-fun testTokenid(tokenid: String) {
-	assertTrue(tokenid=="11")
-}
-
- 
+ /*
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun main( ) {
 		actorQakCoapObserver.activate()
 		System.`in`.read()   //to avoid exit
  }
+ */

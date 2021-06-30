@@ -2,7 +2,7 @@
 
 home(0,0).
 indoor(6,0).
-outdoor(4,6).
+outdoor(6,4).
 
 % getCoordinates(SLOTNUM,Xpos,Ypos)
 getCoordinates(1,1,1).
