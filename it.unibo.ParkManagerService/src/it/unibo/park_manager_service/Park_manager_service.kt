@@ -16,7 +16,9 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var counter=0  
+		 
+				var counter=0 
+				var FREE_INDOOR=true
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -32,22 +34,23 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 					action { //it:State
 						println("ParkManagerServing accepting client requests...")
 					}
-					 transition(edgeName="clientMsg3",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
-					transition(edgeName="clientMsg4",targetState="handleCarEnter",cond=whenRequest("carenter"))
-					transition(edgeName="clientMsg5",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
+					 transition(edgeName="clientMsg4",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="clientMsg5",targetState="handleCarEnter",cond=whenRequest("carenter"))
+					transition(edgeName="clientMsg6",targetState="handleClientOut",cond=whenDispatch("outTokenid"))
 				}	 
 				state("handleClientRequest") { //this:State
 					action { //it:State
-						println("ParkManagerService handeling client request")
+						println("ParkManagerService handling client request")
 						if( checkMsgContent( Term.createTerm("clientRequest(X)"), Term.createTerm("clientRequest(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val requestType = "${payloadArg(0)}"  
 								if(  requestType == "in"  
-								 ){println("ParkManagerServing Request to park received.")
-								solve("getFreeSlot(S)","") //set resVar	
+								 ){if(  FREE_INDOOR  
+								 ){solve("getFreeSlot(S)","") //set resVar	
 								 val SLOTNUM = getCurSol("S")  
 								solve("occupySlot($SLOTNUM)","") //set resVar	
 								answer("clientRequest", "enter", "enter($SLOTNUM)"   )  
+								}
 								}
 						}
 					}
@@ -59,16 +62,26 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						if( checkMsgContent( Term.createTerm("carenter(SLOTNUM)"), Term.createTerm("carenter(SLOTNUM)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val SLOTNUM = payloadArg(0).toInt()  
-								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
-								 val x = getCurSol("X")  
-								 val y = getCurSol("Y")  
+								updateResourceRep( ""+SLOTNUM  
+								)
+								solve("indoor(X,Y)","") //set resVar	
+								 val ix = getCurSol("X")  
+								 val iy = getCurSol("Y")  
 								println("x: $x, y: $y")
+								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
+								 val sx = getCurSol("X")  
+								 val sy = getCurSol("Y")  
+								println("x: $sx, y: $sy")
 								 val TOKENID = "$SLOTNUM,$counter"  
 								 counter++  
 								answer("carenter", "replyTokenid", "replyTokenid($TOKENID)"   )  
 						}
+						stateTimer = TimerActor("timer_handleCarEnter", 
+							scope, context!!, "local_tout_park_manager_service_handleCarEnter", 1000.toLong() )
 					}
-					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
+					 transition(edgeName="t37",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_park_manager_service_handleCarEnter"))   
+					transition(edgeName="t38",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="t39",targetState="handleCarEnter",cond=whenRequest("carenter"))
 				}	 
 				state("handleClientOut") { //this:State
 					action { //it:State
@@ -77,13 +90,28 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TOKENID = "${payloadArg(0)}"  
 								 val SLOTNUM =  TOKENID.split(",")[0]  
+								updateResourceRep( TOKENID  
+								)
+								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
+								 val sx = getCurSol("X")  
+								 val sy = getCurSol("Y")  
 								solve("outdoor(X,Y)","") //set resVar	
-								 val x = getCurSol("X")  
-								 val y = getCurSol("Y")  
-								println("x: $x, y: $y")
+								 val ox = getCurSol("X")  
+								 val oy = getCurSol("Y")  
+								println("x: $ox, y: $oy")
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
-								println("$SLOTNUM")
+								updateResourceRep( ""+SLOTNUM  
+								)
 						}
+						stateTimer = TimerActor("timer_handleClientOut", 
+							scope, context!!, "local_tout_park_manager_service_handleClientOut", 1000.toLong() )
+					}
+					 transition(edgeName="t410",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_park_manager_service_handleClientOut"))   
+					transition(edgeName="t411",targetState="handleClientRequest",cond=whenRequest("clientRequest"))
+					transition(edgeName="t412",targetState="handleCarEnter",cond=whenRequest("carenter"))
+				}	 
+				state("moveTrolleyHome") { //this:State
+					action { //it:State
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 

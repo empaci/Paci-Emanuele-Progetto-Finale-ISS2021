@@ -1,9 +1,9 @@
 System -msglog model
 
-Request clientRequest : clientRequest(X) // X = in/out
-Reply enter : enter(SLOTNUM) // X=0/1/2/3/4/5/6 
+Request clientRequest : clientRequest(X) // X = in
+Reply enter : enter(SLOTNUM) // SLOTNUM=0/1/2/3/4/5/6 
 
-Request carenter : carenter(SLOTNUM)
+Request carenter : carenter(SLOTNUM) // SLOTNUM=1/2/3/4/5/6
 Reply replyTokenid : replyTokenid(TOKENID)
 
 Dispatch outTokenid : outTokenid(TOKENID)
@@ -13,7 +13,6 @@ Dispatch move : move(X,Y)
 Dispatch moveok   : move( MOVESHORT )
 
 Context ctxparkmanager ip [host="localhost" port=8070]
-//Context ctxtrolley ip[host="127.0.0.1" port=8052]
 
 QActor client context ctxparkmanager {
 	[# var TOKENID = ""
@@ -24,15 +23,14 @@ QActor client context ctxparkmanager {
 	Goto requestIn
 	
 	State requestIn {
-		println("Client request to park.")
 		request park_manager_service -m clientRequest : clientRequest(in)
 	}
-	Transition t0 whenReply enter -> handleSlotnum
+	Transition t0 whenTime 5000 -> end
+				  whenReply enter -> handleSlotnum
 		
 	State handleSlotnum {
 		onMsg( enter : enter(SLOTNUM)) {
 			[# SLOTNUM = payloadArg(0).toInt() #]
-			println("received slotnum: $SLOTNUM")
 		} 
 	}
 	Goto end if [# SLOTNUM==0 #] else moveIndoor
@@ -40,19 +38,17 @@ QActor client context ctxparkmanager {
 	State moveIndoor {
 		request park_manager_service -m carenter : carenter($SLOTNUM)	
 	}
-	Transition t0 whenReply replyTokenid -> handleTokenid
+	Transition t1 whenReply replyTokenid -> handleTokenid
 	
 	State handleTokenid {
 		printCurrentMessage
 		onMsg( replyTokenid : replyTokenid(TOKEN)) {
 			[# TOKENID = "${payloadArg(0)}" #]
-			println("received tokenid: $TOKENID")
 		}
 	}
 	Transition out whenTime 1000 -> requestOut
 	
 	State requestOut {
-		println("Client request to exit sent.")
 		forward park_manager_service -m outTokenid : outTokenid($TOKENID) 
 	}
 	Goto end
@@ -63,7 +59,10 @@ QActor client context ctxparkmanager {
 } 
 
 QActor park_manager_service context ctxparkmanager {
-	[# var counter=0 #]
+	[# 
+		var counter=0 
+		var FREE_INDOOR=true
+	#]
 	State s0 initial {
 		discardMsg Off
 		solve( consult("parking.pl"))
@@ -81,20 +80,19 @@ QActor park_manager_service context ctxparkmanager {
 						 whenMsg outTokenid -> handleClientOut
 	
 	State handleClientRequest {
-		println("ParkManagerService handeling client request")
+		println("ParkManagerService handling client request")
 		onMsg( clientRequest : clientRequest(X)) {
 			[# val requestType = "${payloadArg(0)}" #]
 			if [# requestType == "in" #] {
-				println("ParkManagerServing Request to park received.")
 				
-				//verifica se INDOOR è libero
-				//verifica stato del robot
+				if [# FREE_INDOOR #] {
 				
-				solve( getFreeSlot( S ) )
-				[# val SLOTNUM = getCurSol("S") #] 
-				solve( occupySlot( $SLOTNUM ) ) //se poi non fa carenter? occuparlo dopo? se poi lo do ad un altra macchina?
+					solve( getFreeSlot( S ) )
+					[# val SLOTNUM = getCurSol("S") #] 
+					solve( occupySlot( $SLOTNUM ) ) // let's assume at the moment that the client is going to do carenter
 				
-				replyTo clientRequest with  enter :  enter( $SLOTNUM )
+					replyTo clientRequest with  enter :  enter( $SLOTNUM )	
+				}
 			}
 		}
 	}
@@ -105,13 +103,21 @@ QActor park_manager_service context ctxparkmanager {
 		onMsg(carenter : carenter(SLOTNUM)) {
 			[# val SLOTNUM = payloadArg(0).toInt() #]
 			
-			//muovi trolley
+			updateResource [# ""+SLOTNUM #]
+			
+			solve( indoor(X,Y) )
+			[# val ix = getCurSol("X") #]
+			[# val iy = getCurSol("Y") #]
+			println("x: $x, y: $y")
+			
+			//forward transport_trolley -m move : move(ix,iy)
 			
 			solve( getCoordinates($SLOTNUM,X,Y) )
-			[# val x = getCurSol("X") #]
-			[# val y = getCurSol("Y") #]
-			println("x: $x, y: $y")
-			//forward mytrolley -m move : move(x,y)
+			[# val sx = getCurSol("X") #]
+			[# val sy = getCurSol("Y") #]
+			println("x: $sx, y: $sy")
+			
+			//forward transport_trolley -m move : move(sx,sy)
 					
 			[# val TOKENID = "$SLOTNUM,$counter" #]
 			[# counter++ #]
@@ -119,30 +125,43 @@ QActor park_manager_service context ctxparkmanager {
 			replyTo carenter with  replyTokenid :  replyTokenid( $TOKENID )
 		}
 	}
-	Goto accept
+	Transition t3 whenTime 1000 -> moveTrolleyHome
+						 whenRequest clientRequest -> handleClientRequest
+						 whenRequest carenter -> handleCarEnter
 	
 	State handleClientOut {
 		println("ParkManagerServing out.")
-		
-		//verifica OUTDOOR free
-		//verifica stato trolley
 		
 		onMsg( outTokenid : outTokenid(X)) {
 			[# val TOKENID = "${payloadArg(0)}" #]
 			[# val SLOTNUM =  TOKENID.split(",")[0] #]
 			
-			solve( outdoor(X,Y) )
-			[# val x = getCurSol("X") #]
-			[# val y = getCurSol("Y") #]
-			println("x: $x, y: $y")
+			updateResource [# TOKENID #]
 			
-			//forward mytrolley -m move : move(x,y)
+			solve( getCoordinates($SLOTNUM,X,Y) )
+			[# val sx = getCurSol("X") #]
+			[# val sy = getCurSol("Y") #]
+			
+			//forward transport_trolley -m move : move(sx,sy)
+			
+			solve( outdoor(X,Y) )
+			[# val ox = getCurSol("X") #]
+			[# val oy = getCurSol("Y") #]
+			println("x: $ox, y: $oy")
+			
+			//forward transport_trolley -m move : move(ox,oy)
 			
 			solve( unoccupySlot( $SLOTNUM ) ) 
 			
-			println("$SLOTNUM")	
-			//muovi trolley
+			updateResource [# ""+SLOTNUM #]
 		}
+	}
+	Transition t4 whenTime 1000 -> moveTrolleyHome
+				  whenRequest clientRequest -> handleClientRequest
+				  whenRequest carenter -> handleCarEnter
+				  
+	State moveTrolleyHome {
+		//forward transport_trolley -m move : move(0,0)
 	}
 	Goto accept
 	 
@@ -194,21 +213,9 @@ QActor weight_mock context ctxParkManagerService {
 	
 	State sendData {
 		forward weight_sensor -m weightData : weightData(50)
-		
 		delay 5000
-		
 		forward weight_sensor -m weightData : weightData(45)
-		
 		delay 5000
-		
-		forward weight_sensor -m weightData : weightData(0)
-		
-		delay 5000
-		
-		forward weight_sensor -m weightData : weightData(80)
-		
-		delay 5000
-		
 		forward weight_sensor -m weightData : weightData(0)
 	}
 }
@@ -297,11 +304,8 @@ QActor transport_trolley context ctxParkManagerService {
  		if [# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #]{
  			run itunibo.planner.plannerUtil.planForGoal(x,y)
  		}
- 		else{
- 			run itunibo.planner.plannerUtil.planForGoal("0","0")
- 		}
  	}
-    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atHome() #] else  wait
+    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  wait
 	
 }
 * */

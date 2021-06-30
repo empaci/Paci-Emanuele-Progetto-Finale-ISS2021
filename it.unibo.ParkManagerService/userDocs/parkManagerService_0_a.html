@@ -382,14 +382,9 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
   <h3><b>Summary of the first SPRINT-review meeting</b></h3>
  The main results of the SPRINT-review meeting can be summarized as follow:
  <ol>
-	<li>Add <em>carenter</em> botton.</li>
-	<li>Consider the parking state as an object.</li>
 	<li>Add a functioning model and test as code.</li>
 	<li>Use basicrobotactor for the trolley(?).</li>
-	<li>Clarifications about the GUI.</li>
 	<li>Why using qak is also a model, that is understandable by the client, testable and functoning.</li>
-	<li>How the sensor are in the system reality.</li>
-	<li>Trolley positioning.</li>
  </ol>
 </div>
  <br>
@@ -410,7 +405,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li><ks>Fan</ks>: machine for producing airflow, used for cooling the room.</li>
 	<li><ks>Critical situations</ks>: dangerous situations that could cause damage to the system.</li>
  </ul>
- 
+ <p>After the <k>SPRINT-review</k> the cliets gave examples on how the sensors/devices could be realized in the real-world, reinforcing the idea of building a distribuited system. The phisical build of those devices would not have an impact our work because by requirements we will use mocks to simulate them.</p>
  <br>
  The problem required to develop a distribuited system. Also our application must interact with the <a href="../../it.unibo.boundaryWalk/userDocs/VirtualRobot2021.html" target="web">VirtualRobot</a> provided by the costumer.
  <br>
@@ -442,6 +437,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li>Receive a parking request from a client.</li>
 	<li>Check the availability of the slot and if the <em>INDOOR-area</em> is free.</li> 
 	<li>Send the client the value of the <tt>SLOTNUM</tt>.</li>
+	<li>Receive the intention to enter the car from the client.</li>
 	<li>Move the transport trolley.</li>
 	<li>Send the client the <tt>TOKENID</tt>.</li>
 	<li>Move the trolley <tt>home</tt>.</li>
@@ -517,7 +513,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	</table>
 	<br>
 	We will use <a href="../../it.unibo.qakactor/userDocs/LabQakIntro2021.html" target="web">QAkActor</a> or <a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasic.kt" target="code">ActorBasic.kt</a>/<a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasicFsm.kt" target="code">ActorBasicFsm.kt</a>, developed as a result of those studies, to model and realize our distributed components. 
-	We will employ a top-down approach discussing only high-level communication concepts.
+	We will employ a top-down approach discussing only high-level communication concepts. As discussed in the <k>SPRINT-review</k> the model using QAkActors will be developed at the end of the requirements analysis.
 	<br>
  
  	<h3>Main components</h3>
@@ -572,9 +568,9 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  Some coordinates that need to be remembered:
  <ul>
 	<li><ks>home</ks>: (0,0)</li>
-	<li><ks>INDOOR-area</ks>: (6,0)</li>
-	<li><ks>OUTDOOR-area</ks>: (6,4)</li>
-	<li><ks>Parking slot</ks>: (3,1)</li>
+	<li><ks>INDOOR-area</ks>: (0,6)</li>
+	<li><ks>OUTDOOR-area</ks>: (4,6)</li>
+	<li><ks>Parking slot</ks>: (1,2)</li>
   </ul>
   We need a consistent way to memorize this information and the slots that are occupied.
  To represent the state of the current parking slot, the "special" positions we could use different strategies:
@@ -627,6 +623,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 	</table>
 	<br>
+	During the <k>SRINT-review</k> the use of an Object as been discussed, but it will have the same <k><tt>Pros</tt></k>/<k>Cons</k> of writing constats/structure in the code.
 	In conclusion, a Prolog approach is preferred over the other methods.
  
  <h4>TokenID</h4>
@@ -641,34 +638,24 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <br>
  See here the <a href="img\legenda.png" target="img">Legenda</a>.
  <br>
- <br>
- <br>
- <br>
- <br>
- <br>
- <br>
- <br>
- <br>
- <br>
- <br>
  <h3>Interaction beween the ParkManagerService and the Client</h3>
  Schema of the messages between the <tt>ParkManagerService</tt> and the <tt>Client</tt> from the Use-case <ks>the parking slot is empty</ks>:
+ 
  <br>
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
 			<ol>
-				<li>The <tt>Client</tt> sends the first request of interest in parking.</li>
-				<li>The <tt>ParkManagerService</tt> responds with the <tt>SLOTNUM</tt>.</li>
-				<li>The <tt>ParkManagerService</tt> sends the <tt>TOKENID</tt>.</li>
-				<li>After some time the <tt>Client</tt> sends the <tt>TOKENID</tt> back.</li>
+				<li>The <tt>Client</tt> sends a <k>request</k> of interest in parking.</li>
+				<li>The <tt>ParkManagerService</tt> sends a <k>reply</k> with the <tt>SLOTNUM</tt>.</li>
+				<li>the <tt>Client</tt> press carenter and sends a <k>request</k> with the <tt>SLOTNUM</tt> back to the <tt>ParkManagerService</tt></li>
+				<li>The <tt>ParkManagerService</tt> sends a <k>reply</k> with the <tt>TOKENID</tt>.</li>
+				<li>After some time the <tt>Client</tt> sends a <k>dispatch</k> with the <tt>TOKENID</tt> to exit the parking.</li>
 			</ol>
 			Comments:
 			<ul>
 				<li>The optional response to the <tt>Client</tt> will be addressed in the future.</li>
-				<li>We send <tt>TOKENID</tt> and <tt>SLOTNUM</tt> in different messages instead of one, because only when the car has been correctly parked it can be moved out. 
-					So to avoid possible errors or confusion.</li>
-				<li>There is no response after the <tt>Client</tt> sends <tt>TOKENID</tt>. In the future, there could be an "ok" or a "wait" response.</li>
+				<li> After the <k>SPRINT-review</k> the carenter message has been added, to better represent the real interaction between the client and the GUI.</li>
 			</ul>
 			</td>
 			<td>
@@ -678,6 +665,14 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
   </table>
   <br>
   In the other Use-case <ks>the parking slot is already occupied</ks> the communication ends after <tt>Client</tt> receives <tt>SLOTNUM</tt>=0.
+ <br>
+ <p>Model built with QAkActors <a href="../src/park_service_model_0.qak">here</a> </p>
+ <p>Problems arise after building the model:</p>
+ <ol>
+	<li>How does the <tt>ParkManagerService</tt> occupies the SLOT duirign the client interaction between  the request to enter and before the client send a carenter message. 
+		We need to ...
+	</li>
+ </ol>
  <br>
 <h2>Test plans</h2> 
 
@@ -689,8 +684,9 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <ol>
 	<li><tt>SLOTNUM</tt> value is 1.</li>
 	<li><tt>TOKENID</tt> value is 11.</li> 
-	<li>The trolley's final position is <tt>HOME</tt>.</li>
  </ol>
+ <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase1.kt</a>
+ <br>
  <h4>Use-case <ks>the parking slot is already occupied</ks></h4>
   We can generate a client request to park. 
   To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
@@ -699,9 +695,8 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <ol>
 	<li><tt>SLOTNUM</tt> value is 0.</li>
 	<li><tt>TOKENID</tt> is not sent.</li> 
-	<li>The trolley did not move and the final position is <tt>HOME</tt>.</li>
  </ol> 
-
+ <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase2.kt</a></p>
 <h2>Project</h2> 
  
 </div>

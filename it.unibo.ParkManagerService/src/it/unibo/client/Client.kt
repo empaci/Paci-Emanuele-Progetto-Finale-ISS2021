@@ -27,17 +27,18 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				}	 
 				state("requestIn") { //this:State
 					action { //it:State
-						println("Client request to park.")
 						request("clientRequest", "clientRequest(in)" ,"park_manager_service" )  
+						stateTimer = TimerActor("timer_requestIn", 
+							scope, context!!, "local_tout_client_requestIn", 5000.toLong() )
 					}
-					 transition(edgeName="t00",targetState="handleSlotnum",cond=whenReply("enter"))
+					 transition(edgeName="t00",targetState="end",cond=whenTimeout("local_tout_client_requestIn"))   
+					transition(edgeName="t01",targetState="handleSlotnum",cond=whenReply("enter"))
 				}	 
 				state("handleSlotnum") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("enter(SLOTNUM)"), Term.createTerm("enter(SLOTNUM)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 SLOTNUM = payloadArg(0).toInt()  
-								println("received slotnum: $SLOTNUM")
 						}
 					}
 					 transition( edgeName="goto",targetState="end", cond=doswitchGuarded({ SLOTNUM==0  
@@ -49,7 +50,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 					action { //it:State
 						request("carenter", "carenter($SLOTNUM)" ,"park_manager_service" )  
 					}
-					 transition(edgeName="t01",targetState="handleTokenid",cond=whenReply("replyTokenid"))
+					 transition(edgeName="t12",targetState="handleTokenid",cond=whenReply("replyTokenid"))
 				}	 
 				state("handleTokenid") { //this:State
 					action { //it:State
@@ -57,16 +58,14 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						if( checkMsgContent( Term.createTerm("replyTokenid(TOKENID)"), Term.createTerm("replyTokenid(TOKEN)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 TOKENID = "${payloadArg(0)}"  
-								println("received tokenid: $TOKENID")
 						}
 						stateTimer = TimerActor("timer_handleTokenid", 
 							scope, context!!, "local_tout_client_handleTokenid", 1000.toLong() )
 					}
-					 transition(edgeName="out2",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
+					 transition(edgeName="out3",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
 				}	 
 				state("requestOut") { //this:State
 					action { //it:State
-						println("Client request to exit sent.")
 						forward("outTokenid", "outTokenid($TOKENID)" ,"park_manager_service" ) 
 					}
 					 transition( edgeName="goto",targetState="end", cond=doswitch() )
