@@ -5,7 +5,7 @@ indoor(6,0).
 outdoor(4,6).
 
 % getCoordinates(SLOTNUM,Xpos,Ypos)
-getCoordinates(1,1,2).
+getCoordinates(1,1,1).
 
 getFreeSlot(X) :- freeSlot(X), !.
 getFreeSlot(0). %solo se non si sono freeSlot liberi unfica con lo 0

@@ -19,6 +19,8 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 		 
 				var counter=0 
 				var FREE_INDOOR=true
+				var x = 0
+				var y = 0
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -65,13 +67,13 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 								updateResourceRep( ""+SLOTNUM  
 								)
 								solve("indoor(X,Y)","") //set resVar	
-								 val ix = getCurSol("X")  
-								 val iy = getCurSol("Y")  
-								println("x: $x, y: $y")
+								 x = getCurSol("X").toString().toInt()  
+								 y = getCurSol("Y").toString().toInt()  
+								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
-								 val sx = getCurSol("X")  
-								 val sy = getCurSol("Y")  
-								println("x: $sx, y: $sy")
+								 x = getCurSol("X").toString().toInt()  
+								 y = getCurSol("Y").toString().toInt()  
+								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								 val TOKENID = "$SLOTNUM,$counter"  
 								 counter++  
 								answer("carenter", "replyTokenid", "replyTokenid($TOKENID)"   )  
@@ -93,12 +95,13 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 								updateResourceRep( TOKENID  
 								)
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
-								 val sx = getCurSol("X")  
-								 val sy = getCurSol("Y")  
+								 x = getCurSol("X").toString().toInt()  
+								 y = getCurSol("Y").toString().toInt()  
+								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("outdoor(X,Y)","") //set resVar	
-								 val ox = getCurSol("X")  
-								 val oy = getCurSol("Y")  
-								println("x: $ox, y: $oy")
+								 x = getCurSol("X").toString().toInt()  
+								 y = getCurSol("Y").toString().toInt()  
+								 forward("move", "move($x,$y)" ,"transport_trolley" )  
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
 								updateResourceRep( ""+SLOTNUM  
 								)
@@ -112,6 +115,10 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 				}	 
 				state("moveTrolleyHome") { //this:State
 					action { //it:State
+						solve("home(X,Y)","") //set resVar	
+						 x = getCurSol("X").toString().toInt()  
+						 y = getCurSol("Y").toString().toInt()  
+						 forward("move", "move($x,$y)" ,"transport_trolley" )  
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 
