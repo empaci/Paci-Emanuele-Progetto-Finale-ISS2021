@@ -405,7 +405,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li><ks>Fan</ks>: machine for producing airflow, used for cooling the room.</li>
 	<li><ks>Critical situations</ks>: dangerous situations that could cause damage to the system.</li>
  </ul>
- <p>After the <k>SPRINT-review</k> the cliets gave examples on how the sensors/devices could be realized in the real-world, reinforcing the idea of building a distribuited system. The phisical build of those devices would not have an impact our work because by requirements we will use mocks to simulate them.</p>
+ <p>After the <k>SPRINT-review</k> the client gave examples of how the sensors/devices could be realized in the real world, reinforcing the idea of building a distributed system. Although, the physical build of those devices would not have an impact on our work because by requirements we will use mocks to simulate them.</p>
  <br>
  The problem required to develop a distribuited system. Also our application must interact with the <a href="../../it.unibo.boundaryWalk/userDocs/VirtualRobot2021.html" target="web">VirtualRobot</a> provided by the costumer.
  <br>
@@ -513,7 +513,11 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	</table>
 	<br>
 	We will use <a href="../../it.unibo.qakactor/userDocs/LabQakIntro2021.html" target="web">QAkActor</a> or <a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasic.kt" target="code">ActorBasic.kt</a>/<a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasicFsm.kt" target="code">ActorBasicFsm.kt</a>, developed as a result of those studies, to model and realize our distributed components. 
-	We will employ a top-down approach discussing only high-level communication concepts. As discussed in the <k>SPRINT-review</k> the model using QAkActors will be developed at the end of the requirements analysis.
+	We will employ a top-down approach discussing only high-level communication concepts. 
+	<br>
+	As discussed in the <k>SPRINT-review</k> the model using QAkActors will be developed at the end of the requirements analysis. 
+	Because  it will allow representing the problem in an auto-descriptive, without ambiguity, catching only the high-level aspects of the problem and will be also working and testable.
+	This way the model will be available to be discussed with the client.
 	<br>
  
  	<h3>Main components</h3>
@@ -623,7 +627,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 	</table>
 	<br>
-	During the <k>SRINT-review</k> the use of an Object as been discussed, but it will have the same <k><tt>Pros</tt></k>/<k>Cons</k> of writing constats/structure in the code.
+	During the <k>SRINT-review</k> the use of an Object to represent the parking state has been discussed, but it will have the same <k><tt>Pros</tt></k>/<k>Cons</k> of writing constants/structure in the code.
 	In conclusion, a Prolog approach is preferred over the other methods.
  
  <h4>TokenID</h4>
@@ -655,7 +659,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 			Comments:
 			<ul>
 				<li>The optional response to the <tt>Client</tt> will be addressed in the future.</li>
-				<li> After the <k>SPRINT-review</k> the carenter message has been added, to better represent the real interaction between the client and the GUI.</li>
+				<li> After the <k>SPRINT-review</k> the carenter message has been added to better represent the real interaction between the client and the GUI.</li>
 			</ul>
 			</td>
 			<td>
@@ -667,10 +671,12 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
   In the other Use-case <ks>the parking slot is already occupied</ks> the communication ends after <tt>Client</tt> receives <tt>SLOTNUM</tt>=0.
  <br>
  <p>Model built with QAkActors <a href="../src/park_service_model_0.qak">here</a> </p>
- <p>Problems arise after building the model:</p>
+ <h5>Problem arose after building the model:</h5>
  <ol>
-	<li>How does the <tt>ParkManagerService</tt> occupies the SLOT duirign the client interaction between  the request to enter and before the client send a carenter message. 
-		We need to ...
+	<li>(Currently an open point) How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
+	A client could receive the SLOTNUM, then not send a carenter. 
+	<br>
+	At the moment is assumed that the client always sends a carenter request, so the system keeps the slot occupied after the first request to park. 
 	</li>
  </ol>
  <br>
