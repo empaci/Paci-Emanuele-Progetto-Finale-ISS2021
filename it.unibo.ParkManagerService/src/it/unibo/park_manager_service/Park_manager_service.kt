@@ -101,8 +101,6 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
-								updateResourceRep( ""+SLOTNUM  
-								)
 						}
 						stateTimer = TimerActor("timer_handleClientOut", 
 							scope, context!!, "local_tout_park_manager_service_handleClientOut", 1000.toLong() )

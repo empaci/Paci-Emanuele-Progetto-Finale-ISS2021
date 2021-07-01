@@ -11,8 +11,38 @@ import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch 
 import org.junit.Test
 import org.junit.Assert.assertTrue
+import kotlinx.coroutines.Job
+import it.unibo.kactor.QakContext
+import kotlinx.coroutines.cancelAndJoin
 
- 
+internal class TestUseCase2 {
+	
+	lateinit var observer : actorQakCoapObserver2
+	var job: Job? = null
+	
+	@Test
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	fun mainTest() {
+		runBlocking{
+			launch {
+				observer = actorQakCoapObserver2
+				observer.activate()
+			}
+			job = launch {
+				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
+			}
+			delay(4000)
+			println("============ tslot:=" + observer.tSlot)
+			assertTrue(observer.tSlot=="0")
+			
+			job?.cancelAndJoin()
+		}
+	}
+	
+} 
+
+
 object actorQakCoapObserver2 {
 
     private val client = CoapClient()
@@ -22,6 +52,7 @@ object actorQakCoapObserver2 {
  	private val destactor   = "park_manager_service"
 	
 	private var testnum = 0
+	public var tSlot = ""
 
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,8 +66,7 @@ object actorQakCoapObserver2 {
                 println("actortQakCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
 				
 				when (testnum) {
-					0 -> testSlotIsZero(content)
-					1 -> testTokenidNotSet()
+					0 -> tSlot = content
 				}
 				testnum++
 				
@@ -52,17 +82,6 @@ object actorQakCoapObserver2 {
 	}
 
  }
-
-@Test
-fun testSlotIsZero(slotnum: String) {
-	assertTrue(slotnum.toInt()==0)
-}
-
-@Test
-fun testTokenidNotSet() {
-	//Tokenid should not be updated, so the test should never arrive here
-	assertTrue(false)
-}
 
  
 @kotlinx.coroutines.ObsoleteCoroutinesApi

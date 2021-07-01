@@ -60,7 +60,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 								 TOKENID = "${payloadArg(0)}"  
 						}
 						stateTimer = TimerActor("timer_handleTokenid", 
-							scope, context!!, "local_tout_client_handleTokenid", 1000.toLong() )
+							scope, context!!, "local_tout_client_handleTokenid", 6000.toLong() )
 					}
 					 transition(edgeName="out3",targetState="requestOut",cond=whenTimeout("local_tout_client_handleTokenid"))   
 				}	 

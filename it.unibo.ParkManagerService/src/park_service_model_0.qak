@@ -46,7 +46,7 @@ QActor client context ctxparkmanager {
 			[# TOKENID = "${payloadArg(0)}" #]
 		}
 	}
-	Transition out whenTime 1000 -> requestOut
+	Transition out whenTime 6000 -> requestOut
 	
 	State requestOut {
 		forward park_manager_service -m outTokenid : outTokenid($TOKENID) 
@@ -159,7 +159,7 @@ QActor park_manager_service context ctxparkmanager {
 			
 			solve( unoccupySlot( $SLOTNUM ) ) 
 			
-			updateResource [# ""+SLOTNUM #]
+			//updateResource [# ""+SLOTNUM #]
 		}
 	}
 	Transition t4 whenTime 1000 -> moveTrolleyHome

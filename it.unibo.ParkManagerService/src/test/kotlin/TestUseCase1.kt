@@ -16,39 +16,35 @@ import it.unibo.park_manager_service.Park_manager_service
 import it.unibo.client.Client
 import it.unibo.weight_sensor.Weight_sensor
 import it.unibo.kactor.QakContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 
 
-internal class SampleTest {
+internal class TestUseCase1 {
 	
-	//lateinit var service : Park_manager_service
-	//lateinit var client : Client
 	lateinit var observer : actorQakCoapObserver
+	var job: Job? = null
 	
 	@Test
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
-	fun systemUp() {
+	fun mainTest() {
 		runBlocking{
 			launch {
 				observer = actorQakCoapObserver
 				observer.activate()
 			}
-			launch {
+			job = launch {
 				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
-			delay(1000)
-			
+			delay(4000)
+			println("============ tslot:=" + observer.tSlot)
 			assertTrue(observer.tSlot=="1")
-			/*
-			launch {
-				service = Park_manager_service("parkmanager", this)
-				println("============== ParkManagerService activated")
-			}
-			launch {
-				client = Client("client", this)
-				println("============== Client activated")
-			}
-			*/
+			delay(8000)
+			println("============ tokenid:=" + observer.tTokenid)
+			assertTrue(observer.tTokenid=="10")
+			
+			job?.cancelAndJoin()
 		}
 	}
 	
@@ -98,11 +94,12 @@ object actorQakCoapObserver {
 
  }
 
- /*
+
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun main( ) {
 		actorQakCoapObserver.activate()
 		System.`in`.read()   //to avoid exit
  }
- */
+ 
+

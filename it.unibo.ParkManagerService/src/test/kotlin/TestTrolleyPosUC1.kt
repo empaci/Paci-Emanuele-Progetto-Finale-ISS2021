@@ -11,8 +11,46 @@ import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch 
 import org.junit.Test
 import org.junit.Assert.assertTrue
+import kotlinx.coroutines.Job
+import it.unibo.kactor.QakContext
+import kotlinx.coroutines.cancelAndJoin
 
- 
+internal class TestTrolleyPosUC1 {
+	
+	lateinit var observer : actorQakCoapObserver3
+	var job: Job? = null
+	
+	@Test
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	fun mainTest() {
+		runBlocking{
+			launch {
+				observer = actorQakCoapObserver3
+				observer.activate()
+			}
+			job = launch {
+				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
+			}
+			delay(8000)
+			println("============ indoorPos:=" + observer.indoorPos)
+			assertTrue(observer.indoorPos=="(6, 0)")
+			delay(8000)
+			println("============ indoorPos:=" + observer.parkingPos)
+			assertTrue(observer.parkingPos=="(1, 1)")
+			delay(8000)
+			println("============ indoorPos:=" + observer.outdoorPos)
+			assertTrue(observer.outdoorPos=="(6, 4)")
+			delay(8000)
+			println("============ indoorPos:=" + observer.homePos)
+			assertTrue(observer.homePos=="(0, 0)")
+			
+			job?.cancelAndJoin()
+		}
+	}
+	
+} 
+
 object actorQakCoapObserver3 {
 
     private val client = CoapClient()
@@ -22,6 +60,10 @@ object actorQakCoapObserver3 {
  	private val destactor   = "park_manager_service"
 	
 	private var testnum = 0
+	public var indoorPos = ""
+	public var parkingPos = ""
+	public var outdoorPos = ""
+	public var homePos = ""
 
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,10 +77,10 @@ object actorQakCoapObserver3 {
                 println("actortQakCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
 				
 				when (testnum) {
-					0 -> testTrolleyIndoor(content)
-					1 -> testTrolleyParking(content)
-					2 -> testTrolleyOutdoor(content)
-					3 -> testTrolleyHome(content)
+					0 -> indoorPos = content
+					1 -> parkingPos = content
+					2 -> outdoorPos = content
+					3 -> homePos = content
 				}
 				testnum++
 				
@@ -54,27 +96,6 @@ object actorQakCoapObserver3 {
 	}
 
  }
-
-
-@Test
-fun testTrolleyIndoor(pos: String) {
-	assertTrue(pos=="(6, 0)")
-}
-
-@Test
-fun testTrolleyParking(pos: String) {
-	assertTrue(pos=="(1, 1)")
-}
-
-@Test
-fun testTrolleyOutdoor(pos: String) {
-	assertTrue(pos=="(6, 4)")
-}
-
-@Test
-fun testTrolleyHome(pos: String) {
-	assertTrue(pos=="(0, 0)")
-}
 
 
  
