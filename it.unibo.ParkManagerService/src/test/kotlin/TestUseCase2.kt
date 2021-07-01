@@ -14,13 +14,14 @@ import org.junit.Assert.assertTrue
 import kotlinx.coroutines.Job
 import it.unibo.kactor.QakContext
 import kotlinx.coroutines.cancelAndJoin
+import org.junit.Before
 
 internal class TestUseCase2 {
 	
 	lateinit var observer : actorQakCoapObserver2
 	var job: Job? = null
 	
-	@Test
+	@Before
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
 	fun mainTest() {
@@ -32,12 +33,16 @@ internal class TestUseCase2 {
 			job = launch {
 				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
-			delay(4000)
-			println("============ tslot:=" + observer.tSlot)
-			assertTrue(observer.tSlot=="0")
+			delay(6000)
 			
 			job?.cancelAndJoin()
 		}
+	}
+	
+	@Test
+	fun testSlotnum() {
+		println("============ tslot:=" + observer.tSlot)
+		assertTrue(observer.tSlot=="0")
 	}
 	
 } 

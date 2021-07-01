@@ -33,16 +33,22 @@ internal class TestTrolleyPosUC1 {
 				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
 			delay(8000)
-			println("============ indoorPos:=" + observer.indoorPos)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK indoorPos:=" + observer.indoorPos)
 			assertTrue(observer.indoorPos=="(6, 0)")
-			delay(8000)
-			println("============ indoorPos:=" + observer.parkingPos)
+			delay(6000)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK parkingPos:=" + observer.parkingPos)
 			assertTrue(observer.parkingPos=="(1, 1)")
-			delay(8000)
-			println("============ indoorPos:=" + observer.outdoorPos)
+			delay(6000)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK homePos:=" + observer.homePos)
+			assertTrue(observer.homePos=="(0, 0)")
+			delay(6000)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK parkingPos:=" + observer.parkingPos)
+			assertTrue(observer.parkingPos=="(1, 1)")
+			delay(6000)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK outdoorPos:=" + observer.outdoorPos)
 			assertTrue(observer.outdoorPos=="(6, 4)")
-			delay(8000)
-			println("============ indoorPos:=" + observer.homePos)
+			delay(6000)
+			println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK homePos:=" + observer.homePos)
 			assertTrue(observer.homePos=="(0, 0)")
 			
 			job?.cancelAndJoin()
@@ -77,10 +83,13 @@ object actorQakCoapObserver3 {
                 println("actortQakCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
 				
 				when (testnum) {
-					0 -> indoorPos = content
-					1 -> parkingPos = content
-					2 -> outdoorPos = content
+					0 -> println("trolley started")
+					1 -> indoorPos = content
+					2 -> parkingPos = content
 					3 -> homePos = content
+					4 -> parkingPos = content
+					5 -> outdoorPos = content
+					6 -> homePos = content
 				}
 				testnum++
 				

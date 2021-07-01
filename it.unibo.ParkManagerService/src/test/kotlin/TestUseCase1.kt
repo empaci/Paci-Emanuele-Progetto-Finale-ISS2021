@@ -25,7 +25,7 @@ internal class TestUseCase1 {
 	lateinit var observer : actorQakCoapObserver
 	var job: Job? = null
 	
-	@Test
+	@Before
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
 	fun mainTest() {
@@ -37,15 +37,20 @@ internal class TestUseCase1 {
 			job = launch {
 				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
-			delay(4000)
-			println("============ tslot:=" + observer.tSlot)
-			assertTrue(observer.tSlot=="1")
-			delay(8000)
-			println("============ tokenid:=" + observer.tTokenid)
-			assertTrue(observer.tTokenid=="10")
-			
+			delay(10000)
 			job?.cancelAndJoin()
 		}
+	}
+	
+	@Test
+	fun testSlotnum() {
+		println("============ tslot:=" + observer.tSlot)
+		assertTrue(observer.tSlot=="1")
+	}
+	@Test
+	fun testTokenid() {
+		println("============ tokenid:=" + observer.tTokenid)
+		assertTrue(observer.tTokenid=="10")
 	}
 	
 }

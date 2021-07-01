@@ -690,8 +690,15 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <ol>
 	<li><tt>SLOTNUM</tt> value is 1.</li>
 	<li><tt>TOKENID</tt> value is 11.</li> 
+	<li><ul>The trolley moves, in order:
+		<li>Indoor</li>
+		<li>ParkingSlot (parking)</li>
+		<li>ParkingSlot (pick-up)</li>
+		<li>Outdoor</li>
+		<li>Home</li>
+	</ul></li>
  </ol>
- <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase1.kt</a>
+ <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase1.kt</a>, <a href="../src/test/kotlin/TestTrolleyPosUC1.kt">TestTrolleyPosUC1.kt</a>
  <br>
  <h4>Use-case <ks>the parking slot is already occupied</ks></h4>
   We can generate a client request to park. 
