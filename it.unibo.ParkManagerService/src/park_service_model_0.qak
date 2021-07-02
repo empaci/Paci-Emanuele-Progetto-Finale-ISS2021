@@ -158,8 +158,6 @@ QActor park_manager_service context ctxparkmanager {
 			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			solve( unoccupySlot( $SLOTNUM ) ) 
-			
-			//updateResource [# ""+SLOTNUM #]
 		}
 	}
 	Transition t4 whenTime 1000 -> moveTrolleyHome
@@ -311,7 +309,9 @@ QActor transport_trolley context ctxparkmanager {
 	
 }
 
+*/
 
+/*
 QActor weight_mock context ctxparkmanager {
 	State s0 initial {
 		println("Starting WeightMock")
