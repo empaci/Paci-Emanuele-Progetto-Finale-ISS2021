@@ -70,6 +70,7 @@ QActor park_manager_service context ctxparkmanager {
 		solve( consult("parking.pl"))
 		solve( dynamic("freeSlot/1") )
 		solve(unoccupySlot(1))
+		qrun coap.actorQakWeightCoapObserver.activate( myself  )
 		println("Starting ParkManagerService.")
 	}
 	Goto accept
@@ -87,13 +88,16 @@ QActor park_manager_service context ctxparkmanager {
 			[# val requestType = "${payloadArg(0)}" #]
 			if [# requestType == "in" #] {
 				
-				if [# FREE_INDOOR #] {
+				if [# coap.actorQakWeightCoapObserver.readResponse()=="free" #] {
 				
 					solve( getFreeSlot( S ) )
 					[# val SLOTNUM = getCurSol("S") #] 
 					solve( occupySlot( $SLOTNUM ) ) // let's assume at the moment that the client is going to do carenter
 				
 					replyTo clientRequest with  enter :  enter( $SLOTNUM )	
+				}
+				else {
+					replyTo clientRequest with  enter :  enter( 0 ) //at the moment the client is refused if the indoor area is occupied
 				}
 			}
 		}
@@ -193,6 +197,7 @@ QActor weight_sensor context ctxparkmanager {
 	
 	State s0 initial {
 		println("Starting Weight sensor.")
+		updateResource [# "free" #] //stato iniziale
 	}
 	Goto wait
 	

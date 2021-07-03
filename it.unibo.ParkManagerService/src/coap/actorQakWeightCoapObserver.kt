@@ -12,14 +12,13 @@ import org.eclipse.californium.core.CoapHandler
 import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch 
  
-object actorQakCoapObserver {
+object actorQakWeightCoapObserver {
 
     private val client = CoapClient()
 	
 	private val ipaddr      = "localhost:8070"		//5683 default
-	private val context     = "ctxParkManagerService"
+	private val context     = "ctxparkmanager"
  	private val destactor   = "weight_sensor"
-//	private val msgId       = "cmd"
 
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +40,12 @@ object actorQakCoapObserver {
             }
         })		
 	}
+	
+	fun readResponse() : String {
+		var respGet = client.get( );
+		System.out.println("CoapSupport | readResource RESPONSE CODE: " + respGet.getCode());		
+		return respGet.getResponseText();
+	}
 
  }
 
@@ -51,4 +56,3 @@ fun main( ) {
 		actorQakCoapObserver.activate()
 		System.`in`.read()   //to avoid exit
  }
-

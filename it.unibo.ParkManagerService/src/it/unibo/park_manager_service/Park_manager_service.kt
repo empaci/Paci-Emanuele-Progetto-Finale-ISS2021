@@ -28,6 +28,7 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						solve("consult('parking.pl')","") //set resVar	
 						solve("dynamic('freeSlot/1')","") //set resVar	
 						solve("unoccupySlot(1)","") //set resVar	
+						coap.actorQakWeightCoapObserver.activate(myself)
 						println("Starting ParkManagerService.")
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
@@ -47,12 +48,15 @@ class Park_manager_service ( name: String, scope: CoroutineScope  ) : ActorBasic
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val requestType = "${payloadArg(0)}"  
 								if(  requestType == "in"  
-								 ){if(  FREE_INDOOR  
+								 ){if(  coap.actorQakWeightCoapObserver.readResponse()=="free"  
 								 ){solve("getFreeSlot(S)","") //set resVar	
 								 val SLOTNUM = getCurSol("S")  
 								solve("occupySlot($SLOTNUM)","") //set resVar	
 								answer("clientRequest", "enter", "enter($SLOTNUM)"   )  
 								}
+								else
+								 {answer("clientRequest", "enter", "enter(0)"   )  
+								 }
 								}
 						}
 					}

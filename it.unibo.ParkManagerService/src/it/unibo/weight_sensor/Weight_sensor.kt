@@ -31,6 +31,8 @@ class Weight_sensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				state("s0") { //this:State
 					action { //it:State
 						println("Starting Weight sensor.")
+						updateResourceRep( "free"  
+						)
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
