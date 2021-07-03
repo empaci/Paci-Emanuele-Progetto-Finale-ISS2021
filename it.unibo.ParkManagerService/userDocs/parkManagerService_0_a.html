@@ -468,7 +468,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			Direct communication between the resource and the application (Es. TCP) 		
+			<ks>Direct communication between the resource and the application (Es. TCP)</ks>
 			</td>
 			<td>
 				<dl>
@@ -484,7 +484,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			A middleware between the resource and the application (Es. MQTT)
+			<ks>A middleware between the resource and the application (Es. MQTT)</ks>
 			</td>
 			<td>
 				<dl>
@@ -498,7 +498,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			Costum support
+			<ks>Costum support</ks>
 			</td>
 			<td>
 				<dl>
@@ -582,7 +582,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			Special coordinates are written as constant in the code, a structure to memorize the state of the parking 		
+			<ks>Special coordinates are written as constant in the code, a structure to memorize the state of the parking</ks>		
 			</td>
 			<td>
 				<dl>
@@ -598,7 +598,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			External file with the position of each parking and their state
+			<ks>External file with the position of each parking and their state</ks>
 			</td>
 			<td>
 				<dl>
@@ -613,7 +613,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			Prolog knowledge-base
+			<ks>Prolog knowledge-base</ks>
 			</td>
 			<td>
 				<dl>
@@ -683,14 +683,22 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 <h2>Test plans</h2> 
 
  <h4>Use-case <ks>the parking slot is empty</ks></h4>
- We can generate a client request to park and, after receiving the receipt, exit. 
+ We can generate a client thta request to park and, after receiving the receipt, to exit the parking slot.
+<br> 
  To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
+ <br><br>
+ <ks>Starting conditions:</ks>
+ <ul>
+	<li><em>INDOOR-area</em> is free.</li>
+	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
+	<li>The parking slot is not occupied.</li>
+ </ul>
  
  We expect that:
  <ol>
 	<li><tt>SLOTNUM</tt> value is 1.</li>
 	<li><tt>TOKENID</tt> value is 11.</li> 
-	<li><ul>The trolley moves, in order:
+	<li><ul>Also the trolley must move, in order:
 		<li>Indoor</li>
 		<li>ParkingSlot (parking)</li>
 		<li>ParkingSlot (pick-up)</li>
@@ -701,8 +709,15 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase1.kt</a>, <a href="../src/test/kotlin/TestTrolleyPosUC1.kt">TestTrolleyPosUC1.kt</a>
  <br>
  <h4>Use-case <ks>the parking slot is already occupied</ks></h4>
-  We can generate a client request to park. 
+  We can generate a client request to park, the service refuse. 
   To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
+ <br><br>
+  <ks>Starting conditions:</ks>
+  <ul>
+	<li><em>INDOOR-area</em> is free.</li>
+	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
+	<li>The parking slot is occupied.</li>
+  <ul>
  
  We expect that:
  <ol>
