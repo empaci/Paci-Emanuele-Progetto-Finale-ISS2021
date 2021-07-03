@@ -368,25 +368,12 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 <h2>Requirement analysis</h2>
  
  In this SPRINT is considered only one parking spot and the <em>weightsensor</em> and no other elements (<tt>outsonar</tt>, <tt>ParkServiceGUI</tt>, <tt>ParkServiceStatusGUI</tt>, <tt>parking-manager</tt>, <tt>fan</tt>, <tt>thermometer</tt>).
- We are cnsidering an easier problem to focus on the core elements of the application.
+ We are considering an easier problem to focus on the core elements of the application.
  <br>
  At the end of the <k>SPRINT</k> a client should be able to successfully park and exit. 
  Also, the system should be able to reject a client's parking request if the slot is occupied.
  <br>
  </div>
-<div style="background-color: #f0e1ff;
-    border: 1.5px solid #d5f2ed;
-    padding: 15px;
-    margin: 10px;
-	border-radius: 25px;">
-  <h3><b>Summary of the first SPRINT-review meeting</b></h3>
- The main results of the SPRINT-review meeting can be summarized as follow:
- <ol>
-	<li>Add a functioning model and test as code.</li>
-	<li>Use basicrobotactor for the trolley(?).</li>
-	<li>Why using qak is also a model, that is understandable by the client, testable and functoning.</li>
- </ol>
-</div>
  <br>
  Note: optional parts will not be discussed at this stage and will be implemented at the end.
  <br>
@@ -516,17 +503,17 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	We will employ a top-down approach discussing only high-level communication concepts. 
 	<br>
 	As discussed in the <k>SPRINT-review</k> the model using QAkActors will be developed at the end of the requirements analysis. 
-	Because  it will allow representing the problem in an auto-descriptive, without ambiguity, catching only the high-level aspects of the problem and will be also working and testable.
-	This way the model will be available to be discussed with the client.
+	Because  it will allow representing the problem in an auto-descriptive way, without ambiguity while being working and testable. <br>
+	The model will be available to be discussed with the client.
 	<br>
  
  	<h3>Main components</h3>
 	In the application we can identify 4 macro-components:
 	<ul>
 		<li><ks>ParkManagerService</ks>: the core of the application, used to interact with the client and control the trolley movement.</li>
-		<li><ks>Client</ks>: used by the clients to communicate with the ParkManagerService.</li>
+		<li><ks>Client</ks>: used by the clients to communicate with the <tt>ParkManagerService</tt>.</li>
 		<li><ks>Transport trolley</ks>: used to interact with the <tt>DDR</tt> robot.</li>
-		<li><ks>Weight-sensor resource</ks>: a resource that receives, stores, and makes available the data from the weight-sensor.</li>
+		<li><ks>Weight-sensor resource</ks>: a resource that receives, stores, and makes available the data from the <em>weightsensor</em>.</li>
 	</ul>
 	 <h4>ParkManagerService</h4>
 	  This component can:
@@ -544,16 +531,71 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 <br>
 	 The <tt>Trolley</tt> doesn't need to have any application logic, it only needs the coordinates sent by the <tt>ParkManagerService</tt>.
 	 <br>
+	 At the moment the <tt>Trolley</tt> can be at <tt>home</tt> or working, so there is no need to define its state.
+	 <br>
 	 <h4>Weight-sensor resource</h4>
-	  <tt>Weight-sensor resource</tt> should be modeled as an observable resource, which stores the information regarding the <em>INDOOR-area</em>.
+	  <tt>Weight-sensor resource</tt> receives data from the <em>weightsensor</em>, which means that it must stores the information regarding the <em>INDOOR-area</em> and makes them avaiable to the other entities in the system. 
 	  <br>
-	  Based on the work done in <a>LabRadarGui | Radar GUI as a service</a> similar to the Sonar, we can define the Weightsensor resource as a CoAp observable actor and the <tt>ParkmanagerService</tt> as an observer.
+	  We can retrieve the information from the <tt>Weight-sensor</tt> in different ways, based on the work done in <a href="../../it.unibo.raspIntro2020/userDocs/LabRadarGui.html" target="web">LabRadarGui | Radar GUI as a service</a> here are the main methods:
 	  <br>
-	  We can use the qak actor because it already implements this feature.
+	<table style="width:100%" border="1">
+		<tr>
+			<td style="width:50%">
+			<ks>Polling</ks> (<tt>ParkManagerService</tt> ask for the <tt>Weight-sensor resource</tt> to send the information)
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>Easy to realize two-way communication.</dd>
+					<dt><k>Cons</k>:</dt> 
+				    <dd>Slow. Every time <tt>ParkManagerService</tt> has to wait for an answer.</dd>
+				    <dd>Message exchange is always needed even if the state of the resource did not change. </dd>
+					<dd>The entities are not loosely coupled.</dd>
+					<dd>Communication logic is not clearly separated from the application logic.</dd>
+				</dl>
+			</td>
+			
+		</tr>
+		<tr>
+			<td>
+			<ks>A publish-subscribe method</ks> (<tt>ParkManagerService</tt> is a subscriber and <tt>Weight-sensor resource</tt> is a publisher)
+			</td>
+			<td>
+				<dl>
+				<dt><k><tt>Pro</tt></k>:</dt>
+				<dd>The entities are loosely coupled.</dd>
+				<dt><k>Cons</k>:</dt> 
+				<dd>Message is exchange always needed even if the state of the resource did not change.</dd>
+				</dl>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<ks>Resource observation</ks> (<tt>ParkManagerService</tt> observe <tt>Weight-sensor resource</tt>)
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt>
+					<dd>The entities are loosely coupled.</dd> 
+					<dd>We are informed only if the state changes, no useless message exchange.</dd>
+					<dt><k>Cons</k>:</dt>
+					<dd></dd>
+				</dl>
+			</td>
+		</tr>
+	</table>
+	<br>
+	  
+	  
+	  So the <tt>Weight-sensor resource</tt> should be modeled as an observable resource.
+	  <br><br>
+	  We can define the <tt>Weightsensor</tt> resource as a <k>CoAp</k> observable actor and the <tt>ParkmanagerService</tt> as an observer.
+	  <br>
+	  We can use the QAkActor because it already implements this feature.
 	  <br>
 	  <br>
 	  Because we are interested only if a car is present or not, we don't need to memorize the weight of the car, but we can use a symbolic string such as "free" and "occupied".
-	The change of the value of the CoAp-observable state should be done only if the weight change significantly. 
+	The change of the value of the <k>CoAp</k> observable state should be done only if the weight change significantly. 
 	<br>
 	Let's consider a fixed value delta. If the <k>| previous value - the current value | > delta</k> then we change it.
 	<br>
@@ -561,7 +603,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 A mock of the weight sensor is required to simulate the real sensor. The decision around the nature of the mock itself is left during the project phase.
 	 <br>
 	 <h4>Client</h4>
-	 At the moment we can consider this as a mock of a real client, in the future this could be an intermediary between the GUI used by the client and the application. 
+	 At the moment we can consider this as a mock of a real client, in the future this could be an intermediary between the <ks>GUI</ks> used by the client and the application. 
 	 <br>
  
  
@@ -582,7 +624,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<ks>Special coordinates are written as constant in the code, a structure to memorize the state of the parking</ks>		
+			<ks>Special coordinates are written as constant in the code and/or a structure that memorize the state of the parking</ks>		
 			</td>
 			<td>
 				<dl>
@@ -627,7 +669,6 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 	</table>
 	<br>
-	During the <k>SRINT-review</k> the use of an Object to represent the parking state has been discussed, but it will have the same <k><tt>Pros</tt></k>/<k>Cons</k> of writing constants/structure in the code.
 	In conclusion, a Prolog approach is preferred over the other methods.
  
  <h4>TokenID</h4>
@@ -659,7 +700,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 			Comments:
 			<ul>
 				<li>The optional response to the <tt>Client</tt> will be addressed in the future.</li>
-				<li> After the <k>SPRINT-review</k> the carenter message has been added to better represent the real interaction between the client and the GUI.</li>
+				<li> After the <k>SPRINT-review</k> the carenter message has been added to better represent the real interaction between the client and the <ks>GUI</ks>.</li>
 			</ul>
 			</td>
 			<td>
@@ -670,15 +711,15 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
   <br>
   In the other Use-case <ks>the parking slot is already occupied</ks> the communication ends after <tt>Client</tt> receives <tt>SLOTNUM</tt>=0.
  <br>
- <p>Model built with QAkActors <a href="../src/park_service_model_0.qak">here</a> </p>
- <h5>Problem arose after building the model:</h5>
- <ol>
+ <br>
+ <k>Model built with QAkActors</k> <a href="../src/park_service_model_0.qak">here</a>.
+ <!--
 	<li>(Currently an open point) How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
 	A client could receive the SLOTNUM, then not send a carenter. 
 	<br>
 	At the moment is assumed that the client always sends a carenter request, so the system keeps the slot occupied after the first request to park. 
 	</li>
- </ol>
+ -->
  <br>
 <h2>Test plans</h2> 
 
@@ -701,6 +742,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li><ul>Also the trolley must move, in order:
 		<li>Indoor</li>
 		<li>ParkingSlot (parking)</li>
+		<li>Home</li>
 		<li>ParkingSlot (pick-up)</li>
 		<li>Outdoor</li>
 		<li>Home</li>
@@ -717,14 +759,14 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li><em>INDOOR-area</em> is free.</li>
 	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
 	<li>The parking slot is occupied.</li>
-  <ul>
+  </ul>
  
  We expect that:
  <ol>
 	<li><tt>SLOTNUM</tt> value is 0.</li>
 	<li><tt>TOKENID</tt> is not sent.</li> 
  </ol> 
- <p>JUnit test: <a href="../src/test/kotlin/TestUseCase1.kt">TestUseCase2.kt</a></p>
+ <p>JUnit test: <a href="../src/test/kotlin/TestUseCase2.kt">TestUseCase2.kt</a></p>
 <h2>Project</h2> 
  
 </div>

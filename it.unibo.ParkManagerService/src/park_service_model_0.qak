@@ -116,7 +116,7 @@ QActor park_manager_service context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			
 			solve( getCoordinates($SLOTNUM,X,Y) )
@@ -124,7 +124,7 @@ QActor park_manager_service context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 
 			//forward transport_trolley -m move : move($x,$y)
-			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 					
 			[# val TOKENID = "$SLOTNUM"+"$counter" #]
 			[# counter++ #]
@@ -144,7 +144,6 @@ QActor park_manager_service context ctxparkmanager {
 			[# val TOKENID = "${payloadArg(0)}" #]
 			[# val SLOTNUM =  TOKENID.first() #]
 
-			println("TOKENID $TOKENID")
 			updateResource [# ""+TOKENID #]
 			
 			solve( getCoordinates($SLOTNUM,X,Y) )
@@ -152,14 +151,14 @@ QActor park_manager_service context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			solve( outdoor(X,Y) )
 			[# x = getCurSol("X").toString().toInt() #]
 			[# y = getCurSol("Y").toString().toInt() #]
 			
 			//forward transport_trolley -m move : move($x,$y)
-			//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+			[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 			
 			solve( unoccupySlot( $SLOTNUM ) ) 
 		}
@@ -174,7 +173,7 @@ QActor park_manager_service context ctxparkmanager {
 		[# x = getCurSol("X").toString().toInt() #]
 		[# y = getCurSol("Y").toString().toInt() #]
 		//forward transport_trolley -m move : move($x,$y)
-		//[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
+		[# forward("move", "move($x,$y)" ,"transport_trolley" ) #]
 	}
 	Goto accept
 	 
@@ -219,7 +218,6 @@ QActor weight_sensor context ctxparkmanager {
 	
 }
 
-/* 
 
 QActor transport_trolley context ctxparkmanager {
 	
@@ -314,7 +312,6 @@ QActor transport_trolley context ctxparkmanager {
 	
 }
 
-*/
 
 /*
 QActor weight_mock context ctxparkmanager {

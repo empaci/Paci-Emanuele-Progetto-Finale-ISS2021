@@ -53,6 +53,6 @@ object actorQakWeightCoapObserver {
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun main( ) {
-		actorQakCoapObserver.activate()
+		actorQakWeightCoapObserver.activate()
 		System.`in`.read()   //to avoid exit
  }
