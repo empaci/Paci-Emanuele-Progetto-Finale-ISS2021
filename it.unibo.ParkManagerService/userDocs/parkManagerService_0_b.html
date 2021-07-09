@@ -678,7 +678,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  
  <h3>Logical architecture</h3>
  
- <img src="img\LogicArchitecture.png">
+ <img src="img\LogicalArchitecture.png">
  <br>
  <br>
  See here the <a href="img\legenda.png" target="img">Legenda</a>.
@@ -721,10 +721,12 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	</li>
  -->
  <br>
+ <h3>Expected Time</h3>
+ Starting from the model already built, the first portoype is expected to be developed in 1 day of work max.
 <h2>Test plans</h2> 
 
  <h4>Use-case <ks>the parking slot is empty</ks></h4>
- We can generate a client thta request to park and, after receiving the receipt, to exit the parking slot.
+ We can generate a client that request to park and, after receiving the receipt, to exit the parking slot.
 <br> 
  To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
  <br><br>
@@ -770,7 +772,83 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 
 
 <h2>Project</h2> 
-
+ <h3>Concrete architecture</h3>
+  <img src="img\ConcreteArchitecture.png" width="100%">
+ <h3>Components</h3>
+ The components are left unchanged from their qak model description introduced in the analysis phase. The client and the weightsensor have been sepaated in differents context so they can be deployed in the distribuited environment as separate entities.
+ The nature of the application components are the auto-generated kotlin code from qak model.
+ <h4>ParkmanagerService</h4>
+	 <table style="width:100%" border="1">
+	<tr>
+		<td style="width:30%">
+			<img src="img\PMSActor.png">
+		</td>
+		<td>
+			<ol>
+				<li>This components fulfill all the functions stated in the analisys.</li>
+				<li>
+				Prolog logic has been used to memorize the special positions and to represent the parking state. Also is used to get the number of the free parking slot
+				and given the parking slot number to get the coordinates in the grid. See <a href="../parking.pl">parking.pl</a>.
+				<ul>
+					<li><k>getFreeSlot(X)</k> "X is the number of the parking slot, or 0 if is not free" </li>
+					<li><k>getCoordinats(SLOTNUM,X,Y)</k> "X and Y are the coordinates of the SLOTNUM given"</li>
+					<li><k>occupySlot(X)</k> "remove the unifying fact freeSlot(X) from the database"</li>
+					<li><k>unoccupySlot(X)</k> "assert the fact freeSlot(X) into the database"</li>
+				</ul>
+				<ks>NOTE</ks>: <k>occupySlot/unoccupySlot</k> are used to mantain wich slot is avaiable, to do so we use the predicate <a href="https://www.swi-prolog.org/pldoc/doc_for?object=assert/1" target="web">assert</a> and because of that 
+				we can't defined the freeSlot as a static predicate,so we need to need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("freeSlot/1")</a> to define it, then we need to
+				create dinamically from the initial state of <tt>parkmanageservice</tt> using: solve(unoccupySlot(1)) to assert into the databse freeSlot(1), which means that the parking slot 1 is free.
+				</li>
+				<li> To observe the <tt>weightsensor</tt> without interferring with the execution of the <tt>parkmanagerservice</tt> we need to introduce proper support. This is done adding a new actor: <a href="..\src\coap\actorQakWeightCoapObserver.kt">actorQakWeightCoapObserver.kt</a>.
+				Which can observer <tt>weightsensor</tt> and is able to receive and memorize the data. Then <tt>parkmanagerservice</tt> can retrieve the information about the <em>INDOOR-area</em> only when it needs to elaborate the parking request.
+				</li>
+				<li>Since it wasn't specified in the analysis when the <em>INDOOR-area</em> is not free the <tt>client</tt> is simply responded 0 at the request to enter.</li>
+			</ol>
+		</td>
+	</tr>
+	</table>
+ <h4>Client</h4>
+ <table style="width:100%" border="1">
+	<tr>
+	<td style="width:30%">
+		<img src="img\ClientActor.png">
+	</td>
+	<td>This component has been left unchanged from the analysis. The description can be ... (how it works...)</td>
+	</tr>
+	</table>
+ <h4>TransportationTrolley</h4>
+ <table style="width:100%" border="1">
+	<tr>
+		<td style="width:30%">
+			<img src="img\TTrolleyActor.png">
+		</td>
+		<td>
+			<ol>
+				<li>TransportTrolley is left unchanged, it receives a couple of coordinate and send the robot there.</li>
+				<li>The trolley now make uses of the basicrobot (descibed in <a href="\iss2021\issLab2021\it.unibo.qak21.basicrobot\userDocs">it.unibo.qak21.basicrobot</a> </li>
+				<li>We used the planner described in <a></a> wich return the series of movement necessary to go in the coordinates given, then the trolley calls the basicrobot to perform them.</li> 
+		</td>
+	</tr>
+	</table>
+ <h4>WeightSensor</h4>
+ <table style="width:100%" border="1">
+	<tr>
+		<td style="width:30%">
+			<img src="img\WeightSActor.png">
+			<br>
+			<div class="remark">
+			As stated in the analysis it changes the CoAP-observable state with the String: "<b>free</b>" or "<b>occupied</b>"
+			</div>
+		</td>
+		<td>
+			<ol>
+				<li>Description how it works (logic...)</li>
+				<li>A mock as been developed in python file: <a href="../pythonMocks/weightSensorMockTCP.ipynb">weightSensorMockTCP.ipynb</a> uses TCP to send the data to the sensor and a grafic interface that allow to type in the next value.</li> 
+		</td>
+	</tr>
+	</table>
+ <h3>Application Logic</h3>
+ <h3>External components</h3>
 
 <h2>Testing</h2> 
  

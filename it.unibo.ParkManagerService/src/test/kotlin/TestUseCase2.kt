@@ -54,7 +54,7 @@ object actorQakCoapObserver2 {
 	
 	private val ipaddr      = "localhost:8070"      //5683 default
 	private val context     = "ctxparkmanager"
- 	private val destactor   = "park_manager_service"
+ 	private val destactor   = "parkmanagerservice"
 	
 	private var testnum = 0
 	public var tSlot = ""

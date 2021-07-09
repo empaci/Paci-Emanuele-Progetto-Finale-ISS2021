@@ -18,7 +18,7 @@ object actorQakWeightCoapObserver {
 	
 	private val ipaddr      = "localhost:8070"		//5683 default
 	private val context     = "ctxparkmanager"
- 	private val destactor   = "weight_sensor"
+ 	private val destactor   = "weightsensor"
 
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -27,7 +27,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				}	 
 				state("requestIn") { //this:State
 					action { //it:State
-						request("clientRequest", "clientRequest(in)" ,"park_manager_service" )  
+						request("clientRequest", "clientRequest(in)" ,"parkmanagerservice" )  
 						stateTimer = TimerActor("timer_requestIn", 
 							scope, context!!, "local_tout_client_requestIn", 5000.toLong() )
 					}
@@ -48,7 +48,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				}	 
 				state("moveIndoor") { //this:State
 					action { //it:State
-						request("carenter", "carenter($SLOTNUM)" ,"park_manager_service" )  
+						request("carenter", "carenter($SLOTNUM)" ,"parkmanagerservice" )  
 					}
 					 transition(edgeName="t12",targetState="handleTokenid",cond=whenReply("receipt"))
 				}	 
@@ -66,7 +66,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				}	 
 				state("requestOut") { //this:State
 					action { //it:State
-						forward("outTokenid", "outTokenid($TOKENID)" ,"park_manager_service" ) 
+						forward("outTokenid", "outTokenid($TOKENID)" ,"parkmanagerservice" ) 
 					}
 					 transition( edgeName="goto",targetState="end", cond=doswitch() )
 				}	 

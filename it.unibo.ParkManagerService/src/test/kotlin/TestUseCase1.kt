@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.Before
 import org.junit.Assert.assertTrue
-import it.unibo.park_manager_service.Park_manager_service
+import it.unibo.parkmanagerservice.Parkmanagerservice
 import it.unibo.client.Client
-import it.unibo.weight_sensor.Weight_sensor
+import it.unibo.weightsensor.Weightsensor
 import it.unibo.kactor.QakContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -62,7 +62,7 @@ object actorQakCoapObserver {
 	
 	private val ipaddr      = "localhost:8070"      //5683 default
 	private val context     = "ctxparkmanager"
- 	private val destactor   = "park_manager_service"
+ 	private val destactor   = "parkmanagerservice"
 	
 	private var testnum = 0
 	

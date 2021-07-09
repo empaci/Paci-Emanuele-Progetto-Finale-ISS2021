@@ -2,8 +2,10 @@
 % model description   
 %====================================================================================
 context(ctxparkmanager, "localhost",  "TCP", "8070").
- qactor( client, ctxparkmanager, "it.unibo.client.Client").
-  qactor( park_manager_service, ctxparkmanager, "it.unibo.park_manager_service.Park_manager_service").
-  qactor( weight_sensor, ctxparkmanager, "it.unibo.weight_sensor.Weight_sensor").
-  qactor( transport_trolley, ctxparkmanager, "it.unibo.transport_trolley.Transport_trolley").
+context(ctxbasicrobot, "192.168.1.68",  "TCP", "8020").
+ qactor( basicrobot, ctxbasicrobot, "external").
+  qactor( client, ctxparkmanager, "it.unibo.client.Client").
+  qactor( parkmanagerservice, ctxparkmanager, "it.unibo.parkmanagerservice.Parkmanagerservice").
+  qactor( weightsensor, ctxparkmanager, "it.unibo.weightsensor.Weightsensor").
+  qactor( transporttrolley, ctxparkmanager, "it.unibo.transporttrolley.Transporttrolley").
 msglogging.
