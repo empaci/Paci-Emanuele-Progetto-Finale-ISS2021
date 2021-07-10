@@ -18,7 +18,6 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 
 				var counter=0 
-				var FREE_INDOOR=true
 				var x = 0
 				var y = 0
 		return { //this:ActionBasciFsm

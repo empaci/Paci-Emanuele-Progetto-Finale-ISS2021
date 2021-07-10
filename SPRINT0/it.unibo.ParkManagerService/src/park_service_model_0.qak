@@ -13,9 +13,9 @@ Dispatch move : move(X,Y)
 Dispatch moveok   : move( MOVESHORT )
 
 Dispatch cmd       : cmd(MOVE)
-Request step       : step( TIME )	
-Reply   stepdone   : stepdone(V)
-Reply   stepfail   : stepfail(DURATION, CAUSE)
+//Request step       : step( TIME )	
+//Reply   stepdone   : stepdone(V)
+//Reply   stepfail   : stepfail(DURATION, CAUSE)
 
 Context ctxparkmanager ip [host="localhost" port=8070]
 Context ctxbasicrobot ip [host="192.168.1.68" port=8020]    
@@ -69,7 +69,6 @@ QActor client context ctxparkmanager {
 QActor parkmanagerservice context ctxparkmanager {
 	[# 
 		var counter=0 
-		var FREE_INDOOR=true
 		var x = 0
 		var y = 0
 	#]
