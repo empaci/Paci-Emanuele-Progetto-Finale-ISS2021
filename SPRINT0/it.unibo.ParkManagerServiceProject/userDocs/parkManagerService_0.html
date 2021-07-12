@@ -363,17 +363,19 @@ while the <b>start/stop</b> <ks>of the transport trolley</ks> is always up to me
 <li>I expect that the <tt>ParkManagerService</tt> sends to me an <em>alarm</em> if it detectes that the <tt>OUTDOOR-area</tt>
 has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 </ul>
+
 </div>
+
+ 
 
 <h2>Requirement analysis</h2>
  
  In this SPRINT is considered only one parking spot and the <em>weightsensor</em> and no other elements (<tt>outsonar</tt>, <tt>ParkServiceGUI</tt>, <tt>ParkServiceStatusGUI</tt>, <tt>parking-manager</tt>, <tt>fan</tt>, <tt>thermometer</tt>).
- We are considering an easier problem to focus on the core elements of the application.
+ We are cnsidering an easier problem to focus on the core elements of the application.
  <br>
  At the end of the <k>SPRINT</k> a client should be able to successfully park and exit. 
  Also, the system should be able to reject a client's parking request if the slot is occupied.
  <br>
- </div>
  <br>
  Note: optional parts will not be discussed at this stage and will be implemented at the end.
  <br>
@@ -392,7 +394,6 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li><ks>Fan</ks>: machine for producing airflow, used for cooling the room.</li>
 	<li><ks>Critical situations</ks>: dangerous situations that could cause damage to the system.</li>
  </ul>
- <p>After the <k>SPRINT-review</k> the client gave examples of how the sensors/devices could be realized in the real world, reinforcing the idea of building a distributed system. Although, the physical build of those devices would not have an impact on our work because by requirements we will use mocks to simulate them.</p>
  <br>
  The problem required to develop a distribuited system. Also our application must interact with the <a href="../../it.unibo.boundaryWalk/userDocs/VirtualRobot2021.html" target="web">VirtualRobot</a> provided by the costumer.
  <br>
@@ -424,7 +425,6 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li>Receive a parking request from a client.</li>
 	<li>Check the availability of the slot and if the <em>INDOOR-area</em> is free.</li> 
 	<li>Send the client the value of the <tt>SLOTNUM</tt>.</li>
-	<li>Receive the intention to enter the car from the client.</li>
 	<li>Move the transport trolley.</li>
 	<li>Send the client the <tt>TOKENID</tt>.</li>
 	<li>Move the trolley <tt>home</tt>.</li>
@@ -455,7 +455,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<ks>Direct communication between the resource and the application (Es. TCP)</ks>
+			Direct communication between the resource and the application (Es. TCP) 		
 			</td>
 			<td>
 				<dl>
@@ -471,7 +471,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			<ks>A middleware between the resource and the application (Es. MQTT)</ks>
+			A middleware between the resource and the application (Es. MQTT)
 			</td>
 			<td>
 				<dl>
@@ -485,7 +485,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			<ks>Costum support</ks>
+			Costum support
 			</td>
 			<td>
 				<dl>
@@ -500,20 +500,16 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	</table>
 	<br>
 	We will use <a href="../../it.unibo.qakactor/userDocs/LabQakIntro2021.html" target="web">QAkActor</a> or <a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasic.kt" target="code">ActorBasic.kt</a>/<a href="../../it.unibo.qakactor/src/main/kotlin/ActorBasicFsm.kt" target="code">ActorBasicFsm.kt</a>, developed as a result of those studies, to model and realize our distributed components. 
-	We will employ a top-down approach discussing only high-level communication concepts. 
-	<br>
-	As discussed in the <k>SPRINT-review</k> the model using QAkActors will be developed at the end of the requirements analysis. 
-	Because  it will allow representing the problem in an auto-descriptive way, without ambiguity while being working and testable. <br>
-	The model will be available to be discussed with the client.
+	We will employ a top-down approach discussing only high-level communication concepts.
 	<br>
  
  	<h3>Main components</h3>
 	In the application we can identify 4 macro-components:
 	<ul>
 		<li><ks>ParkManagerService</ks>: the core of the application, used to interact with the client and control the trolley movement.</li>
-		<li><ks>Client</ks>: used by the clients to communicate with the <tt>ParkManagerService</tt>.</li>
+		<li><ks>Client</ks>: used by the clients to communicate with the ParkManagerService.</li>
 		<li><ks>Transport trolley</ks>: used to interact with the <tt>DDR</tt> robot.</li>
-		<li><ks>Weight-sensor resource</ks>: a resource that receives, stores, and makes available the data from the <em>weightsensor</em>.</li>
+		<li><ks>Weight-sensor resource</ks>: a resource that receives, stores, and makes available the data from the weight-sensor.</li>
 	</ul>
 	 <h4>ParkManagerService</h4>
 	  This component can:
@@ -531,71 +527,16 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 <br>
 	 The <tt>Trolley</tt> doesn't need to have any application logic, it only needs the coordinates sent by the <tt>ParkManagerService</tt>.
 	 <br>
-	 At the moment the <tt>Trolley</tt> can be at <tt>home</tt> or working, so there is no need to define its state.
-	 <br>
 	 <h4>Weight-sensor resource</h4>
-	  <tt>Weight-sensor resource</tt> receives data from the <em>weightsensor</em>, which means that it must stores the information regarding the <em>INDOOR-area</em> and makes them avaiable to the other entities in the system. 
+	  <tt>Weight-sensor resource</tt> should be modeled as an observable resource, which stores the information regarding the <em>INDOOR-area</em>.
 	  <br>
-	  We can retrieve the information from the <tt>Weight-sensor</tt> in different ways, based on the work done in <a href="../../it.unibo.raspIntro2020/userDocs/LabRadarGui.html" target="web">LabRadarGui | Radar GUI as a service</a> here are the main methods:
+	  Based on the work done in <a>LabRadarGui | Radar GUI as a service</a> similar to the Sonar, we can define the Weightsensor resource as a CoAp observable actor and the <tt>ParkmanagerService</tt> as an observer.
 	  <br>
-	<table style="width:100%" border="1">
-		<tr>
-			<td style="width:50%">
-			<ks>Polling</ks> (<tt>ParkManagerService</tt> ask for the <tt>Weight-sensor resource</tt> to send the information)
-			</td>
-			<td>
-				<dl>
-					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>Easy to realize two-way communication.</dd>
-					<dt><k>Cons</k>:</dt> 
-				    <dd>Slow. Every time <tt>ParkManagerService</tt> has to wait for an answer.</dd>
-				    <dd>Message exchange is always needed even if the state of the resource did not change. </dd>
-					<dd>The entities are not loosely coupled.</dd>
-					<dd>Communication logic is not clearly separated from the application logic.</dd>
-				</dl>
-			</td>
-			
-		</tr>
-		<tr>
-			<td>
-			<ks>A publish-subscribe method</ks> (<tt>ParkManagerService</tt> is a subscriber and <tt>Weight-sensor resource</tt> is a publisher)
-			</td>
-			<td>
-				<dl>
-				<dt><k><tt>Pro</tt></k>:</dt>
-				<dd>The entities are loosely coupled.</dd>
-				<dt><k>Cons</k>:</dt> 
-				<dd>Message is exchange always needed even if the state of the resource did not change.</dd>
-				</dl>
-			</td>
-		</tr>
-		<tr>
-			<td>
-			<ks>Resource observation</ks> (<tt>ParkManagerService</tt> observe <tt>Weight-sensor resource</tt>)
-			</td>
-			<td>
-				<dl>
-					<dt><k><tt>Pro</tt></k>:</dt>
-					<dd>The entities are loosely coupled.</dd> 
-					<dd>We are informed only if the state changes, no useless message exchange.</dd>
-					<dt><k>Cons</k>:</dt>
-					<dd></dd>
-				</dl>
-			</td>
-		</tr>
-	</table>
-	<br>
-	  
-	  
-	  So the <tt>Weight-sensor resource</tt> should be modeled as an observable resource.
-	  <br><br>
-	  We can define the <tt>Weightsensor</tt> resource as a <k>CoAp</k> observable actor and the <tt>ParkmanagerService</tt> as an observer.
-	  <br>
-	  We can use the QAkActor because it already implements this feature.
+	  We can use the qak actor because it already implements this feature.
 	  <br>
 	  <br>
 	  Because we are interested only if a car is present or not, we don't need to memorize the weight of the car, but we can use a symbolic string such as "free" and "occupied".
-	The change of the value of the <k>CoAp</k> observable state should be done only if the weight change significantly. 
+	The change of the value of the CoAp-observable state should be done only if the weight change significantly. 
 	<br>
 	Let's consider a fixed value delta. If the <k>| previous value - the current value | > delta</k> then we change it.
 	<br>
@@ -603,7 +544,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 A mock of the weight sensor is required to simulate the real sensor. The decision around the nature of the mock itself is left during the project phase.
 	 <br>
 	 <h4>Client</h4>
-	 At the moment we can consider this as a mock of a real client, in the future this could be an intermediary between the <ks>GUI</ks> used by the client and the application. 
+	 At the moment we can consider this as a mock of a real client, in the future this could be an intermediary between the GUI used by the client and the application. 
 	 <br>
  
  
@@ -614,9 +555,9 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  Some coordinates that need to be remembered:
  <ul>
 	<li><ks>home</ks>: (0,0)</li>
-	<li><ks>INDOOR-area</ks>: (6,0)</li>
-	<li><ks>OUTDOOR-area</ks>: (6,4)</li>
-	<li><ks>Parking slot</ks>: (2,1)</li>
+	<li><ks>INDOOR-area</ks>: (0,6)</li>
+	<li><ks>OUTDOOR-area</ks>: (4,6)</li>
+	<li><ks>Parking slot</ks>: (1,3)</li>
   </ul>
   We need a consistent way to memorize this information and the slots that are occupied.
  To represent the state of the current parking slot, the "special" positions we could use different strategies:
@@ -624,7 +565,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<ks>Special coordinates are written as constant in the code and/or a structure that memorize the state of the parking</ks>		
+			Special coordinates are written as constant in the code, a structure to memorize the state of the parking 		
 			</td>
 			<td>
 				<dl>
@@ -640,7 +581,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			<ks>External file with the position of each parking and their state</ks>
+			External file with the position of each parking and their state
 			</td>
 			<td>
 				<dl>
@@ -655,7 +596,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</tr>
 		<tr>
 			<td>
-			<ks>Prolog knowledge-base</ks>
+			Prolog knowledge-base
 			</td>
 			<td>
 				<dl>
@@ -676,31 +617,41 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<br>
  We could reset the increment after reaching a certain number ex. 65535 to avoid any problem.
  
- <h3>Logical architecture</h3>
+ <h3>Architecture logic</h3>
  
- <img src="img\LogicalArchitecture.png">
+ <img src="img\LogicArchitecture.png">
  <br>
  <br>
  See here the <a href="img\legenda.png" target="img">Legenda</a>.
  <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
+ <br>
  <h3>Interaction beween the ParkManagerService and the Client</h3>
  Schema of the messages between the <tt>ParkManagerService</tt> and the <tt>Client</tt> from the Use-case <ks>the parking slot is empty</ks>:
- 
  <br>
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
 			<ol>
-				<li>The <tt>Client</tt> sends a <k>request</k> of interest in parking.</li>
-				<li>The <tt>ParkManagerService</tt> sends a <k>reply</k> with the <tt>SLOTNUM</tt>.</li>
-				<li>the <tt>Client</tt> press carenter and sends a <k>request</k> with the <tt>SLOTNUM</tt> back to the <tt>ParkManagerService</tt></li>
-				<li>The <tt>ParkManagerService</tt> sends a <k>reply</k> with the <tt>TOKENID</tt>.</li>
-				<li>After some time the <tt>Client</tt> sends a <k>dispatch</k> with the <tt>TOKENID</tt> to exit the parking.</li>
+				<li>The <tt>Client</tt> sends the first request of interest in parking.</li>
+				<li>The <tt>ParkManagerService</tt> responds with the <tt>SLOTNUM</tt>.</li>
+				<li>The <tt>ParkManagerService</tt> sends the <tt>TOKENID</tt>.</li>
+				<li>After some time the <tt>Client</tt> sends the <tt>TOKENID</tt> back.</li>
 			</ol>
 			Comments:
 			<ul>
 				<li>The optional response to the <tt>Client</tt> will be addressed in the future.</li>
-				<li> After the <k>SPRINT-review</k> the carenter message has been added to better represent the real interaction between the client and the <ks>GUI</ks>.</li>
+				<li>We send <tt>TOKENID</tt> and <tt>SLOTNUM</tt> in different messages instead of one, because only when the car has been correctly parked it can be moved out. 
+					So to avoid possible errors or confusion.</li>
+				<li>There is no response after the <tt>Client</tt> sends <tt>TOKENID</tt>. In the future, there could be an "ok" or a "wait" response.</li>
 			</ul>
 			</td>
 			<td>
@@ -711,161 +662,32 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
   <br>
   In the other Use-case <ks>the parking slot is already occupied</ks> the communication ends after <tt>Client</tt> receives <tt>SLOTNUM</tt>=0.
  <br>
- <br>
- <k>Model built with QAkActors</k> <a href="https://github.com/empaci/Paci-Emanuele-Progetto-Finale-ISS2021/blob/master/it.unibo.ParkManagerService/src/park_service_model_0.qak" target="web">here</a>.
- <!--
-	<li>(Currently an open point) How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
-	A client could receive the SLOTNUM, then not send a carenter. 
-	<br>
-	At the moment is assumed that the client always sends a carenter request, so the system keeps the slot occupied after the first request to park. 
-	</li>
- -->
- <br>
- <h3>Expected Time</h3>
- Starting from the model already built, the first portoype is expected to be developed in 1 day of work.
 <h2>Test plans</h2> 
 
  <h4>Use-case <ks>the parking slot is empty</ks></h4>
- We can generate a client that request to park and, after receiving the receipt, to exit the parking slot.
-<br> 
+ We can generate a client request to park and, after receiving the receipt, exit. 
  To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
- <br><br>
- <ks>Starting conditions:</ks>
- <ul>
-	<li><em>INDOOR-area</em> is free.</li>
-	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
-	<li>The parking slot is not occupied.</li>
- </ul>
  
  We expect that:
  <ol>
 	<li><tt>SLOTNUM</tt> value is 1.</li>
 	<li><tt>TOKENID</tt> value is 11.</li> 
-	<li><ul>Also the trolley must move, in order:
-		<li>Indoor</li>
-		<li>ParkingSlot (parking)</li>
-		<li>Home</li>
-		<li>ParkingSlot (pick-up)</li>
-		<li>Outdoor</li>
-		<li>Home</li>
-	</ul></li>
+	<li>The trolley's final position is <tt>HOME</tt>.</li>
  </ol>
- <p>JUnit test: <a href="https://github.com/empaci/Paci-Emanuele-Progetto-Finale-ISS2021/blob/master/it.unibo.ParkManagerService/src/test/kotlin/TestUseCase1.kt">TestUseCase1.kt</a>, <a href="https://github.com/empaci/Paci-Emanuele-Progetto-Finale-ISS2021/blob/master/it.unibo.ParkManagerService/src/test/kotlin/TestTrolleyPosUC1.kt">TestTrolleyPosUC1.kt</a>
- <br>
  <h4>Use-case <ks>the parking slot is already occupied</ks></h4>
-  We can generate a client request to park, the service refuse. 
+  We can generate a client request to park. 
   To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client. 
- <br><br>
-  <ks>Starting conditions:</ks>
-  <ul>
-	<li><em>INDOOR-area</em> is free.</li>
-	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
-	<li>The parking slot is occupied.</li>
-  </ul>
  
  We expect that:
  <ol>
 	<li><tt>SLOTNUM</tt> value is 0.</li>
 	<li><tt>TOKENID</tt> is not sent.</li> 
+	<li>The trolley did not move and the final position is <tt>HOME</tt>.</li>
  </ol> 
- <p>JUnit test: <a href="https://github.com/empaci/Paci-Emanuele-Progetto-Finale-ISS2021/blob/master/it.unibo.ParkManagerService/src/test/kotlin/TestUseCase2.kt">TestUseCase2.kt</a></p>
-
 
 <h2>Project</h2> 
- <h3>Concrete architecture</h3>
-  <img src="img\ConcreteArchitecture.png" width="100%">
- <h3>Components</h3>
- The application-logic of the model developed in the analysis phase can be adopted unchanged in the project-phase. Although the application code is the same we moved some actors 
- to different contexts; so they can be deployed in the distributed environment over separate computational nodes.
- <h4>Parkmanagerservice</h4>
-	 <table style="width:100%" border="1">
-	<tr>
-		<td style="width:30%">
-			<center><img src="img\PMSActor.png"></center>
-		</td>
-		<td>
-			<ol>
-				<li>This component fulfills all the functions stated in the analysis, see <a href="../src/parkmanager.qak">parkmanager.qak</a>.</li>
-				<li>
-				We used Prolog logic to memorize the "special" positions and to represent the parking state. Also is used to get the number of the free parking slot
-				and given the parking slot number to get the coordinates in the grid. See <a href="../parking.pl">parking.pl</a>.
-				<ul>
-					<li><k>getFreeSlot(X)</k> "X is the number of the parking slot, or 0 if not free" </li>
-					<li><k>getCoordinats(SLOTNUM,X,Y)</k> "X and Y are the coordinates of the SLOTNUM given"</li>
-					<li><k>occupySlot(X)</k> "remove the unifying fact freeSlot(X) from the database"</li>
-					<li><k>unoccupySlot(X)</k> "assert the fact freeSlot(X) into the database"</li>
-				</ul>
-				<ks>NOTE</ks>: <k>occupySlot/unoccupySlot</k>, that are used to maintain the slots state, make use of the predicate <a href="https://www.swi-prolog.org/pldoc/doc_for?object=assert/1" target="web">assert</a>, and therefore 
-				we can't define the freeSlot as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("freeSlot/1")</a>, then we need to
-				create the parking slot starting condition dynamically from the initial state of <tt>parkmanageservice</tt> using: solve(unoccupySlot(1)) to assert into the database freeSlot(1), which means that the parking slot 1 is free.
-				</li>
-				<li> To observe the <tt>weightsensor</tt> without interfering with the execution of the <tt>parkmanagerservice</tt> we need to introduce proper support. So we added a new actor: <a href="..\src\coap\actorQakWeightCoapObserver.kt">actorQakWeightCoapObserver.kt</a>.
-				Which can observer <tt>weightsensor</tt> and can receive and memorize the data. Then <tt>parkmanagerservice</tt> can retrieve the information about the <em>INDOOR-area</em> only when it needs to elaborate the parking request.
-				</li>
-				<li>Since it wasn't specified in the analysis when the <em>INDOOR-area</em> is not free the <tt>client</tt> is responded 0 at the request to enter.</li>
-			</ol>
-		</td>
-	</tr>
-	</table>
- <h4>Client</h4>
- <table style="width:100%" border="1">
-	<tr>
-	<td style="width:30%">
-		<center><img src="img\ClientActor.png"></center>
-		<br>
-<pre>
-Request clientRequest : clientRequest(X)
-Reply enter : enter(SLOTNUM)  
-
-Request carenter : carenter(SLOTNUM)
-Reply receipt : receipt(TOKENID)
-
-Dispatch outTokenid : outTokenid(TOKENID)
-</pre>
-	</td>
-	<td>The model developed in the analysis phase can be adopted also as our <tt>client</tt> component in the project phase, see <a href="../src/client.qak">client.qak</a>.</td>
-	</tr>
-	</table>
- <h4>Transporttrolley</h4>
- <table style="width:100%" border="1">
-	<tr>
-		<td style="width:30%">
-			<center><img src="img\TTrolleyActor.png"></center>
-			<br>
-<pre>
-Dispatch move : move(X,Y)
-Dispatch moveok   : move( MOVESHORT )
-
-Dispatch cmd       : cmd(MOVE)
-</pre>
-		</td>
-		<td>
-			<ol>
-				<li>TransportTrolley remained the same from the model, see <a href="../src/parkmanager.qak">parkmanager.qak</a>, but in the concrete architecture instead of communicating directly with the wenv sends the moves to the basicrobot (see <a href="\iss2021\issLab2021\it.unibo.qak21.basicrobot\userDocs">it.unibo.qak21.basicrobot</a>).</li>
-				<li>The <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">itunibo.planner.plannerUtil</a> has been used to find the path from the current robot position to the coordinates received. Since the planner returns a series of movement, we developed the logic
-				to read in the returned string the next move "w","r" or "l" and sending the dispatch to the basicrobot.</li> 
-		</td>
-	</tr>
-	</table>
- <h4>Weightsensor</h4>
- <table style="width:100%" border="1">
-	<tr>
-		<td style="width:30%">
-			<center><img src="img\WeightSActor.png"></center>
-			<br>
-			<div class="remark">
-			As stated in the analysis it changes the CoAP-observable state with the String: "<b>free</b>" or "<b>occupied</b>".
-			<br><br>
-			The inital state is set to "<b>free</b>".
-			</div>
-		</td>
-		<td>
-			<ol>
-				<li>The model introduced in the analysis phase can be adopted also as our <tt>weightsensor</tt> component in the project phase, see <a href="../src/weightsensor.qak">weightsensor.qak</a>.</li>
-				<li>A mock as been developed in python file: <a href="../pythonMocks/weightSensorMockTCP.ipynb">weightSensorMockTCP.ipynb</a> uses TCP to send the data to the sensor and a grafic interface that allow to type in the next value.</li> 
-		</td>
-	</tr>
-	</table>
+ 
+</div>
 
 <h2>Testing</h2> 
  
@@ -892,7 +714,7 @@ Dispatch cmd       : cmd(MOVE)
 By Emanuele Paci email: emanuele.paci@studio.unibo.it
 <br/>
 Repository: https://github.com/empaci/Paci-Emanuele-Progetto-Finale-ISS2021
-<img src="img\fototessera.png" alt="foto" width="15%" height="15%" style="float:right;">
+<img src="D:\Scuola\magistrale\IngegneriaDelSoftware\iss2021\AutomatedCarParking\it.unibo.ParkManagerService\userDocs\img\fototessera.png" alt="foto" width="15%" height="15%" style="float:right;">
 </div> 
 </body>
 </html>
