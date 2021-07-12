@@ -12,41 +12,35 @@ import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.Before
 import org.junit.Assert.assertTrue
+import it.unibo.parkmanagerservice.Parkmanagerservice
+import it.unibo.client.Client
+import it.unibo.weightsensor.Weightsensor
 import it.unibo.kactor.QakContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import it.unibo.kactor.ActorBasicFsm
-import it.unibo.client.Client
+import org.junit.BeforeClass
+import kotlinx.coroutines.GlobalScope
+
 
 internal class TestUseCase1 {
 	
 	lateinit var observer : actorQakCoapObserver
 	var job: Job? = null
-	var job1: Job? = null
-	var job2: Job? = null
 	
-	@Before
+	@BeforeClass
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
-	fun mainTest() {
+	fun testMain() {
 		runBlocking{
 			launch {
 				observer = actorQakCoapObserver
 				observer.activate()
 			}
 			job = launch {
-				QakContext.createContexts("localhost", this, "weightsensorp.pl", "sysRules.pl")
-			}
-			job1 = launch {
-				QakContext.createContexts("localhost", this, "parkmanagerp.pl", "sysRules.pl")
-			}
-			job2 = launch {
-				QakContext.createContexts("localhost", this, "clientp.pl", "sysRules.pl")
+				QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
 			delay(10000)
 			job?.cancelAndJoin()
-			job1?.cancelAndJoin()
-			job2?.cancelAndJoin()
 		}
 	}
 	
@@ -111,42 +105,34 @@ object actorQakCoapObserver {
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun main( ) {
-	lateinit var observer : actorQakCoapObserver
-	var job: Job? = null
-	var job1: Job? = null
-	var job2: Job? = null
-	
-	lateinit var robot : ActorBasicFsm 
-	//actorQakCoapObserver.activate()
-	runBlocking{
-			//launch {
-				//observer = actorQakCoapObserver
-				//observer.activate()
-			//}
-			robot = Client("client", this)
-			println("Avvio...")
-			println("Lanciando PMS 1")
-			job1 = launch {
-				println("Lanciando PMS")
-				QakContext.createContexts("localhost", this, "parkmanagerp.pl", "sysRules.pl")
+		lateinit var observer : actorQakCoapObserver
+		var job1: Job? = null
+		var job2: Job? = null
+		var job3: Job? = null
+		//actorQakCoapObserver.activate()
+		//System.`in`.read()   //to avoid exit
+		runBlocking{
+			launch {
+				observer = actorQakCoapObserver
+				observer.activate()
 			}
-			println("Lanciato PMS")
-			job = launch {
-				QakContext.createContexts("192.168.1.68", this, "weightsensorp.pl", "sysRules.pl")
+			job1 = GlobalScope.launch {
+				it.unibo.ctxweightsensor.main()
+				//QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
-			println("Lanciato Weightsensor")
-			//delay(1000)
-			job2 = launch {
-				println("Lanciando Client")
-				QakContext.createContexts("192.168.1.68", this, "clientp.pl", "sysRules.pl")
+			job2 = GlobalScope.launch {
+				it.unibo.ctxparkmanager.main()
+				//QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
 			}
-			println("Lanciato Client")
+			job3 = GlobalScope.launch {
+				it.unibo.ctxclient.main()
+				//QakContext.createContexts("localhost", this, "model.pl", "sysRules.pl")
+			}
 			delay(10000)
-			job?.cancelAndJoin()
 			job1?.cancelAndJoin()
 			job2?.cancelAndJoin()
+			job3?.cancelAndJoin()
 		}
-		//System.`in`.read()   //to avoid exit
  }
  
 
