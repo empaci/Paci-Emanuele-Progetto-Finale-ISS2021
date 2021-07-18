@@ -1,0 +1,245 @@
+System -msglog parkmanager
+
+Request clientRequest : clientRequest(X) // X = in
+Reply enter : enter(SLOTNUM) // SLOTNUM=0/1/2/3/4/5/6 
+
+Request carenter : carenter(SLOTNUM) // SLOTNUM=1/2/3/4/5/6
+Reply receipt : receipt(TOKENID)
+
+Dispatch outTokenid : outTokenid(TOKENID)
+
+Dispatch move : move(X,Y)
+Dispatch moveok   : move( MOVESHORT )
+
+Dispatch cmd       : cmd(MOVE)
+Request step       : step( TIME )	
+Reply   stepdone   : stepdone(V)
+Reply   stepfail   : stepfail(DURATION, CAUSE)
+
+Context ctxclient ip [host="192.168.1.68" port=8069] 
+Context ctxparkmanager ip [host="localhost" port=8070]
+Context ctxbasicrobot ip [host="192.168.1.68" port=8020]    
+
+ExternalQActor basicrobot context ctxbasicrobot
+
+QActor parkmanagerservice context ctxparkmanager {
+	[# 
+		var counter=0 
+		var x = 0
+		var y = 0
+	#]
+	State s0 initial {
+		discardMsg Off
+		solve( consult("parking.pl"))
+		solve( dynamic("freeSlot/1") )
+		solve(unoccupySlot(1))
+		qrun coap.actorQakWeightCoapObserver.activate( myself  )
+		println("Starting ParkManagerService.")
+	}
+	Goto accept
+	
+	State accept {
+		println("ParkManagerServing accepting client requests...")	
+	}
+	Transition clientMsg whenRequest clientRequest -> handleClientRequest
+						 whenRequest carenter -> handleCarEnter
+						 whenMsg outTokenid -> handleClientOut
+	
+	State handleClientRequest {
+		println("ParkManagerService handling client request")
+		onMsg( clientRequest : clientRequest(X)) {
+			[# val requestType = "${payloadArg(0)}" #]
+			if [# requestType == "in" #] {
+				
+				if [# coap.actorQakWeightCoapObserver.readResponse()=="free" #] {
+				
+					solve( getFreeSlot( S ) )
+					[# val SLOTNUM = getCurSol("S") #] 
+					solve( occupySlot( $SLOTNUM ) ) // let's assume at the moment that the client is going to do carenter
+				
+					replyTo clientRequest with  enter :  enter( $SLOTNUM )	
+				}
+				else {
+					replyTo clientRequest with  enter :  enter( 0 ) //at the moment the client is refused if the indoor area is occupied
+				}
+			}
+		}
+	}
+	Goto accept
+	
+	State handleCarEnter {
+		printCurrentMessage
+		onMsg(carenter : carenter(SLOTNUM)) {
+			[# val SLOTNUM = payloadArg(0).toInt() #]
+			
+			updateResource [# ""+SLOTNUM #]
+			
+			solve( indoor(X,Y) )
+			[# x = getCurSol("X").toString().toInt() #]
+			[# y = getCurSol("Y").toString().toInt() #]
+			
+			//forward transporttrolley -m move : move($x,$y)
+			[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+			
+			
+			solve( getCoordinates($SLOTNUM,X,Y) )
+			[# x = getCurSol("X").toString().toInt() #]
+			[# y = getCurSol("Y").toString().toInt() #]
+
+			//forward transporttrolley -m move : move($x,$y)
+			[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+					
+			[# val TOKENID = "$SLOTNUM"+"$counter" #]
+			[# counter++ #]
+					
+			replyTo carenter with  receipt :  receipt( $TOKENID )
+		}
+	}
+	Transition t3 whenTime 1000 -> moveTrolleyHome
+						 whenRequest clientRequest -> handleClientRequest
+						 whenRequest carenter -> handleCarEnter
+						 whenMsg outTokenid -> handleClientOut
+	
+	State handleClientOut {
+		println("ParkManagerServing out.")
+		
+		onMsg( outTokenid : outTokenid(X)) {
+			[# val TOKENID = "${payloadArg(0)}" #]
+			[# val SLOTNUM =  TOKENID.first() #]
+
+			updateResource [# ""+TOKENID #]
+			
+			solve( getCoordinates($SLOTNUM,X,Y) )
+			[# x = getCurSol("X").toString().toInt() #]
+			[# y = getCurSol("Y").toString().toInt() #]
+			
+			//forward transporttrolley -m move : move($x,$y)
+			[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+			
+			solve( outdoor(X,Y) )
+			[# x = getCurSol("X").toString().toInt() #]
+			[# y = getCurSol("Y").toString().toInt() #]
+			
+			//forward transporttrolley -m move : move($x,$y)
+			[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+			
+			solve( unoccupySlot( $SLOTNUM ) ) 
+		}
+	}
+	Transition t4 whenTime 1000 -> moveTrolleyHome
+				  whenRequest clientRequest -> handleClientRequest
+				  whenRequest carenter -> handleCarEnter
+				  whenMsg outTokenid -> handleClientOut
+				  
+	State moveTrolleyHome {
+		solve( home(X,Y) )
+		[# x = getCurSol("X").toString().toInt() #]
+		[# y = getCurSol("Y").toString().toInt() #]
+		//forward transporttrolley -m move : move($x,$y)
+		[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+	}
+	Goto accept
+	 
+}
+
+QActor transporttrolley context ctxparkmanager {
+	
+	[#
+		val mapname     = "parkingMap"  		 
+		var Myself      = myself   
+		var CurrentPlannedMove = "" 
+		var x = ""
+		var y = ""
+	#]
+	
+	State s0 initial {
+		
+		run itunibo.planner.plannerUtil.initAI()
+		run itunibo.planner.plannerUtil.loadRoomMap("$mapname") 
+		run itunibo.planner.plannerUtil.showMap( )   
+     	run itunibo.planner.plannerUtil.showCurrentRobotState()
+     	
+     	//run pathexecutil.register( Myself )
+	}
+	Goto wait
+	
+	State wait {
+		println("Waiting messages...")
+	}
+	Transition t0 whenMsg move -> handle
+	
+	State handle {
+		onMsg(move : move(X,Y)) {
+			[# 
+				x = payloadArg(0)
+				y = payloadArg(1)
+			#]
+			println("x: $x, y: $y")
+			run itunibo.planner.plannerUtil.planForGoal(x,y)
+		}
+	}
+	Goto execPlannedMoves     
+    
+	State execPlannedMoves{   
+		delay 300
+ 		[#  CurrentPlannedMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+ 		println("+++++++++++++++++++++++++++++++ $CurrentPlannedMove")
+ 	}
+ 	Goto doMove if [# CurrentPlannedMove.length>0 #] else parkthecar
+ 
+ 	State doMove{ 		
+ 	}
+ 	Goto wMove if [# CurrentPlannedMove == "w" #] else turnMove
+ 	
+ 	State wMove {     
+ 		//request basicrobot -m step : step(330)
+ 		forward basicrobot -m cmd : cmd(w)  
+		delay 330
+		forward basicrobot -m cmd : cmd(h)
+ 	}
+ 	Transition t0 whenTime 500 -> stepDone
+ 				//whenReply stepdone   -> stepDone
+ 				//whenReply stepfail   -> stepFailed 
+  	
+ 	 State stepDone{  
+ 		//updateResource [# itunibo.planner.plannerUtil.getMap() #]
+ 		run itunibo.planner.plannerUtil.updateMap(  "w" )
+ 		run itunibo.planner.plannerUtil.showCurrentRobotState( )
+ 		//updateResource [# "stepDone" # ]
+  	} 
+ 	Goto execPlannedMoves
+ 	
+ 	State turnMove{
+ 		println("-----qqqq-----------------dsaasds---------------sdaadssdasdassdadsd - -- -$CurrentPlannedMove")
+  		if [# CurrentPlannedMove == "l" || CurrentPlannedMove == "r"  #]{
+  			forward basicrobot -m cmd : cmd($CurrentPlannedMove)
+  		} 
+ 	} 
+ 	Goto rotationDone
+
+ 	State rotationDone{
+ 		run itunibo.planner.plannerUtil.updateMap(  "$CurrentPlannedMove" )
+ 	} 
+ 	 Goto execPlannedMoves
+ 	
+ 	State parkthecar{
+ 		printCurrentMessage
+ 		run itunibo.planner.plannerUtil.showCurrentRobotState( )  
+ 		if [# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #]{
+ 			run itunibo.planner.plannerUtil.planForGoal(x,y)
+ 		}
+ 		else {
+ 			[# println(itunibo.planner.plannerUtil.get_curPos().toString()) #]
+ 			updateResource [# itunibo.planner.plannerUtil.get_curPos().toString() #]
+ 		}
+ 	}
+    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  wait
+	
+	State stepFailed{  //has found an obstacle (a wall)
+		printCurrentMessage
+ 		println("basicboundarywalker | FOUND A WALL at home=${itunibo.planner.plannerUtil.atHome()}")
+ 		updateResource [# "stepFailed" # ]  
+ 	}    
+    Goto wait
+	
+}

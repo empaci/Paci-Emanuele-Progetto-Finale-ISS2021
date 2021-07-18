@@ -1,0 +1,10 @@
+Workplan Progetto finale ISS2021 - Emanuele Paci
+
+
+SPRINT
+0. Considero solo un parcheggio e il sensore di peso in ingresso. Obbiettivo: fare parcheggiare e uscire un cliente e rifiutare l'ingresso di un cliente.
+1. Amplio l'applicazione a 6 parcheggi (quindi considero anche più clienti alla volta). Introduco l'outsonar.
+2. Inserisco il parking-manager e relativa GUI. Introduco fan e termometro.
+3. GUI relativa al cliente e richieste opzionali.
+
+Circa 10 giorni ogni SPRINT. Termine entro fine Luglio.
