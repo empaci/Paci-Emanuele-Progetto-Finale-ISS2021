@@ -528,20 +528,23 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	  </ul>
 	  There is no need to divide this component into simpler components since the complexity to coordinate them is greater than the complexity of the single one.  
 	 <h4>Trolley</h4>
-	 The <tt>Trolley</tt> is able to communicate to the <tt>DDR</tt> robot where to move in the grid, to do so the code already built in <a href="../../it.unibo.qakDemo/userDocs/LabQakDemo2021.html" target="web">it.unibo.qakDemo​</a> should be used. 
+	 The <tt>Trolley</tt> should communicate with the <tt>DDR</tt> robot the next movement to perform, and it should use the <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.qak21.basicrobot/userDocs/basicrobot2021.html" target="web">basicrobot</a> as an intermediary.
+	 According to the client, this will simplify the passage from the <ks>virtual robot</ks> to the <ks>real robot</ks>.
 	 <br>
 	 <br>
-	 The <tt>Trolley</tt> should use the <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.qak21.basicrobot/userDocs/basicrobot2021.html" target="web">basicrobot</a> as an intermediary to communicate to the <tt>DDR</tt> robot.
-	 Using this new component will simplify the passage from virtual to real robot.
+	 The <tt>Trolley</tt> receives a couple of coordinates from the <tt>ParkmanagerService</tt> and it should limit itself to move the robot to that position. 
 	 <br>
 	 <br>
-	 The <tt>Trolley</tt> doesn't need to have any application logic, it only needs the coordinates sent by the <tt>ParkManagerService</tt>.
-	 Although is doesn't contain any logic, is preferred to keep the <tt>ParkManagerService</tt> and the <tt>Trolley</tt> as separate entities.
-	 Because doing in only one component will make it, not only more complex, but also the have differents roles. The <tt>ParkManagerService</tt> represent
-	 the core of the application, while the <tt>Trolley</tt> represent the robot and its state. 
+	 To implement this logic check the code already built in <a href="../../it.unibo.qakDemo/userDocs/LabQakDemo2021.html" target="web">it.unibo.qakDemo​</a>.
+	 Also, to find the path, or set of movements, to reach the coordinate's position <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">itunibo.planner.plannerUtil</a> should be used as it already provides the logic necessary. 
 	 <br>
 	 <br>
-	 At the moment the <tt>Trolley</tt> can be at <tt>home</tt> or working, so there is no need to define its state.
+	 Because the <tt>Trolley</tt> doesn't contain any application logic, we can merge it with the <tt>ParkmanagerService</tt>. But is it preferred to keep
+	 them separate because merging will make the <tt>ParkmanagerTrolley</tt> complex and hard to understand. But also they represent differents logical part of the system: 
+	 the <tt>ParkManagerService</tt> represent the core of the application and interaction with the clients, while the <tt>Trolley</tt> represents every aspect concerning the robot. 
+	 <br>
+	 <br>
+	 In this <k>SPRINT</k> the <tt>Trolley</tt> can be at <tt>home</tt> or working, so there is no need to define its state.
 	 <br>
 	 <h4>Weight-sensor resource</h4>
 	  <tt>Weight-sensor resource</tt> receives data from the <em>weightsensor</em>, which means that it must stores the information regarding the <em>INDOOR-area</em> and makes them avaiable to the other entities in the system. 
@@ -794,7 +797,8 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  The application-logic of the model developed in the analysis phase can be adopted unchanged in the project-phase. Although the application code is the same we moved some actors 
  to different contexts; so they can be deployed in the distributed environment over separate computational nodes.
  <br>
- <tt>parkmanagerservice</tt> and <tt>transporttrolley</tt> can be kept in the same context, because: <tt>transporttrolley</tt> can be seen as the logic used by the <tt>parkmanagerservice</tt> to move the robot. 
+ <br>
+ <tt>parkmanagerservice</tt> and <tt>transporttrolley</tt> can be kept in the same context, because <tt>transporttrolley</tt> can be seen as the logic used by the <tt>parkmanagerservice</tt> to move the robot. 
  
  
  <h4>Parkmanagerservice</h4>
@@ -805,7 +809,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		</td>
 		<td>
 			<ol>
-				<li>This component fulfills all the functions stated in the analysis, see <a href="../src/parkmanager.qak">parkmanager.qak</a>.</li>
+				<li>This component fulfills all the functions stated in the analysis, see <a href="../../../progetto/it.unibo.ParkManagerTrolley/src/parkmanager.qak">parkmanager.qak</a>.</li>
 				<li>
 				We used Prolog logic to memorize the "special" positions and to represent the parking state. Also is used to get the number of the free parking slot
 				and given the parking slot number to get the coordinates in the grid. See <a href="../parking.pl">parking.pl</a>.
@@ -843,7 +847,7 @@ Reply receipt : receipt(TOKENID)
 Dispatch outTokenid : outTokenid(TOKENID)
 </pre>
 	</td>
-	<td>The model developed in the analysis phase can be adopted also as our <tt>client</tt> component in the project phase, see <a href="../src/client.qak">client.qak</a>.</td>
+	<td>The model of the client developed in the analysis phase can be adopted also as our <tt>client</tt> component in the project phase, see <a href="../../../progetto/it.unibo.Client/src/client.qak">client.qak</a>.</td>
 	</tr>
 	</table>
  <h4>Transporttrolley</h4>
@@ -857,13 +861,16 @@ Dispatch move : move(X,Y)
 Dispatch moveok   : move( MOVESHORT )
 
 Dispatch cmd       : cmd(MOVE)
+Request step       : step( TIME )	
+Reply   stepdone   : stepdone(V)
+Reply   stepfail   : stepfail(DURATION, CAUSE)
 </pre>
 		</td>
 		<td>
 			<ol>
-				<li>TransportTrolley remained the same from the model, see <a href="../src/parkmanager.qak">parkmanager.qak</a>, but in the concrete architecture instead of communicating directly with the wenv sends the moves to the basicrobot (see <a href="\iss2021\issLab2021\it.unibo.qak21.basicrobot\userDocs">it.unibo.qak21.basicrobot</a>).</li>
-				<li>The <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">itunibo.planner.plannerUtil</a> has been used to find the path from the current robot position to the coordinates received. Since the planner returns a series of movement, we developed the logic
-				to read in the returned string the next move "w","r" or "l" and sending the dispatch to the basicrobot.</li> 
+				<li>The model of the transporttrolley developed in the analysis phase can be adopted also as our <tt>transporttrolley</tt> in the project phase, see <a href="../../../progetto/it.unibo.ParkManagerTrolley/src/parkmanager.qak">parkmanager.qak</a>.</li>
+				<li>We used <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">itunibo.planner.plannerUtil</a> to find the path from the current robot position to the coordinates received. Since it returns a series of movements, we developed the logic
+				to read in the returned string the next move "w", "r" or "l" and sending the appropriate dispatch or request to the basicrobot.</li> 
 		</td>
 	</tr>
 	</table>
@@ -881,14 +888,47 @@ Dispatch cmd       : cmd(MOVE)
 		</td>
 		<td>
 			<ol>
-				<li>The model introduced in the analysis phase can be adopted also as our <tt>weightsensor</tt> component in the project phase, see <a href="../src/weightsensor.qak">weightsensor.qak</a>.</li>
+				<li>The model of the weighsensor introduced in the analysis phase can be adopted also as our <tt>weightsensor</tt> component in the project phase, see <a href="../../../progetto/it.unibo.Weightsensor/src/weightsensor.qak">weightsensor.qak</a>.</li>
 				<li>A mock as been developed in python file: <a href="../pythonMocks/weightSensorMockTCP.ipynb">weightSensorMockTCP.ipynb</a> uses TCP to send the data to the sensor and a grafic interface that allow to type in the next value.</li> 
 		</td>
 	</tr>
 	</table>
 
-<h2>Testing</h2> 
- 
+<h2>Testing</h2>
+ We performed a <em>Non-distibuted</em> testing. All the components are deployed in the same PC and are in the same context.
+ <br>
+ In the following tests we only checked if the code meet the set of requirement imposed by the <kt>Use-cases</kt>.
+ Also note that the tests have been executed using only the <ks>virtual robot</ks>.
+ <h3>Test execution</h3>
+ <table style="width:100%" border="1">
+	<tr>
+		<td style="width:50%">
+			<center><img src="img\testPlan1.png" width="80%" height="80%"></center>
+		</td>
+		<td>
+			Test <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a> to occupy a parking slot completed successfully.
+			The system returned a <tt>SLOTNUM</tt> of 1 corresponding on the parking slot, and generated a <tt>TOKENID</tt> of 10.
+		</td>
+	</tr>
+	<tr>
+		<td style="width:50%">
+			<center><img src="img\testPlan1Robot.png" width="80%" height="80%"></center>
+		</td>
+		<td>
+			Test <a href="../src/test/TestPlanUseCase1RobotPos.kt">TestPlanUseCase1RobotPos.kt</a> to occupy a parking slot completed successfully.
+			The system returned all the correct robot positions in the right order.
+		</td>
+	</tr>
+	<tr>
+		<td style="width:50%">
+			<center><img src="img\testPlan2.png" width="80%" height="80%"></center>
+		</td>
+		<td>
+			Test <a href="../src/test/TestPlanUseCase2.kt">TestPlanUseCase1.kt</a> to refuse a client to park completed successfully.
+			The system responded with a <tt>SLOTNUM</tt> of value 0 to the simulated client request to park.
+		</td>
+	</tr>
+</table>
 
 <h2>Deployment</h2> 
 
@@ -924,7 +964,9 @@ Dispatch cmd       : cmd(MOVE)
 				<li>Test launching <ks>client</ks> on <k>PC</k></li>
 			</ol>
 		</td>
-		<td> desc</td>
+		<td>
+		
+		</td>
 	</tr>
 </table>
 

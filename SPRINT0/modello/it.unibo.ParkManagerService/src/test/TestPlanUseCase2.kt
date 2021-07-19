@@ -43,8 +43,7 @@ class TestPlanUseCase2 {
 					println("+++++++++ waiting for system startup ...")
 					delay(500)
 					myactor=QakContext.getActor("parkmanagerservice")
-				}				
-				delay(5000)	//Give time to set up
+				}
 				channelSyncStart.send("starttesting")
 				testingObserver = CoapObserverForTesting()
 			}		 
@@ -78,15 +77,20 @@ class TestPlanUseCase2 {
 	}
 	
     @Test
-    fun testUC1(){
+    fun testUC2(){
 		println("+++++++++ testslotnum ")
 		//Send a command and look at the result
 		var result  = ""
 		runBlocking{
  			val channelForObserverL = Channel<String>()
 			
-			//test if the parkmanagerservice respond with the absence of a free parking slot 0
 			testingObserver!!.addObserver( channelForObserverL,"enter")
+			
+			//occupies the parking slot
+			MsgUtil.sendMsg(MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice"), myactor!!)
+			result = channelForObserverL.receive()
+			
+			//test if the parkmanagerservice respond with the absence of a free parking slot 0
 			val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
 			MsgUtil.sendMsg(reqin, myactor!!)
 			result = channelForObserverL.receive()

@@ -92,15 +92,20 @@ class TestPlanUseCase1RobotPos {
 			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen, myactor!!)
 			
+			result = channelForObserverL.receive()
+			assertEquals( result, "pos(6, 0)")
+			result = channelForObserverL.receive()
+			assertEquals( result, "pos(1, 1)")
+			result = channelForObserverL.receive()
+			assertEquals( result, "pos(0, 0)")
+			
 			MsgUtil.sendMsg("outTokenid","outTokenid(10)",myactor!!)
 			
 			result = channelForObserverL.receive()
-			
-			assertEquals( result, "pos(6, 0)")
 			assertEquals( result, "pos(1, 1)")
-			assertEquals( result, "pos(0, 0)")
-			assertEquals( result, "pos(1, 1)")
+			result = channelForObserverL.receive()
 			assertEquals( result, "pos(6, 4)")
+			result = channelForObserverL.receive()
 			assertEquals( result, "pos(0, 0)")
 			
 			testingObserver!!.removeObserver()

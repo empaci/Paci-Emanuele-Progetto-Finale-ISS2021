@@ -72,13 +72,10 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("wMove") { //this:State
 					action { //it:State
-						forward("cmd", "cmd(w)" ,"basicrobot" ) 
-						delay(330) 
-						forward("cmd", "cmd(h)" ,"basicrobot" ) 
-						stateTimer = TimerActor("timer_wMove", 
-							scope, context!!, "local_tout_transporttrolley_wMove", 500.toLong() )
+						request("step", "step(170)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t012",targetState="stepDone",cond=whenTimeout("local_tout_transporttrolley_wMove"))   
+					 transition(edgeName="t012",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t013",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State

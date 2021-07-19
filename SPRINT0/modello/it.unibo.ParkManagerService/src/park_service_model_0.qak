@@ -278,7 +278,7 @@ QActor transporttrolley context ctxparkmanager {
  	Goto wMove if [# CurrentPlannedMove == "w" #] else turnMove
  	
  	State wMove {     
- 		request basicrobot -m step : step(330)
+ 		request basicrobot -m step : step(170)
  		//forward basicrobot -m cmd : cmd(w)  
 		//delay 330
 		//forward basicrobot -m cmd : cmd(h)

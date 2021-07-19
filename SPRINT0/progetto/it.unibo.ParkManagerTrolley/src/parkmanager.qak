@@ -192,14 +192,10 @@ QActor transporttrolley context ctxparkmanager {
  	Goto wMove if [# CurrentPlannedMove == "w" #] else turnMove
  	
  	State wMove {     
- 		//request basicrobot -m step : step(330)
- 		forward basicrobot -m cmd : cmd(w)  
-		delay 330
-		forward basicrobot -m cmd : cmd(h)
+ 		request basicrobot -m step : step(170)
  	}
- 	Transition t0 whenTime 500 -> stepDone
- 				//whenReply stepdone   -> stepDone
- 				//whenReply stepfail   -> stepFailed 
+ 	Transition t0 whenReply stepdone   -> stepDone
+ 				  whenReply stepfail   -> stepFailed 
   	
  	 State stepDone{  
  		//updateResource [# itunibo.planner.plannerUtil.getMap() #]

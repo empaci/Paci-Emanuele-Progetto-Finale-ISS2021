@@ -72,7 +72,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("wMove") { //this:State
 					action { //it:State
-						request("step", "step(330)" ,"basicrobot" )  
+						request("step", "step(170)" ,"basicrobot" )  
 					}
 					 transition(edgeName="t017",targetState="stepDone",cond=whenReply("stepdone"))
 					transition(edgeName="t018",targetState="stepFailed",cond=whenReply("stepfail"))
