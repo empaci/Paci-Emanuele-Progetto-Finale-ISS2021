@@ -445,7 +445,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	<li>Move the trolley home.</li>
  </ol>
 
-<h2>Problem analysis</h2>
+<h2 id="problemanalysis">Problem analysis</h2>
  
   This problem requires the communications of different components in a distributed environment.
   To do so let's consider the analysis made in <a href="../../it.unibo.raspIntro2020/userDocs/LabRadarGui.html" target="web">LabRadarGUI | Radar GUI as a service​</a> and <a href="../../it.unibo.raspIntro2020/userDocs/LabRadarGui.html" target="web">the relative SPRINT review</a>.
@@ -532,7 +532,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 According to the client, this will simplify the passage from the <ks>virtual robot</ks> to the <ks>real robot</ks>.
 	 <br>
 	 <br>
-	 The <tt>Trolley</tt> receives a couple of coordinates from the <tt>ParkmanagerService</tt> and it should limit itself to move the robot to that position. 
+	 The <tt>Trolley</tt> receives a couple of coordinates from the <tt>ParkmanagerService</tt> and it should limit itself to move the robot in that position. 
 	 <br>
 	 <br>
 	 To implement this logic check the code already built in <a href="../../it.unibo.qakDemo/userDocs/LabQakDemo2021.html" target="web">it.unibo.qakDemo​</a>.
@@ -546,7 +546,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 	 <br>
 	 In this <k>SPRINT</k> the <tt>Trolley</tt> can be at <tt>home</tt> or working, so there is no need to define its state.
 	 <br>
-	 <h4>Weight-sensor resource</h4>
+	 <h4 id="weightsensor">Weight-sensor resource</h4>
 	  <tt>Weight-sensor resource</tt> receives data from the <em>weightsensor</em>, which means that it must stores the information regarding the <em>INDOOR-area</em> and makes them avaiable to the other entities in the system. 
 	  <br>
 	  We can retrieve the information from the <tt>Weight-sensor</tt> in different ways, based on the work done in <a href="../../it.unibo.raspIntro2020/userDocs/LabRadarGui.html" target="web">LabRadarGui | Radar GUI as a service</a> here are the main methods:
@@ -764,7 +764,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 		<li>ParkingSlot (pick-up)</li>
 		<li>Outdoor</li>
 		<li>Home</li>
-		We can check the trolley position using the coordinates given by the <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">planner</a>
+		We can check the trolley position using the coordinates given by the <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab2021/blob/main/it.unibo.planner20/userDocs/LabPlanner.html">planner</a>.
 	</ul></li>
  </ol>
  <p>JUnit test: <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a>, <a href="../src/test/TestPlanUseCase1RobotPos.kt">TestPlanUseCase1RobotPos.kt</a>
@@ -824,7 +824,7 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 				create the parking slot starting condition dynamically from the initial state of <tt>parkmanageservice</tt> using: solve(unoccupySlot(1)) to assert into the database freeSlot(1), which means that the parking slot 1 is free.
 				</li>
 				<li> To observe the <tt>weightsensor</tt> without interfering with the execution of the <tt>parkmanagerservice</tt> we need to introduce proper support. So we added a new actor: <a href="..\src\coap\actorQakWeightCoapObserver.kt">actorQakWeightCoapObserver.kt</a>.
-				Which can observer <tt>weightsensor</tt> and can receive and memorize the data. Then <tt>parkmanagerservice</tt> can retrieve the information about the <em>INDOOR-area</em> only when it needs to elaborate the parking request.
+				Which can observe <tt>weightsensor</tt> and can receive and memorize the data. Then <tt>parkmanagerservice</tt> can retrieve the information about the <em>INDOOR-area</em> only when it needs to elaborate the parking request.
 				</li>
 				<li>Since it wasn't specified in the analysis when the <em>INDOOR-area</em> is not free the <tt>client</tt> is responded 0 at the request to enter.</li>
 			</ol>
@@ -889,7 +889,7 @@ Reply   stepfail   : stepfail(DURATION, CAUSE)
 		<td>
 			<ol>
 				<li>The model of the weighsensor introduced in the analysis phase can be adopted also as our <tt>weightsensor</tt> component in the project phase, see <a href="../../../progetto/it.unibo.Weightsensor/src/weightsensor.qak">weightsensor.qak</a>.</li>
-				<li>A mock as been developed in python file: <a href="../pythonMocks/weightSensorMockTCP.ipynb">weightSensorMockTCP.ipynb</a> uses TCP to send the data to the sensor and a grafic interface that allow to type in the next value.</li> 
+				<li>A mock has been developed in python file: <a href="../pythonMocks/weightSensorMockTCP.ipynb">weightSensorMockTCP.ipynb</a> uses TCP to send the data to the sensor and a graphic interface that allow typing in the next value.</li> 
 		</td>
 	</tr>
 	</table>

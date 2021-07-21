@@ -1,0 +1,47 @@
+System -msglog model
+
+Dispatch sonarData : sonarData(D) 
+
+Context ctxparkmanager ip [host="192.168.1.68" port=8070] 
+Context ctxsonarsensor ip [host="127.0.0.1" port=8072]
+
+QActor sonarsensor context ctxparkmanager {
+	
+	[#   
+		var prevDist=0f
+		
+		fun resourceInfo(dist: Float, preDist: Float) : String {
+			if (Math.abs(dist - prevDist) > 3) {
+				if (dist.toInt() == 0) {
+					return "free"
+				}
+ 			}
+ 			return "occupied"
+ 		}
+	#]
+	
+	State s0 initial {
+		println("Starting Sonar sensor.")
+		updateResource [# "free" #] //stato iniziale
+	}
+	Goto wait
+	
+	State wait {
+		println("Sonarsensor waiting for data...")
+	}
+	Transition data whenMsg sonarData -> handleData
+	
+	State handleData {
+		println("Sonarsensor received data")
+		onMsg(sonarData : sonarData(D)) {
+			[# var dist = "${payloadArg(0)}" #]
+			println("distance: $dist")
+		
+			updateResource [# resourceInfo(dist.toFloat(), prevDist.toFloat()) #]
+
+			[# prevDist = dist.toFloat() #]
+		}
+	}
+	Goto wait
+	
+}
