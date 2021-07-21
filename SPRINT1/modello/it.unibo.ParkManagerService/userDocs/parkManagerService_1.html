@@ -433,7 +433,9 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
  <h3>Other relevant aspects</h3>
  
  <h4>Assign a slot to a client</h4>
- We need to find the best way to assign a parking slot to an incoming car. There are different methods:
+ We need to find the best way to assign a parking slot to an incoming car. There are different methods: 
+ <br>
+ (<b>Note</b>: when we refer to near or close we mean based on the distance calculated in  <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" target="web">Manhattan distance</a> without considering the squares occupied by the parking slots).
  <br>
  <table style="width:100%" border="1">
 		<tr>
@@ -460,19 +462,19 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 				<dd></dd>
 				<dt><k>Cons</k>:</dt> 
 				<dd>The robot position when the slot is requested maybe not be the same when the client request to enter.</dd>
-				<dd>The robot always pick-up the car in the <em>INDOOR-area</em>, so the current robot position doesn't matter since the distance to park from the <em>INDOOR-area</em> would be the same.</dd>
+				<dd>The robot always pick-up the car in the <tt>INDOOR</tt>, so the current robot position doesn't matter since the distance to park from the <tt>INDOOR</tt> would be the same.</dd>
 				</dl>
 			</td>
 		</tr>
 		<tr>
 			<td>
-			<ks>Prioritize the slot nearest to the <tt>INDOOR</tt> in <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" target="web">Manhattan distance</a></ks>
+			<ks>Prioritize the slot near the <tt>INDOOR</tt></ks>
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>Prioritize shortest parking distance, meaning less waiting time for the next client.</dd>
-					<dd>Prioritize slot that are close to the <tt>HOME</tt> position.</dd>
+					<dd>Also close to the <tt>HOME</tt> position.</dd>
 					<dd>Cover the shortest distance if there are multiple succeeding requests to enter.</dd>
 					<dt><k>Cons</k>:</dt>
 					<dd>Furthest from the <tt>OUTDOOR</tt>, meaning longer waiting time for the exiting clients.</dd>
@@ -481,7 +483,7 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 		</tr>
 		<tr>
 			<td>
-			<ks>Prioritize the slot nearest to the <tt>OUTDOOR</tt> in <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" target="web">Manhattan distance</a></ks>
+			<ks>Prioritize the slot near the <tt>OUTDOOR</tt></ks>
 			</td>
 			<td>
 				<dl>
@@ -491,13 +493,13 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 					<dd>Furthest from the <tt>INDOOR</tt> and <tt>HOME</tt> position.</dd>
 					<dd>Longer route to go back <tt>HOME</tt> if there are no other requests.</dd>
 					<dd>Longer route to go <tt>INDOOR</tt> if there is a parking request.</dd>
-					<!-- <dd>From the <tt>HOME</tt> position the distance to pick-up the car (HOME->parkingslot->OUTDOOR) remain the same.</dd> -->
+					<dd>During the <tt>pick-up</tt> phase if the <tt>trolley </tt> is <tt>HOME</tt> the distance to reach the <tt>OUTDOOR</tt> would still be the same using the other methods.</dd>
 				</dl>
 			</td>
 		</tr>
 		<tr>
 			<td>
-			<ks>Prioritize the slot nearest to the <tt>HOME</tt> in <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" target="web">Manhattan distance</a></ks>
+			<ks>Prioritize the slot near the <tt>HOME</tt></ks>
 			</td>
 			<td>
 				<dl>
@@ -511,8 +513,8 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 		</tr>
 	</table>
 	<br>
-	Not choose close to the <tt>OUDOOR-area</tt> because is the slowest to park the car and to go home.
-	In conclusion the best approach would be to choose the slot closest to the <tt>HOME</tt> position, because assuming that the robot will return often <tt>home</tt> make sense to
+	We would not advise choosing the option <ks>near the <tt>OUTDOOR-area</tt></ks> because the <tt>trolley</tt> needs to travel the longest path from/to <tt>HOME</tt>.
+	The preferred approach would be to choose the slot <ks>closest to the <tt>HOME</tt></ks> position, because assuming that the robot will return often <tt>HOME</tt> make sense to
 	keep it close to walk less distance, while also being close enough to the <tt>INDOOR</tt>.<br>
 	If we considered the slot number numbered like:
 	<pre>
@@ -524,9 +526,15 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 |X, X, X, X, X, X, X, X, 
 	</pre>
 	To do so we could assign the slot in this order: 1,2,3,5,4,6.
-	
-	Would be convieniet to re-order them exchanging the 4 and 5, so that the smallest number has always the priority on the other, simplyfing the logic to choose the parking slot. 
-	New Parking slot numbering on the map:
+	<br>
+	It would be convenient to assign a <ks>priority</ks> number, so that the smallest number has the highest priority, simplifyfing the prolog logic to choose the parking slot.
+	<br>
+	Also if one method turns out to be preferred over the others we could easily change the parking slot priority assigned and not the Prolog logic. 
+	<br>
+    <ks>For example</ks>, if the request traffic from the clients is higher than expected and the trolley rarely goes <tt>HOME</tt> we can easily change it to prioritize the slot near the <tt>INDOOR</tt>.
+	<br>
+	<br>
+	Parking slot <ks>priority</ks> showed on the map:
 	<pre>
 |r, 0, 0, 0, 0, 0, 0, X, 
 |0, 0, <bc>1,</bc> <bc>2,</bc>, 0, 0, 0, X, 
@@ -535,9 +543,8 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 |0, 0, 0, 0, 0, 0, 0, X, 
 |X, X, X, X, X, X, X, X, 
 	</pre>
-
-  The prolog knowledge-base can be easily modified to implement this changes.
- 
+  Since the requirements don't impose any particular restriction on the parking numbering we can decide that, at the moment, every slot number has the same as their respective <ks>priority</ks>.
+  The prolog knowledge-base can be easily modified to implement these changes.
  <h3>Architecture logic</h3>
  <img src="img\LogicalArchitecture_1.png"  width="100%">
  <br>
@@ -647,8 +654,8 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
 		<td>
 			<ol>
 				<li>The model introduced in the analysis phase can be adopted also as our <tt>parkmanager</tt> component in the project phase, see <a href="../../../progetto/it.unibo.parkManagerTrolley/src/parkManagerTrolley.qak">parkmanager.qak</a>.</li>
-				<li>We changed the prolog logic and added the facts about the new slots. We updated the method to return a free parking slot to return the order already discussed 
-				retrieving the min number from the parking slot free, see <a href="../parking.pl">parking.pl</a>.</li>
+				<li>We changed the prolog logic and added the facts about the new slots. We updated the method to return a free parking slot as discussed, 
+				retrieving the min number from the free parking slot, see <a href="../parking.pl">parking.pl</a>.</li>
 				<li>As already done with the <tt>weightsensor</tt>, to observe the <tt>sonarsensor</tt> without interfering with the execution of the <tt>parkmanagerservice</tt> we need to introduce proper support. So we added a new actor: <a href="..\src\coap\actorQakSonarCoapObserver.kt">actorQakSonarCoapObserver.kt</a>.
 				Which can observe <tt>sonarsensor</tt> and can receive and memorize the data. Then <tt>parkmanagerservice</tt> can retrieve the information about the <em>OUTDOOR-area</em> only when it needs to elaborate the parking request.</li>
 		</td>
