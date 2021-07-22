@@ -27,3 +27,7 @@ gradlew.bat
 docker/
 /.metadata/
 /src-gen/
+
+userDocs/template2021.html
+userDocs/TFBO21ParkingISS.pdf
+userDocs/workplan.txt
