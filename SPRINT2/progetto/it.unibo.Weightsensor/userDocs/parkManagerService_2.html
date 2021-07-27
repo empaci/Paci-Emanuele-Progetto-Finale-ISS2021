@@ -370,22 +370,21 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
 
 <h2>Requirement analysis</h2>
  
- In this <k>SPRINT</k> we will add <em>parking-manager</em> to the application with the relative GUI, <em>fan</em>, and <em>thermometer</em>.
- Also, we will perform the analysis so that the <em>fan</em> is activated automatically. 
+ In this <k>SPRINT</k> we will add the the application the <em>parking-manager</em> whith the relative GUI, <em>fan</em> and <em>thermomether</em>.
+ Also we will work on the following requirements: <em>monitor</em>, <em>manage</em>. Also, if possible we would we will perform the analysis to activate the <em>fan</em> automatically. 
  <br>
  <br>
- At the end of this <k>SPRINT</k> the <tt>parking-manager</tt> will be able to interact with the <em>ParkServiceStatusGUI</em> complete in every aspect. 
- <br>
- The graphic interface should be able to notify the <tt>parking-manager</tt> if a <tt>client</tt> has not left the <em>OUTDOOR-area</em> within the <em>DTFREE</em> interval of time. 
- Also, the <tt>parking-manager</tt> can stop and resume the <tt>transport trolley</tt>.
+ At the end of this <k>SPRINT</k> the <tt>parking-manager</tt> will be able to interact with the <em>ParkServiceStatusGUI</em>. Shoudl be able to notify the 
+ <tt>park-manager</tt> if a <tt>client</tt> has not left the <em>OUTDOOR-area</em> whithin the <em>DTFREE</em> interval of time. Also, the <tt>park-manager</tt> can stop and resume the
+ <tt>transport trolley</tt>.
  </div>
  <br>
  Note: optional parts will not be discussed at this stage and will be implemented at the end.
  <br>
  <br>
- Another term to clarify:
+ Other term to clarify:
  <ul>
-	<li><em>alarm</em>: a video notice in the graphic interface that signals the <tt>park-manager</tt> that after <tt>DTFREE</tt> the <tt>OUTDOOR</tt> is still occupied
+	<li><em>alarm</em>: a video notice in the graphic interface that signal the <tt>park-manager</tt> that after <tt>DTFREE</tt> the <tt>OUTDOOR</tt> is still occupied
 	 by a car.</li>
  </ul>
  <br>
@@ -394,14 +393,14 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  The application should be able, in order, to: 
  <br>
  <ol>
-	<li>Check if the temperature measured by the <em>thermometer</em> is above <k>TMAX</k>.</li>
+	<li>Check if the temperature measured by the <em>thermomether</em> is above <k>TMAX</k>.</li>
 	<li>Send the <em>alarm</em> to the <em>parking-manager</em>.</li>
 	<li>Activate the <em>fan</em>.</li>
 	<li>The <em>parking-manager</em> stops the <em>Transport Trolley</em>.</li>
-	<li>Check if the temperature measured by the <em>thermometer</em> is below <k>TMAX</k>.</li>
+	<li>Check if the temperature measured by the <em>thermomether</em> is below <k>TMAX</k>.</li>
 	<li>Notify the <em>parking-manager</em>.</li>
 	<li>Deactivate the <em>fan</em>.</li>
-	<li>The <em>parking-manager</em> starts the <em>Transport Trolley</em></li>
+	<li>The <em>park-manager</em> starts the <em>Transport Trolley</em></li>
  </ol>
  <h4>Use-case <ks><tt>OUTDOOR-area</tt> is not free whithin <tt>DTFREE</tt></ks></h4>
  The application should be able, in order, to: 
@@ -413,10 +412,9 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  </ol>
 
 <h2>Problem analysis</h2>
-As stated in the previous <k>SPRINT</k>, this problem requires the communications of different components in a distributed environment, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#problemanalysis">SPRINT0 | problem analysis</a>. 
-And, following the reasoning already made, we will add the <em>thermometer</em> and <em>fan</em> as a QakActor to the already existing architecture.
+   Following the work on the previous <k>SPRINT</k>: link doc1, link doc2.  We will use QaKActor to develop the component in the distributed environment.
    
-   <h3><ks>Park-manager GUI</h3>
+   <h3><ks>Park-manager GUI</ks> Requirement: <em>monitor</em></h3>
    <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
@@ -438,10 +436,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 				<br>
 				To grant wide usability the system should be developed as a Web-application. 
 				<br>
-				<k>SpringBoot</k> should be used to reduce development time.
-				<br>
-				<br>
-				The html page will incude a INPUT section (requirement: <em>manage</em>) and an OUTPUT section (requirement: <em>monitor</em>).
+				<k>Springboot</k> should be used to reduce development time. (link info/ previous projects)
 			</td>
 			<td>
 				<img src="img\parkservicestatusGui_example.png" width="80%" height="80%">
@@ -450,101 +445,153 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	</table>
    <br>
    <h3>Current state of the system</h3>
-   Because we have multiple resources that are a source of data and a couple of components (<tt>ParkmanagerService</tt> and <tt>ParkServiceStatusGUI</tt>) that observe them, we need to discuss the best way to make them available.
+   Becaue we have multiple resource that are source of data and a couple of actors that uses multiple of them we need to discuss the best way to make them avaiable.
    There are different approaches we can take:
 	<table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>ParkmanagerService</tt> stores the resources information as a CoAP Observable entity.
+			<tt>ParkmanagerService</tt> itself Store the system informations as a CoAP Observable entity
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>No new component is introduced.</dd>
+					<dd>ParkServiceStatusGUI only observe one actor.</dd>
 					<dt><k>Cons</k>:</dt> 
-					<dd>Increase <tt>ParkManagerService</tt> complexity.</dd>
-				    <dd>Adding a new resource means modify the core of our application.</dd>
+					<dd>Increased ParkManagerService complexity.</dd>
+				    <dd>Adding a new resource means modify our core element application.</dd>
+				    <dd>.</dd>
 				</dl>
 			</td>
 			
 		</tr>
 		<tr>
 			<td style="width:50%">
-			Add a new actor that stores the resources information as a CoAp Observable entity.
+			Add a new actor that contains the current state of the system as a CoAp Observable entity
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>Do not overload ParkmanagerService.</dd>
-					<dd>Adding a new resource means modifyng only this component.</dd>
-					<dd>Can be be used by every component.</dd>
-					<dd>Represent the state of the system</dd>
-					<dd>A new component that need any resource can use this instead.</dd>
-					<dd>Every component needs to observe one single component, so it simplify the overall architecture.</dd>
+					<dd>Adding a new resource means modifyng only the state component and the observer.</dd>
+					<dd>Simplyfing overall archietecture.</dd>
+					<dd>One resource can be be used by multiple actors.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Not strictly necessary.</dd>
-				    <dd>Add a new component.</dd>
+				    <dd>.</dd>
+				    <dd>.</dd>
 				</dl>
 			</td>
 		</tr>
 		<tr>
 			<td style="width:50%">
-			No new element is introduced, every components observe the resource they are intersted in.
+			Every actor observe the resource they are interested in
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>No new elements.</dd>
-					<dd>Each component doesn't get information about resource they don't need.</dd>
+					<dd>Each component can observed only the resource they need.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Double code for each observing component.</dd>
-				    <dd><tt>ParkServiceStatusGUI</tt> has to know every entity in the system. ??</dd>
-				    <dd>Complex architecture.</dd>
+				    <dd>ParkServiceStatusGUI has to know every entity in the system.?</dd>
+				    <dd>Complex architacture.</dd>
 				</dl>
 			</td>
 			
 		</tr>
 	</table>
-	<br>
-	So it is preferred to add a new component: <tt>ParkingState</tt>.
+	
+	So it is preferred to add a new State component ...
+<!--
+ 
+ <h3>Temperature check and fan activation</h3>
+	We need to introduce two new element: fan and thermometer. We need to activate the fan when TA>TMAX and give a notice to the <tt>park-manager</tt>.
+	There are different methods:
+  <table style="width:100%" border="1">
+		<tr>
+			<td style="width:50%">
+			Thermometer send event when TA>TMAX and when TA<TMAX
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>Reach every component, without the need to know them.</dd>
+					<dd>?.</dd>
+					<dt><k>Cons</k>:</dt> 
+					<dd>Logic inside the thermometer.</dd>
+				    <dd>No reusability.</dd>
+				</dl>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:50%">
+			Fan, ParkServiceStatusGUI and ParkManagerService observe TA and act consequently
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>?.</dd>
+					<dt><k>Cons</k>:</dt> 
+					<dd>?.</dd>
+				    <dd>?.</dd>
+				</dl>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:50%">
+			Actor with the logic
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>?.</dd>
+					<dt><k>Cons</k>:</dt> 
+					<dd>?.</dd>
+				    <dd>?.</dd>
+				</dl>
+			</td>
+		</tr>
+	</table>
+ -->
  <h3>Components</h3>
  We can add to the application 4 macro-components:
  <ul>
-	<li><ks>ParkingState</ks>: used to keep the current state of the system grouping the information from the resources.</li>
-	<li><ks>ParkManagerStatusGUI</ks>: used by the <tt>park-manager</tt> to communicate with the <tt>ParkmanagerService</tt>.</li>
+	<li><ks>ParkingState</ks>: used to keep the current state of the system.</li>
+	<li><ks>ParkManagerStatusGUI</ks>: used by the <tt>park-manager</tt> to comunicate with the <tt>ParkmanagerService</tt>.</li>
 	<li><ks>Thermometer resource</ks>: a resource that receives, stores, and makes available the data from the <em>thermometer</em>.</li>
-	<li><ks>Fan</ks>: a resource that activates the <em>fan</em>.</li>
+	<li><ks>Fan</ks>: a resource that activate the <em>fan</em>.</li>
  </ul>
  We need to modify 2 components:
   <ul>
-	<li><ks>Transport trolley</ks>: add the state <k>idle, working, or stopped</k>.</li>
+	<li><ks>Transport trolley</ks>: add the state <k>idle, working or stopped</k>.</li>
 	<li><ks>Sonar</ks>: add the logic to notify the <tt>park-manager</tt> after <tt>DTFREE</tt>.</li>
  </ul>
- <h4>ParkingState</h4>
- This component can observe every resource in our application a make those information avaiable as a CoAp observable resource, as already observed the best way to realize it, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#weightsensor">SPRINT0 | Weight-sensor-resource</a>.
+ <h4>Parking state</h4>
+ This component can observe every resource in our application a make those information avaiable as a CoAp observable resource.
  
- <tt>ParkManagerService</tt> will be changed to observe this resource.
+ We could change the CoAp observcable state of this component using a String as a JSON. (pro: wide usability )
  
  <h4>ParkManagerStatusGUI</h4>
  Mock used to simulate the park-manager in the model.
  Should be able to:
  <ol>
-	<li>Send stop/start messages to the <tt>Trolley</tt>.</li>
-	<li>Observe <tt>ParkingState</tt>.</li>
-	<li>Being notifed if <em>OUTDOOR-area</em> is occupied for a time above <tt>DTFREE</tt>.</li>
+	<li>Send stop/start messages to the trolley.</li>
+	<li>Observe the current state of the parking slot.</li>
+	<li>Being notifed if OUTDOOR is occupied for a time > DTFREE</li>
  </ol>
  
  <h4>Trolley</h4>
-  We can modify the esisting component <tt>transportrrolley</tt> to work as CoAp observable and able to change the state with: <k>idle, working, or stopped.</k>
+  We can define this component as CoAp observable and change the state with: idle, working, or stopped.
   
  <h4>Sonar</h4>
- We need to modify this <tt>sonarresource</tt>, or at least add logic to notify the <tt>ParkManagerStatusGUI</tt> if the <em>OUTDOOR-area</em> is occupied for a time above <tt>DTFREE</tt>.
- <br>
+ We need to modify this resource, or at least add logic to notify ...
+ We need to send an Event to the parking-manager visible on the <em>ParkServiceStatusGUI</em> if the <em>OUTDOOR-area</em> has not been cleaned within <tt>DTFREE</tt> interval of time.
  There are different approach we can take:
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>Sonarresource</tt> sends an events after <tt>DTFREE</tt> time has passed and the state remained <ks>"occupied"</ks>
+			Sonarresource sends an events after <tt>DTFREE</tt> time
 			</td>
 			<td>
 				<dl>
@@ -563,38 +610,29 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>sonarresource</tt>.</dd>
-					<dd><tt>sonarresource</tt> can be reused unchanged in other applications.</dd>
+					<dd>Separate the logic from the other components.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Not strictly needed.</dd>
+					<dd>Extra actor to consider and interact with.</dd>
 				</dl>
 			</td>
 		</tr>
 	</table>
- <br>
- To simplify the model the first option is chosen and will be included in the model after the Analysis. 
- During the project phase, it can be changed based on the architecture adopted.
+ 
+ Both of this option are avaiable, to simplify the model the first option is chosen to include in the model after the Analisys, but during the project phase
+ the choice is left based on the type of architecture adopted.
+ 
  
  <h4>Thermometer</h4>
- We need to add a new component: <tt>Thermometer resource</tt>.
-	<br>
-	<tt>Thermometer resource</tt> receives data from a external <em>thermometer</em>, which means that it must store the information regarding the room temperature and makes them available to the other entities in the system.
-	<br><br>
-	This component is similar to the <tt>weightsensor</tt> already introduced, and as already observed the best way to realize it is to have an observable resource, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#weightsensor">SPRINT0 | Weight-sensor-resource</a>. 
-	In particular, we can define <tt>Thermometer resource</tt> as a <k>CoAp</k> observable actor. 
-	<br>
-	<br>
-	A mock of the thermometer is required to simulate the real sensor. The decision around the nature of the mock itself is left during the project phase.
  
  <h4>Fan</h4>
- CoAp observable object, mock of the real fan, can chenage the state to: "on" and "off".
  
  <h3>Other relevant aspects</h3>
 
   <h4>Trolley start and stop Requirement: <em>manage</em></h4>
- <tt>ParkServiceStatusGUI</tt> send a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
- The dispatch is sent to the manager and not the trolley beacause the GUI doesn't know the trolley.
- A dispatch is used because, no rensponse is needed since the state of the trolley will change in the UI.
+ ParkServiceStatusGUI send a dispatch to the ParkManager that propagate it to the trolley.
+  Why dispatch?
+ Why parkmanagersrviceand not idrectely to the trolley?
  
  <h4>Temperature check and fan activation</h4>
 	We need to introduce two new element: fan and thermometer. We need to activate the fan when TA>TMAX and give a notice to the <tt>park-manager</tt>.
@@ -602,13 +640,13 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
   <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>Thermometer</tt> send event when <k>TA>TMAX</k> and when <k>TA<TMAX</k>
+			Thermometer send event when TA>TMAX and when TA<TMAX
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>Reach every component, without the need to know them.</dd>
-					<dd>Easy to realize.</dd>
+					<dd>?.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Logic inside the thermometer.</dd>
 				    <dd>No reusability.</dd>
@@ -617,14 +655,14 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 		</tr>
 		<tr>
 			<td style="width:50%">
-			<tt>Fan</tt>, <tt>ParkServiceStatusGUI</tt> and <tt>ParkManagerService</tt> observe the <k>TA</k> and act consequently
+			Fan, ParkServiceStatusGUI and ParkManagerService observe TA and act consequently
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>No extra exchange.</dd>
+					<dd>?.</dd>
 					<dt><k>Cons</k>:</dt> 
-					<dd>Logic distributed in different actors.</dd>
+					<dd>?.</dd>
 				    <dd>?.</dd>
 				</dl>
 			</td>
@@ -636,16 +674,15 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>thermometer resource</tt>.</dd>
-					<dd><tt>thermometer resource</tt> can be reused unchanged in other applications.</dd>
+					<dd>?.</dd>
 					<dt><k>Cons</k>:</dt> 
-					<dd>Not strictly needed.</dd>
+					<dd>?.</dd>
+				    <dd>?.</dd>
 				</dl>
 			</td>
 		</tr>
 	</table>
-	<br>
-	To simplify the model the first option is chosen and will be included in the model after the Analysis. During the project phase, it can be changed based on the architecture adopted.
+ In the model for simplicity we decide to add the logic to the Thermometer, other option are open to be implemented based on the Architacture chosen in the project phase.
 
  <h3>Logical architecture</h3>
  
@@ -695,7 +732,7 @@ requests. To check if the test if succesful we need to observe the fan and the t
  <br>
  <h4>Use-case <ks><tt>OUTDOOR-area</tt> is not free whithin <tt>DTFREE</tt></ks></h4>
   We can simulate to occupy the <tt>OUTDOOR</tt> and wait a time over <tt>DTFREE</tt>. 
-  To check if the test is successful we need to observe the event sent by the sonar that is received by ParkManagerStatusGUI.
+  To check if the test is successful we need to observe the event sent by the sonar.
   <br><br>
    Requirements: <em>alarm</em>.
  <br><br>
@@ -706,31 +743,17 @@ requests. To check if the test if succesful we need to observe the fan and the t
  
  We expect that:
  <ol>
-	<li>sonar send an event and ParkManagerStatusGUI receive it.</li>
+	<li>sonar send an event</li>
  </ol> 
  <p>JUnit test: <a href="../src/test/TestPlanUseCase2.kt">TestPlanUseCase2.kt</a></p>
 
 <h2>Project</h2> 
-
-In the project phase we chose to develop the application usign the <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="web">clean code architecture</a>.
- <img src="img\cleanArch.jpg"  width="50%" height="50%">
- <br>
- <!-- D:\Scuola\Registrazioni\Ing\ultimeLezioni -> lezione 20210601 per clean architecture -->
- <br>
- To do so we need to refactor part of the code developed in the model. We need to separate entities and Use-cases. 
+ D:\Scuola\Registrazioni\Ing\ultimeLezioni -> lezione 20210601 per clean architecture
  
- <h3>Code refactor followingf the clean architecture</h3>
+ <h3>Clean architecture</h3>
+ https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
  
- <table style="width:100%" border="1">
-	<tr>
-		<td style="width:50%">
-			to blah blah lbah prnciple blash sepatate bal ..
-		</td>
-		<td>
-			<img src="img\myCleanArch.png" width="100%" height="100%">
-		</td>
-	</tr>
-</table>
+ refactory code
  
  Entities: weightsensor, sonarsensor, thermometer, fan
  <br>
@@ -746,10 +769,10 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\weightrefactory.png">
+			img
 		</td>
 		<td>
-			The logic was moved to weightlogic ... use prolog link doc perche prlog e meglio ... link lofica prolog 
+			explanation ...
 		</td>
 	</tr>
 </table>
@@ -757,7 +780,7 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\sonarrefactory.png">
+			img
 		</td>
 		<td>
 			explanation ...
@@ -768,7 +791,7 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\thermometerrefactory.png">
+			img
 		</td>
 		<td>
 			explanation ...
@@ -786,7 +809,7 @@ In the project phase we chose to develop the application usign the <a href="http
 		</td>
 	</tr>
 </table>
- <h3>Concrete architecture</h3>
+ 
  <img src="img\ConcreteArchitecture_2.png" width="100%">
 
 <h2>Testing</h2> 
