@@ -1,0 +1,30 @@
+System -msglog model
+
+Event thermometerevent : thermometerevent(X) //X=above/below
+
+Context ctxfan ip [host="127.0.0.1" port=8072]    
+
+QActor fan context ctxfan {
+	State s0 initial {
+		println("Starting Fan.")
+		updateResource [# "off" #] //stato iniziale
+	}
+	Goto wait
+	
+	State wait {
+		println("Fan waiting...")
+	}
+	Transition data whenEvent thermometerevent -> handleEvent
+	
+	State handleEvent {
+		onMsg(thermometerevent : thermometerevent(X)) {
+			[# var type = "${payloadArg(0)}" #]
+			if [# type == "above" #] {
+				updateResource [# "on" #]
+			} else {
+				updateResource [# "off" #]
+			}
+		}
+	}
+	Goto wait
+}

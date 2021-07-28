@@ -48,7 +48,6 @@ class Weightsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 var status = "${payloadArg(0)}"  
 								updateResourceRep( status  
 								)
-								println("$status")
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

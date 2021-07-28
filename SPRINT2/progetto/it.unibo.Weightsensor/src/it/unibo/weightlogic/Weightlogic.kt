@@ -22,8 +22,7 @@ class Weightlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						println("Starting Weight logic.")
 						solve("consult('weightapplogic.pl')","") //set resVar	
 						solve("dynamic('prevWeight/1')","") //set resVar	
-						solve("'init()'","") //set resVar	
-						solve("statusFree(X)","") //set resVar	
+						solve("init(X)","") //set resVar	
 						 val INITSTATUS = getCurSol("X").toString()  
 						forward("weightstatusupdate", "weightstatusupdate($INITSTATUS)" ,"weightsensor" ) 
 					}
@@ -39,10 +38,8 @@ class Weightlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						if( checkMsgContent( Term.createTerm("localweightupdate(W)"), Term.createTerm("localweightupdate(W)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val WEIGHT = "${payloadArg(0)}"  
-								println("WEIGHT $WEIGHT")
 								solve("modifyStatus($WEIGHT,RES)","") //set resVar	
 								 val RESULT = getCurSol("RES").toString()  
-								println("RESULT $RESULT")
 								if(  RESULT=="true"  
 								 ){solve("getStatus($WEIGHT,X)","") //set resVar	
 								 var STATUS = getCurSol("X").toString()  

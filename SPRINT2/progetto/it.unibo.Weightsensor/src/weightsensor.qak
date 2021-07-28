@@ -5,7 +5,7 @@ Event    localweightupdate   : localweightupdate(W)
 Dispatch weightstatusupdate   : weightstatusupdate(S)
 
 
-Context ctxweightsensor ip [host="127.0.0.1" port=8071]    
+Context ctxweightsensor ip [host="127.0.0.1" port=8072]    
 
 QActor weightsensor context ctxweightsensor {
 	State s0 initial {
@@ -32,7 +32,7 @@ QActor weightsensor context ctxweightsensor {
 		onMsg(weightstatusupdate : weightstatusupdate(S)) {
 			[# var status = "${payloadArg(0)}" #]
 			updateResource [# status #]
-			println("$status")
+			//println("$status")
 		}
 	}
 	Goto wait
@@ -44,12 +44,10 @@ QActor weightlogic context ctxweightsensor {
 	State s0 initial {
 		println("Starting Weight logic.")
 		
-		//solve( consult("sysRules.pl"))
 		solve( consult("weightapplogic.pl"))
 		solve( dynamic("prevWeight/1") )
-		solve( "init()" )
+		solve( init(X) )
 		
-		solve( statusFree(X))
 		[# val INITSTATUS = getCurSol("X").toString() #]
 		forward weightsensor -m weightstatusupdate : weightstatusupdate($INITSTATUS)
 	}
@@ -62,12 +60,9 @@ QActor weightlogic context ctxweightsensor {
 	State applylogic {
 		onMsg(localweightupdate : localweightupdate(W)) {
 			[# val WEIGHT = "${payloadArg(0)}" #]
-			println("WEIGHT $WEIGHT")
 			
 			solve( modifyStatus($WEIGHT, RES) )
-			[# val RESULT = getCurSol("RES").toString() #] //eccezione qui
-			
-			println("RESULT $RESULT")
+			[# val RESULT = getCurSol("RES").toString() #]
 			
 			if [# RESULT=="true" #] {
 			

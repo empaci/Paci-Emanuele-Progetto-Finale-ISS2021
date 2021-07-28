@@ -1,0 +1,80 @@
+System -msglog model
+
+Dispatch tempData : tempData(W)
+Event    localthermupdate   : localthermupdate(W)
+Dispatch thermstatusupdate   : thermstatusupdate(S)
+
+Event thermometerevent : thermometerevent(X) //X=above/below
+
+Context ctxthermometer ip [host="127.0.0.1" port=8073]    
+
+QActor thermometer context ctxthermometer {
+	State s0 initial {
+		println("Starting Thermometer.")
+	}
+	Goto wait
+	
+	State wait {
+		println("Thermometer waiting for data...")
+	}
+	Transition t0 whenMsg tempData -> handleData
+				  whenMsg thermstatusupdate -> updateStatus	
+	
+	State handleData {
+		println("Thermometer received data")
+		onMsg(tempData : tempData(W)) {
+			[# var WEIGHT = "${payloadArg(0)}" #]
+			emit localthermupdate : localthermupdate($WEIGHT)
+		}
+	}
+	Goto wait
+	
+	State updateStatus {
+		onMsg(thermstatusupdate : thermstatusupdate(S)) {
+			[# var status = "${payloadArg(0)}" #]
+			updateResource [# status #]
+			println("$status")
+		}
+	}
+	Goto wait
+}
+
+QActor thermometerlogic context ctxthermometer {
+	
+	State s0 initial {
+		println("Starting Thermometer logic.")
+		
+		solve( consult("thermapplogic.pl"))
+		solve( dynamic("criticTemp/1") )
+		solve( init(X) )
+
+		[# val INITSTATUS = getCurSol("X").toString() #]
+		forward thermometer -m thermstatusupdate : thermstatusupdate($INITSTATUS)
+	
+	}
+	Goto wait
+	
+	State wait {
+	}
+	Transition t0 whenEvent localthermupdate -> applylogic
+	
+	State applylogic {
+		onMsg(localthermupdate : localthermupdate(W)) {
+			[# val TEMP = "${payloadArg(0)}" #]
+			
+			forward thermometer -m thermstatusupdate : thermstatusupdate($TEMP)
+			
+			solve( notice($TEMP, RES) )
+			[# val RESULT = getCurSol("RES").toString() #]
+			
+			if [# RESULT=="above" #] {
+				emit thermometerevent : thermometerevent(above)
+			} else {
+				if [# RESULT=="below" #] {
+					emit thermometerevent : thermometerevent(below)
+				}
+			}
+		}
+	}
+	Goto wait
+}

@@ -1,0 +1,59 @@
+System -msglog client
+
+Request clientRequest : clientRequest(X) // X = in
+Reply enter : enter(SLOTNUM) // SLOTNUM=0/1/2/3/4/5/6 
+
+Request carenter : carenter(SLOTNUM) // SLOTNUM=1/2/3/4/5/6
+Reply receipt : receipt(TOKENID)
+
+Dispatch outTokenid : outTokenid(TOKENID)
+Dispatch weightData : weightData(W) 
+
+Context ctxclient ip [host="localhost" port=8069] 
+Context ctxparkmanager ip [host="127.0.0.1" port=8070]    
+
+ExternalQActor parkmanagerservice context ctxparkmanager
+
+QActor client context ctxclient {
+	[# var TOKENID = ""
+	 var SLOTNUM = 0  #]
+	State s0 initial {
+		println("Starting Client.")
+	}
+	Goto requestIn
+	
+	State requestIn {
+		request parkmanagerservice -m clientRequest : clientRequest(in)
+	}
+	Transition t0 whenTime 5000 -> end
+				  whenReply enter -> handleSlotnum
+		
+	State handleSlotnum {
+		onMsg( enter : enter(SLOTNUM)) {
+			[# SLOTNUM = payloadArg(0).toInt() #]
+		} 
+	}
+	Goto end if [# SLOTNUM==0 #] else moveIndoor
+	
+	State moveIndoor {
+		request parkmanagerservice -m carenter : carenter($SLOTNUM)	
+	}
+	Transition t1 whenReply receipt -> handleTokenid
+	
+	State handleTokenid {
+		printCurrentMessage
+		onMsg( receipt : receipt(TOKENID)) {
+			[# TOKENID = "${payloadArg(0)}" #]
+		}
+	}
+	Transition out whenTime 6000 -> requestOut
+	
+	State requestOut {
+		forward parkmanagerservice -m outTokenid : outTokenid($TOKENID) 
+	}
+	Goto end
+
+	State end {
+		println("Client finished")
+	}
+} 
