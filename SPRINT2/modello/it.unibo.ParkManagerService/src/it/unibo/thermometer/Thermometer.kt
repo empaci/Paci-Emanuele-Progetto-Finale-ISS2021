@@ -33,7 +33,7 @@ class Thermometer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					action { //it:State
 						println("Thermometer waiting for data...")
 					}
-					 transition(edgeName="data30",targetState="handleData",cond=whenDispatch("tempData"))
+					 transition(edgeName="data32",targetState="handleData",cond=whenDispatch("tempData"))
 				}	 
 				state("handleData") { //this:State
 					action { //it:State
@@ -56,7 +56,7 @@ class Thermometer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						 criticTemp=true  
 						emit("thermometerevent", "thermometerevent(above)" ) 
 					}
-					 transition(edgeName="data31",targetState="handleData",cond=whenDispatch("tempData"))
+					 transition(edgeName="data33",targetState="handleData",cond=whenDispatch("tempData"))
 				}	 
 				state("checkbelowtemp") { //this:State
 					action { //it:State
@@ -71,7 +71,7 @@ class Thermometer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						 criticTemp=false  
 						emit("thermometerevent", "thermometerevent(below)" ) 
 					}
-					 transition(edgeName="data32",targetState="handleData",cond=whenDispatch("tempData"))
+					 transition(edgeName="data34",targetState="handleData",cond=whenDispatch("tempData"))
 				}	 
 			}
 		}

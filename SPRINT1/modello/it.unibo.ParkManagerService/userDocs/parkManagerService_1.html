@@ -369,7 +369,21 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  
 
 <h2>Requirement analysis</h2>
- 
+Result of the previous <k>SPRINT</k> Analysis
+  <table style="width:100%" border="1">
+		<tr>
+			<td rowspan="2" style="width:80%">
+			 <img src="img\LogicalArchitecture.png" width="100%">
+			<td>
+				<a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/park_service_model_0.qak">Model SPRINT0</a>
+			</td>
+			<tr>
+				<td><a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
+			</tr>
+		</tr>
+  </table>
+ <br>
+ <br>
  In this <k>SPRINT</k> we will include the <em>outsonar</em> and we will expand the parking slots from one to six spots. We will not consider any other elements (<tt>ParkServiceGUI</tt>, <tt>ParkServiceStatusGUI</tt>, <tt>parking-manager</tt>, <tt>fan</tt>, <tt>thermometer</tt>).
  <br>
  We are updating the previous work (see the <a href="../../SPRINT0/it.unibo.ParkManagerService/uderDocs/parkManagerService_0_c">documentation</a>) to handle a higher amount of clients and to complete the <em>acceptOUT</em> requirement, 
@@ -546,13 +560,20 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
   Since the requirements don't impose any particular restriction on the parking numbering we can decide that, at the moment, every slot number has the same as their respective <ks>priority</ks>.
   The prolog knowledge-base can be easily modified to implement these changes.
  <h3>Logical architecture</h3>
- <img src="img\LogicalArchitecture_1.png"  width="100%">
+ <table style="width:100%" border="1">
+		<tr>
+			<td rowspan="2" style="width:80%">
+			 <img src="img/LogicalArchitecture_1.png" width="100%">
+			<td>
+				<a href="../src/park_service_model_1.qak">Model SPRINT1</a>
+			</td>
+			<tr>
+				<td><a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
+			</tr>
+		</tr>
+  </table>
  <br>
- <br>
- See here the <a href="img\legenda.png" target="img">Legenda</a>.
- <br>
- <br>
- <k>Model built with QAkActors</k> <a href="../src/park_service_model_1.qak" target="web">here</a>.
+ <k>See here the <a href="img\legenda.png" target="img">Legenda</a>.</k>
  <!--
 	<li>(Currently an open point) How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
 	A client could receive the SLOTNUM, then not send a carenter. 

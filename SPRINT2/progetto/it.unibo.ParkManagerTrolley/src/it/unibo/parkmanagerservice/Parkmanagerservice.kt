@@ -149,14 +149,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("stop(X)"), Term.createTerm("stop(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val CMD = "${payloadArg(0)}"  
-								if(  CMD == "stop"  
-								 ){forward("stop", "stop($CMD)" ,"transporttrolley" ) 
-								}
-								else
-								 {if(  CMD == "start"  
-								  ){forward("start", "start($CMD)" ,"transporttrolley" ) 
-								 }
-								 }
+								forward("stop", "stop($CMD)" ,"trolleylogic" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )

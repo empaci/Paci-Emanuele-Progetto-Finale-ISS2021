@@ -311,9 +311,7 @@ QActor transporttrolley context ctxparkmanager {
 			run itunibo.planner.plannerUtil.planForGoal(x,y)
 		}
 	}
-	Goto execPlannedMoves  
-	//Transition t0 whenTime 10 -> execPlannedMoves
-	//			  whenMsg stop -> stopped   
+	Goto execPlannedMoves    
     
 	State execPlannedMoves{   
 		delay 300
@@ -365,7 +363,7 @@ QActor transporttrolley context ctxparkmanager {
  			//updateResource [# "pos" + itunibo.planner.plannerUtil.get_curPos().toString() #]
  		}
  	}
-    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  wait
+    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  checkStop	
 	
 	State stepFailed{  //has found an obstacle (a wall)
 		printCurrentMessage
@@ -379,11 +377,16 @@ QActor transporttrolley context ctxparkmanager {
     Transition t1 whenReply stepdone   -> stepDone
  				  whenReply stepfail   -> stepFailed 
  	
+ 	State checkStop {
+ 	} 
+ 	Transition t1 	whenTime 200 -> wait
+ 					whenMsg stop -> stopped
+ 	
  	State stopped {
  		println("STOPPED !!!!!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!")
  		updateResource [# "stopped" #]
  	}
- 	Transition t1 whenMsg start -> wait
+ 	Transition t2 whenMsg start -> wait
 	
 }
 
@@ -564,20 +567,31 @@ QActor parkingservicestatusgui context ctxparkmanager {
 		println("Starting ParkingServiceStatusGUI.")
 		qrun coap.actorQakStateCoapObserver.activate( myself )
 	}
-	//Goto printAndStop
+	Goto wait
 	
-	State printAndStop {
+	State wait {
 		[# println("Stato sistema:" + coap.actorQakStateCoapObserver.readResponse()) #]
-		delay 5000
-		forward parkmanagerservice -m stop : stop(stop)
-		//forward transporttrolley -m stop : stop(stop)
-		delay 15000
-		forward parkmanagerservice -m stop : stop(start)
-		//forward transporttrolley -m stop : stop(start)
+		//delay 5000
+		//forward parkmanagerservice -m stop : stop(stop)
+		//delay 15000
+		//forward parkmanagerservice -m stop : stop(start))
 	}
 	Transition t0 whenEvent sonarevent -> eventReceived
+				  whenEvent thermometerevent -> thermEvent
 	
 	State eventReceived {
 		printCurrentMessage
 	}
+	
+	State thermEvent {
+		onMsg(thermometerevent : thermometerevent(X)) {
+			[# var type = "${payloadArg(0)}" #]
+			if [# type == "above" #] {
+				updateResource [# "received: above" #]
+			} else {
+				updateResource [# "received: below" #]
+			}
+		}
+	}
+	Goto wait
 }

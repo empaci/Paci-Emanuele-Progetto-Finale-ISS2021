@@ -13,6 +13,10 @@ Dispatch moveok   : move( MOVESHORT )
 Dispatch stop : stop(X) //X=start/stop
 Dispatch start : start(X)  //Used to simplify transporttrolley
 
+Dispatch trolleystatusupdate : trolleystatusupdate(S)
+Event localeventmove : localeventmove(X,Y)
+Event localeventbasic : localeventbasic(CMD)
+
 Dispatch cmd       : cmd(MOVE)
 Request step       : step( TIME )	
 Reply   stepdone   : stepdone(V)
@@ -157,6 +161,9 @@ QActor parkmanagerservice context ctxparkmanager {
 		onMsg( stop : stop(CMD)) {
 			[# val CMD = "${payloadArg(0)}" #]
 			//propaga il comando al trolley
+			
+			forward trolleylogic -m stop : stop($CMD)
+			/* 
 			if [# CMD == "stop" #] {
 				forward transporttrolley -m stop : stop($CMD)
 			} else { 
@@ -164,13 +171,34 @@ QActor parkmanagerservice context ctxparkmanager {
 					forward transporttrolley -m start : start($CMD)
 				}
 			}
+			* 
+			*/
 		}
 	} Goto accept
 }
 
-
 QActor transporttrolley context ctxparkmanager {
 	
+	State s0 initial {
+	} 
+	Goto wait
+	
+	State wait {
+	}
+	Transition t0 whenMsg trolleystatusupdate -> updatestatus
+	
+	State updatestatus {
+		onMsg(trolleystatusupdate : trolleystatusupdate(S)) {
+			[# 
+				var STATE = payloadArg(0)
+			#]
+			updateResource [# STATE #]
+		}
+	}
+	Goto wait
+}
+
+QActor trolleylogic context ctxparkmanager {
 	[#
 		val mapname     = "parkingMap"  		 
 		var Myself      = myself   
@@ -182,20 +210,20 @@ QActor transporttrolley context ctxparkmanager {
 	#]
 	
 	State s0 initial {
-		
 		run itunibo.planner.plannerUtil.initAI()
 		run itunibo.planner.plannerUtil.loadRoomMap("$mapname") 
 		run itunibo.planner.plannerUtil.showMap( )   
      	run itunibo.planner.plannerUtil.showCurrentRobotState()
-     	
 	}
 	Goto wait
 	
 	State wait {
 		if [# itunibo.planner.plannerUtil.atHome() #] {
- 			updateResource [# "idle" #]
+ 			//updateResource [# "idle" #]
+ 			forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(idle)
  		} else {
- 			updateResource [# "working" #]
+ 			//updateResource [# "working" #]
+ 			forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(working)
  		}
 		println("Waiting messages...")
 	}
@@ -210,14 +238,13 @@ QActor transporttrolley context ctxparkmanager {
 			#]
 			println("x: $x, y: $y")
 			
-			updateResource [# "working" #]
+			//updateResource [# "working" #]
+			forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(working)
 			
 			run itunibo.planner.plannerUtil.planForGoal(x,y)
 		}
 	}
-	Goto execPlannedMoves  
-	//Transition t0 whenTime 10 -> execPlannedMoves
-	//			  whenMsg stop -> stopped   
+	Goto execPlannedMoves     
     
 	State execPlannedMoves{   
 		delay 300
@@ -231,10 +258,10 @@ QActor transporttrolley context ctxparkmanager {
  	Goto wMove if [# CurrentPlannedMove == "w" #] else turnMove
  	
  	State wMove {     
- 		request basicrobot -m step : step(175) //330
+ 		//request basicrobot -m step : step(175) //330
+ 		emit localeventbasic : localeventbasic(w)
  	}
- 	Transition t0 whenReply stepdone   -> stepDone
- 				  whenReply stepfail   -> stepFailed 
+ 	Goto stepDone 
   	
  	 State stepDone{  
  		//updateResource [# itunibo.planner.plannerUtil.getMap() #]
@@ -245,7 +272,8 @@ QActor transporttrolley context ctxparkmanager {
  	
  	State turnMove{
   		if [# CurrentPlannedMove == "l" || CurrentPlannedMove == "r"  #]{
-  			forward basicrobot -m cmd : cmd($CurrentPlannedMove)
+  			//forward basicrobot -m cmd : cmd($CurrentPlannedMove)
+  			emit localeventbasic : localeventbasic($CurrentPlannedMove)
   		} 
  	} 
  	Goto rotationDone
@@ -264,30 +292,66 @@ QActor transporttrolley context ctxparkmanager {
  		else {
  			[# println(itunibo.planner.plannerUtil.get_curPos().toString()) #]
  			if [# itunibo.planner.plannerUtil.atHome() #] {
- 				updateResource [# "idle" #]
+ 				//updateResource [# "idle" #]
+ 				forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(idle)
  			}
  			//updateResource [# "pos" + itunibo.planner.plannerUtil.get_curPos().toString() #]
  		}
  	}
-    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else  wait
-	
-	State stepFailed{  //has found an obstacle (a wall)
-		printCurrentMessage
-		onMsg(stepfail : stepfail(DURATION,OBSTACLE)) {
-			[# 
-				DIST = payloadArg(0) //sostituire con pathexecutil.waitUser("Reposition the robot",10000)
-			#]
-			request basicrobot -m step : step( $DIST )
-		}
- 	}    
-    Transition t1 whenReply stepdone   -> stepDone
- 				  whenReply stepfail   -> stepFailed 
+    Goto execPlannedMoves  if[# ! itunibo.planner.plannerUtil.atPos(x.toInt(),y.toInt()) #] else checkStop
+ 	
+ 	State checkStop {
+ 	} 
+ 	Transition t1 	whenTime 200 -> wait
+ 					whenMsg stop -> stopped
  	
  	State stopped {
  		println("STOPPED !!!!!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!")
- 		updateResource [# "stopped" #]
+ 		//updateResource [# "stopped" #]
+ 		forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(stopped)
  	}
  	Transition t1 whenMsg start -> wait
+}
+
+QActor trolleyintermediary context ctxparkmanager {
+	
+	State s0 initial {
+	} 
+	Goto wait
+	
+	State wait {
+		
+	}
+	Transition t0 whenEvent localeventbasic -> handleEvent
+	
+	State handleEvent {
+		//localeventbasic
+		onMsg(localeventbasic : localeventbasic(CMD)) {
+			[# 
+				var CMD = payloadArg(0)
+			#]
+			if [# CMD == "w" #] {
+				request basicrobot -m step : step(175)
+			}
+			else {
+				forward basicrobot -m cmd : cmd($CMD)
+			}
+		}
+	}
+	Transition t0 whenReply stepdone   -> wait
+ 				  whenReply stepfail   -> stepFailed
+ 				  
+ 	State stepFailed{  //has found an obstacle (a wall)
+		printCurrentMessage
+		onMsg(stepfail : stepfail(DURATION,OBSTACLE)) {
+			[# 
+				var DIST = payloadArg(0) //sostituire con pathexecutil.waitUser("Reposition the robot",10000)
+			#]
+			request basicrobot -m step : step( $DIST ) //da sostituire solo temporaneo per prove!!
+		}
+ 	}    
+    Transition t1 whenReply stepdone   -> wait
+ 				  whenReply stepfail   -> stepFailed 
 	
 }
 

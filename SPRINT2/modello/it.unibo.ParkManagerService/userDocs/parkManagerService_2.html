@@ -86,6 +86,26 @@ kc{
     color: #008000	;
 	font-size: 90%;
 }
+en{
+	font-family: "Arial";
+    font-size: 90%;
+	background-color: #FFFFA6;
+}
+uc {
+	font-family: "Arial";
+    font-size: 90%;
+	background-color: #F8CECC;
+}
+ia {
+	font-family: "Arial";
+    font-size: 90%;
+	background-color: #97D077;
+}
+fd {
+	font-family: "Arial";
+    font-size: 90%;
+	background-color: #CCE5FF;
+}
 pre{
 	font-family: "Consolas";
 	font-size: 85%;
@@ -369,6 +389,20 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  
 
 <h2>Requirement analysis</h2>
+ Result of the previous <k>SPRINT</k> Analysis
+ <table style="width:100%" border="1">
+		<tr>
+			<td rowspan="2" style="width:80%">
+			 <img src="img/LogicalArchitecture_1.png" width="100%">
+			<td>
+				<a href="../../../../SPRINT1/modello/it.unibo.ParkManagerService/src/park_service_model_1.qak">Model SPRINT1</a>
+			</td>
+			<tr>
+				<td><a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
+			</tr>
+		</tr>
+  </table>
+ <br>
  
  In this <k>SPRINT</k> we will add <em>parking-manager</em> to the application with the relative GUI, <em>fan</em>, and <em>thermometer</em>.
  Also, we will perform the analysis so that the <em>fan</em> is activated automatically. 
@@ -427,10 +461,11 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 							<li>Value of the temperature <tt>TA</tt>.</li>
 							<li>State of the <tt>fan</tt> (on/off).</li>
 							<li>State of the <tt>trolley</tt> (<k>idle, working, or stopped</k>). </li>
+							<li>The start/stop botton should be active only if they can be used in that moment.</li>
 							<li><ks>Optionally</ks> other helpful information such as the current robot position or the map.</li>
 						</ul>
 					</li>
-					<li>Send a <ks>stop</ks> command to the <tt>trolley</tt> when <k>TA>TMAX</k>.</li>
+					<li>give the possibility to send a <ks>stop</ks> command to the <tt>trolley</tt> when <k>TA>TMAX</k>.</li>
 					<li>Show a visual notice when <tt>TA</tt> surpasses <tt>TMAX</tt> and when <tt>TA</tt> goes below <tt>TMAX</tt>.</li>
 					<li>Show a visual notice if the <em>OUTDOOR-area</em> has not been cleaned within the <tt>DTFREE</tt> interval of time, and
 						hide it after it returns <tt>free</tt>.</li>
@@ -444,7 +479,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 				The html page will incude a INPUT section (requirement: <em>manage</em>) and an OUTPUT section (requirement: <em>monitor</em>).
 			</td>
 			<td>
-				<img src="img\parkservicestatusGui_example.png" width="80%" height="80%">
+				<center><img src="img\parkservicestatusGui_example.png" width="80%" height="80%"></center>
 			</td>
 		</tr>
 	</table>
@@ -455,51 +490,32 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	<table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>ParkmanagerService</tt> stores the resources information as a CoAP Observable entity.
-			</td>
-			<td>
-				<dl>
-					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>No new component is introduced.</dd>
-					<dt><k>Cons</k>:</dt> 
-					<dd>Increase <tt>ParkManagerService</tt> complexity.</dd>
-				    <dd>Adding a new resource means modify the core of our application.</dd>
-				</dl>
-			</td>
-			
-		</tr>
-		<tr>
-			<td style="width:50%">
 			Add a new actor that stores the resources information as a CoAp Observable entity.
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>Do not overload ParkmanagerService.</dd>
-					<dd>Adding a new resource means modifyng only this component.</dd>
 					<dd>Can be be used by every component.</dd>
-					<dd>Represent the state of the system</dd>
+					<dd>Represent the current state of the system</dd>
 					<dd>A new component that need any resource can use this instead.</dd>
-					<dd>Every component needs to observe one single component, so it simplify the overall architecture.</dd>
+					<dd>Every other component that could need more resources needs to observe one single component, so it simplify the overall architecture.</dd>
 					<dt><k>Cons</k>:</dt> 
-					<dd>Not strictly necessary.</dd>
-				    <dd>Add a new component.</dd>
+					<dd>Add a new component that is not strictly necessary.</dd>
 				</dl>
 			</td>
 		</tr>
 		<tr>
 			<td style="width:50%">
-			No new element is introduced, every components observe the resource they are intersted in.
+			No new element is introduced, every components observe the resource they are interested in.
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>No new elements.</dd>
-					<dd>Each component doesn't get information about resource they don't need.</dd>
+					<dd>Observe only the resources they need.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Double code for each observing component.</dd>
-				    <dd><tt>ParkServiceStatusGUI</tt> has to know every entity in the system. ??</dd>
-				    <dd>Complex architecture.</dd>
+				    <dd>Add overall complexity to the architecture (spiegha meglio).</dd>
 				</dl>
 			</td>
 			
@@ -587,14 +603,17 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	A mock of the thermometer is required to simulate the real sensor. The decision around the nature of the mock itself is left during the project phase.
  
  <h4>Fan</h4>
- CoAp observable object, mock of the real fan, can chenage the state to: "on" and "off".
+ CoAp observable object, mock of the real fan, can change the state to: "on" and "off".
  
  <h3>Other relevant aspects</h3>
 
   <h4>Trolley start and stop Requirement: <em>manage</em></h4>
- <tt>ParkServiceStatusGUI</tt> send a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
- The dispatch is sent to the manager and not the trolley beacause the GUI doesn't know the trolley.
- A dispatch is used because, no rensponse is needed since the state of the trolley will change in the UI.
+	<tt>ParkServiceStatusGUI</tt> send a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
+	The dispatch is sent to the manager and not the trolley beacause the GUI doesn't need to know the trolley.
+	<br>
+	A dispatch is used because, no rensponse is needed since the state of the trolley will change in the UI, and we don't want it to be lost.
+	<br>
+	When the trolley is asked to stop it moves until it finishes the current task.
  
  <h4>Temperature check and fan activation</h4>
 	We need to introduce two new element: fan and thermometer. We need to activate the fan when TA>TMAX and give a notice to the <tt>park-manager</tt>.
@@ -622,10 +641,9 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>No extra exchange.</dd>
+					<dd>No extra message exchange.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Logic distributed in different actors.</dd>
-				    <dd>?.</dd>
 				</dl>
 			</td>
 		</tr>
@@ -648,14 +666,21 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	To simplify the model the first option is chosen and will be included in the model after the Analysis. During the project phase, it can be changed based on the architecture adopted.
 
  <h3>Logical architecture</h3>
- 
- <img src="img\LogicalArchitecture_2.png" width="100%">
+  <table style="width:100%" border="1">
+		<tr>
+			<td rowspan="2" style="width:80%">
+			 <img src="img/LogicalArchitecture_2.png" width="100%">
+			<td>
+				<a href="../src/park_service_model_2.qak">Model SPRINT2</a>
+			</td>
+			<tr>
+				<td><a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
+			</tr>
+		</tr>
+  </table>
  <br>
- <br>
- See here the <a href="img\legenda.png" target="img">Legenda</a>.
- <br>
- <br>
- <k>Model built with QAkActors</k> <a href="../src/park_service_model_2.qak" target="web">here</a>.
+ <!-- <img src="img\LogicalArchitecture_2.png" width="100%"> -->
+ <k>See here the <a href="img\legenda.png" target="img">Legenda</a>.</k>
  <!--
 	<li>How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
 	A client could receive the SLOTNUM, then not send a carenter. 
@@ -717,14 +742,23 @@ In the project phase we chose to develop the application usign the <a href="http
  <br>
  <!-- D:\Scuola\Registrazioni\Ing\ultimeLezioni -> lezione 20210601 per clean architecture -->
  <br>
- To do so we need to refactor part of the code developed in the model. We need to separate entities and Use-cases. 
+ That means we can't use the model as it is, but we need to refactor it to separte the entities and Use-cases, and to respect the <i>Dependecy Rule</i>.
  
- <h3>Code refactor followingf the clean architecture</h3>
+ <h3>Code refactor following the clean architecture</h3>
  
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			to blah blah lbah prnciple blash sepatate bal ..
+			The <k>Entities</k> do not depend on any operational change in the application, in our case are: <en>weightsensor</en>, <en>sonarsensor</en>, <en>thermometer</en>, <en>fan</en>.
+			<br>
+			Which receives the respective sensor data and make it avaiable as a CoAp observable resource.
+			<br>
+			We can keep them as QaKActors, but we need to separate the logic in the <k>Use-cases</k>: <uc>weightlogic</uc>, <uc>sonarlogic</uc>, <uc>thermometerlogic</uc>.
+			<br><br>
+			For the <en>transporttrolley</en> we separted the logic and the entity, also we added <ia>trolleyintermediary</ia> which is used to maintain the logic of the trolley indipendent from the <fd>basicrobot</fd>.
+			<br><br>
+			Then, we need to define some adapters.
+			In the external circle there is the <fd>SpringBoot</fd> Web Framework.
 		</td>
 		<td>
 			<img src="img\myCleanArch.png" width="100%" height="100%">
@@ -732,24 +766,32 @@ In the project phase we chose to develop the application usign the <a href="http
 	</tr>
 </table>
  
- Entities: weightsensor, sonarsensor, thermometer, fan
- <br>
- <br>
- Use-case: weightsensorlogic, sonarlogic, thermometer logic, fan logic, trolley logic?
- <br>
- <br>
- Interfaces:
- <br>
- <br>
- frameworks
  <h4>weightsensor refactory</h4>
  <table style="width:100%" border="1">
 	<tr>
-		<td style="width:50%">
+		<td style="width:40%">
 			<img src="img\weightrefactory.png">
 		</td>
 		<td>
-			The logic was moved to weightlogic ... use prolog link doc perche prlog e meglio ... link lofica prolog 
+			<ol>
+				<li>The logic was separated from the component, see <a href="../../../progetto/it.unibo.Weightsensor/src/weightsensor.qak">weightsensor.qak</a>.</li>
+				<li>
+				We used Prolog logic to implement the application logic. See <a href="../../../progetto/it.unibo.Weightsensor/weightapplogic.pl">weightapplogic.pl</a>.
+				<ul>
+					<li><k>init(X)</k> "X is the initial state"</li>
+					<li><k>modifyStatus(WEIGHT,X)</k> "X is true if <k>| previous weight - the current weight | > delta</k>" </li>
+					<li><k>getStatus(WEIGHT,X)</k> "X is the state (free or occupied) to send at the <tt>weightsensor</tt>"</li>
+				</ul>
+				<ks>NOTE</ks>: <k>reassign</k>, is to change the previous weight, make use of the predicate <a href="https://www.swi-prolog.org/pldoc/doc_for?object=assert/1" target="web">assert</a>, and therefore 
+				we can't define the preWeight as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("preWeight/1")</a>, then we need to use the init predicate.
+				</li>
+				<li>
+				When <en>weightsensor</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>weightlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				can't know anything about a component on an outer circle. 
+				<br>
+				The <uc>weightlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				</li>
+			</ol> 
 		</td>
 	</tr>
 </table>
@@ -760,35 +802,87 @@ In the project phase we chose to develop the application usign the <a href="http
 			<img src="img\sonarrefactory.png">
 		</td>
 		<td>
-			explanation ...
+			<ol>
+				<li>The logic was separated from the component, see <a href="../../../progetto/it.unibo.Sonarsensor/src/sonarsensor.qak">sonarsensor.qak</a>.</li>
+				<li>
+				We used Prolog logic to implement the application logic. See <a href="../../../progetto/it.unibo.Sonarsensor/sonarapplogic.pl">sonarapplogic.pl</a>.
+				<ul>
+					<li><k>init(X)</k> "X is the initial state"</li>
+					<li><k>modifyStatus(DISTANCE,X)</k> "X is true if <k>| previous distance - the current distance | > delta</k>" </li>
+					<li><k>getStatus(DISTANCE,X)</k> "X is the state (free or occupied) to send at the <tt>sonarsensor</tt>"</li>
+				</ul>
+				<ks>NOTE</ks>: <k>reassign</k>, is to change the previous distance, make use of the predicate <a href="https://www.swi-prolog.org/pldoc/doc_for?object=assert/1" target="web">assert</a>, and therefore 
+				we can't define the preDist as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("preDist/1")</a>, then we need to use the init predicate.
+				</li>
+				<li>
+				When <en>sonarsensor</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>sonarlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				can't know anything about a component on an outer circle. 
+				<br>
+				The <uc>weightlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				</li>
+			</ol> 
 		</td>
 	</tr>
 </table>
-<h4>thermometer/fan</h4>
+<h4>thermometer/fan refactory</h4>
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
 			<img src="img\thermometerrefactory.png">
 		</td>
 		<td>
-			explanation ...
+			<ol>
+				<li>The logic was separated from the component, see <a href="../../../progetto/it.unibo.Thermometer/src/thermometer.qak">thermometer.qak</a>.</li>
+				<li>
+				We used Prolog logic to implement the application logic. See <a href="../../../progetto/it.unibo.Thermometer/thermapplogic.pl">thermpapplogic.pl</a>.
+				<ul>
+					<li><k>init(X)</k> "X is the initial state"</li>
+					<li><k>notice(TEMP,X)</k> "X is <k>above</k> or <k>below</k> based on which event is needed" </li>
+				</ul>
+				<ks>NOTE</ks>: <k>reassign</k>, is to change the flag that tells if the previous temperature was above <k>TMAX</k>, make use of the predicate <a href="https://www.swi-prolog.org/pldoc/doc_for?object=assert/1" target="web">assert</a>, and therefore 
+				we can't define the criticTemp as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("criticTemp/1")</a>, then we need to use the init predicate.
+				</li>
+				<li>
+				When <en>thermometer</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>thermometerlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				can't know anything about a component on an outer circle. 
+				<br>
+				The <uc>thermometerlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				<br>
+				Also, <uc>thermometerlogic</uc> send an event (4) that is caught by the <en>fan</en> that change its state. 
+				</li>
+			</ol> 
 		</td>
 	</tr>
 </table>
-<h4>trolley?</h4>
+<h4>transporttrolley refactory</h4>
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			img
+			<img src="img\trolleyrefactory.png" width="100%">
 		</td>
 		<td>
-			explanation ...
+			<ol>
+				<li>The logic was separated from the component, see <a href="../../../progetto/it.unibo.ParkManagerTrolley/src/parkamanagertrolley.qak">parkamanagertrolley.qak</a>.</li>
+				<li>
+				<en>transporttrolley</en> keeps the state of the <tt>trolley</tt>. <uc>trolleylogic</uc> contains the logic on how to move the <tt>trolley</tt> and how to update the state.
+				<ia>trolleyintermediary</ia> is used to maintain the logic indipendent from the <fd>basicrobot</fd>.
+				</li>
+				<li>
+				When <uc>trolleylogic</uc> receives a command from the <tt>parkmanagerservice</tt>, if is a start/stop command send a dispatch to the <en>transporttrolley</en> to change the state, 
+				if is a move command sends a event, because of the <i>Dependency Rule</i>, to the <ia>trolleyintermediary</ia>, and if it changes the state send a dispatch to the <en>transporttrolley</en>.
+				<br>
+				</li>
+			</ol> 
 		</td>
 	</tr>
 </table>
  <h3>Concrete architecture</h3>
  <img src="img\ConcreteArchitecture_2.png" width="100%">
 
+ <h3>Graphic interface</h3>
+
+ <h4>Workflow</h4>
+ 
 <h2>Testing</h2> 
  
 

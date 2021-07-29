@@ -22,21 +22,36 @@ class Parkingservicestatusgui ( name: String, scope: CoroutineScope  ) : ActorBa
 						println("Starting ParkingServiceStatusGUI.")
 						coap.actorQakStateCoapObserver.activate(myself)
 					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
-				state("printAndStop") { //this:State
+				state("wait") { //this:State
 					action { //it:State
 						 println("Stato sistema:" + coap.actorQakStateCoapObserver.readResponse())  
-						delay(5000) 
-						forward("stop", "stop(stop)" ,"parkmanagerservice" ) 
-						delay(15000) 
-						forward("stop", "stop(start)" ,"parkmanagerservice" ) 
 					}
-					 transition(edgeName="t035",targetState="eventReceived",cond=whenEvent("sonarevent"))
+					 transition(edgeName="t037",targetState="eventReceived",cond=whenEvent("sonarevent"))
+					transition(edgeName="t038",targetState="thermEvent",cond=whenEvent("thermometerevent"))
 				}	 
 				state("eventReceived") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 					}
+				}	 
+				state("thermEvent") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("thermometerevent(X)"), Term.createTerm("thermometerevent(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 var type = "${payloadArg(0)}"  
+								if(  type == "above"  
+								 ){updateResourceRep( "received: above"  
+								)
+								}
+								else
+								 {updateResourceRep( "received: below"  
+								 )
+								 }
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 			}
 		}

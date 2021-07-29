@@ -19,6 +19,7 @@ import it.unibo.kactor.sysUtil
 import it.unibo.kactor.ApplMessage
 import org.junit.After
 import test.kotlin.CoapObserverForTesting
+import test.kotlin.CoapObserverForTesting3
  
  
 class TestPlanUseCase2 {
@@ -26,7 +27,7 @@ class TestPlanUseCase2 {
 	companion object{
 		var systemStarted         = false
 		val channelSyncStart      = Channel<String>()
-		var testingObserver       : CoapObserverForTesting? = null
+		var testingObserver       : CoapObserverForTesting3? = null
 		var myactor               : ActorBasic? = null
 
 		@JvmStatic
@@ -42,11 +43,11 @@ class TestPlanUseCase2 {
  				while(  myactor == null )		{
 					println("+++++++++ waiting for system startup ...")
 					delay(500)
-					myactor=QakContext.getActor("parkmanagerservice")
+					myactor=QakContext.getActor("thermometer")
 				}				
-				delay(5000)	//Give time to set up
+				delay(1000)	//Give time to set up
 				channelSyncStart.send("starttesting")
-				testingObserver = CoapObserverForTesting()
+				testingObserver = CoapObserverForTesting3()
 			}		 
 		}//init
 		
@@ -78,16 +79,27 @@ class TestPlanUseCase2 {
 	}
 	
     @Test
-    fun testUC1(){
-		println("+++++++++ testslotnum ")
-		//Send a command and look at the result
-		var result  = ""
+    fun testUC2(){
+		var result = ""
 		runBlocking{
-			val channelForObserverL = Channel<String>()
-			testingObserver!!.addObserver( channelForObserverL,"enter")
+			val channelForObserverT = Channel<String>()
+			testingObserver!!.addObserver( channelForObserverT,"received")
 			
+			var temp = MsgUtil.buildDispatch("tester","tempData","tempData(40)","thermometer")
+			MsgUtil.sendMsg(temp, myactor!!)
 			
+			result = channelForObserverT.receive()
+			assertEquals( result, "received: above")
 			
+			println("===================== Received above ok")
+			
+			temp = MsgUtil.buildDispatch("tester","tempData","tempData(10)","thermometer")
+			MsgUtil.sendMsg(temp, myactor!!)
+			
+			result = channelForObserverT.receive()
+			assertEquals( result, "received: below")
+			
+			println("===================== Received below ok")
 		}	
 	}
 }
