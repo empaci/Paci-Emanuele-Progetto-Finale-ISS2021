@@ -82,8 +82,6 @@ class TestPlanUseCase1 {
 	
     @Test
     fun testUC1(){
-		println("+++++++++ testslotnum ")
-		//Send a command and look at the result
 		var result  = ""
 		runBlocking{
  			val channelForObserverT = Channel<String>()
@@ -102,6 +100,11 @@ class TestPlanUseCase1 {
 			temp = MsgUtil.buildDispatch("tester","stop","stop(stop)","parkingservicestatusgui")
 			MsgUtil.sendMsg(temp, myactor!!)
 			
+			val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
+			MsgUtil.sendMsg(reqin, myactor!!)
+				
+			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
+			MsgUtil.sendMsg(reqen, myactor!!)
 			
 			result = channelForObserverT.receive()
 			assertEquals( result, "stopped")

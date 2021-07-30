@@ -465,7 +465,8 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 							<li><ks>Optionally</ks> other helpful information such as the current robot position or the map.</li>
 						</ul>
 					</li>
-					<li>give the possibility to send a <ks>stop</ks> command to the <tt>trolley</tt> when <k>TA>TMAX</k>.</li>
+					<li>Give the possibility to send a <ks>stop</ks> command to the <tt>trolley</tt> when <k>TA>TMAX</k>.</li>
+					<li>Give the possibility to send a <ks>start</ks> command to the <tt>trolley</tt> when <k>TA<TMAX</k> and the trolley is stopped.</li>
 					<li>Show a visual notice when <tt>TA</tt> surpasses <tt>TMAX</tt> and when <tt>TA</tt> goes below <tt>TMAX</tt>.</li>
 					<li>Show a visual notice if the <em>OUTDOOR-area</em> has not been cleaned within the <tt>DTFREE</tt> interval of time, and
 						hide it after it returns <tt>free</tt>.</li>
@@ -496,8 +497,8 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>Can be be used by every component.</dd>
-					<dd>Represent the current state of the system</dd>
-					<dd>A new component that need any resource can use this instead.</dd>
+					<dd>Represent the current state of the system.</dd>
+					<dd>A new component that needs any resource can use this instead.</dd>
 					<dd>Every other component that could need more resources needs to observe one single component, so it simplify the overall architecture.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Add a new component that is not strictly necessary.</dd>
@@ -515,14 +516,14 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 					<dd>Observe only the resources they need.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Double code for each observing component.</dd>
-				    <dd>Add overall complexity to the architecture (spiegha meglio).</dd>
+				    <dd>Every component need to know and observe every resource that they need means adding extra complexity to that component.</dd>
 				</dl>
 			</td>
 			
 		</tr>
 	</table>
 	<br>
-	So it is preferred to add a new component: <tt>ParkingState</tt>.
+	Given the benefit, we prefer to add the new component: <tt>ParkingState</tt>.
  <h3>Components</h3>
  We can add to the application 4 macro-components:
  <ul>
@@ -537,10 +538,11 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	<li><ks>Sonar</ks>: add the logic to notify the <tt>park-manager</tt> after <tt>DTFREE</tt>.</li>
  </ul>
  <h4>ParkingState</h4>
- This component can observe every resource in our application a make those information avaiable as a CoAp observable resource, as already observed the best way to realize it, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#weightsensor">SPRINT0 | Weight-sensor-resource</a>.
- 
+ This component can observe every resource in our application a make that information available as a CoAp observable resource, as already observed the best way to realize it, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#weightsensor">SPRINT0 | Weight-sensor-resource</a>.
+ <br>
+ The string format used to represent this information should be chosen during the project phase since there is no need for anything particolar.
+  <br>
  <tt>ParkManagerService</tt> will be changed to observe this resource.
- 
  <h4>ParkManagerStatusGUI</h4>
  Mock used to simulate the park-manager in the model.
  Should be able to:
@@ -548,6 +550,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	<li>Send stop/start messages to the <tt>Trolley</tt>.</li>
 	<li>Observe <tt>ParkingState</tt>.</li>
 	<li>Being notifed if <em>OUTDOOR-area</em> is occupied for a time above <tt>DTFREE</tt>.</li>
+	<li>Being notified when <k>TA</k> surpasses or goes below <k>TMAX</k>.</li>
  </ol>
  
  <h4>Trolley</h4>
@@ -607,13 +610,18 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
  
  <h3>Other relevant aspects</h3>
 
-  <h4>Trolley start and stop Requirement: <em>manage</em></h4>
-	<tt>ParkServiceStatusGUI</tt> send a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
-	The dispatch is sent to the manager and not the trolley beacause the GUI doesn't need to know the trolley.
+  <h4>Trolley start and stop</h4>
+  
+	To start/stop the trolley (requirement: <em>manage</em>) we chose that <tt>ParkServiceStatusGUI</tt> sends a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
 	<br>
-	A dispatch is used because, no rensponse is needed since the state of the trolley will change in the UI, and we don't want it to be lost.
+	<tt>ParkServiceStatusGUI</tt> sends the message to the <tt>ParkManagerService</tt> and not the trolley because the trolley is the logic adopted to move the robot. While <tt>ParkManagerService</tt>
+	is the application core logic used to interact with the other components.
 	<br>
-	When the trolley is asked to stop it moves until it finishes the current task.
+	We choose a dispatch instead of a request because the state of the trolley will change in the UI so the <em>park-manager</em> can see if it was successful.
+	We don't use an Event because we don't want it to be lost.
+	<br>
+	<br>
+	When the trolley is asked to stop it moves until it finishes the current task, so if it was a <em>pick-up</em> or a <em>parking</em> request the client is not left waiting.
  
  <h4>Temperature check and fan activation</h4>
 	We need to introduce two new element: fan and thermometer. We need to activate the fan when TA>TMAX and give a notice to the <tt>park-manager</tt>.
@@ -621,12 +629,12 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
   <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>Thermometer</tt> send event when <k>TA>TMAX</k> and when <k>TA<TMAX</k>
+			<tt>Thermometer</tt> send event when <k>TA</k> surpasses <k>TMAX</k> and when it goes below
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
-					<dd>Reach every component, without the need to know them.</dd>
+					<dd>Reach both components (<tt>Fan</tt> and <tt>ParkServiceStatusGUI</tt>), without knowing them.</dd>
 					<dd>Easy to realize.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Logic inside the thermometer.</dd>
@@ -694,10 +702,11 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 <h2>Test plans</h2> 
 
 <h4>Use-case <ks>The <k>TA</k> measured by the <tt>thermometer</tt> is increased over <k>TMAX</k></ks></h4>
- We can send a temperature above, then below, TMAX and simulate a park-manager that stop and start the trolley. Also while the trolley is stopped we can simulate clients
-requests. To check if the test if succesful we need to observe the fan and the trolley state, while also checking that while stopped the trolley doen't move.
+ We can send a temperature above, then below, <k>TMAX</k> and simulate a <em>park-manager</em> that stops and starts the <tt>trolley</tt>. 
+ <br>
+ To check if the test if successful we need to observe the <tt>fan</tt> and the <tt>trolley</tt> state, while also checking that while stopped the trolley doen't move by simulating client requests.
 <br> 
- To check if the test is successful we need to observe the trolley movement and the message exchange between the application and the client.
+ To check if the test is successful we need to observe the <tt>trolley</tt> and the <tt>fan</tt> state.
  <br><br>
  Requirements: <em>manage</em>.
  <br><br>
@@ -710,13 +719,13 @@ requests. To check if the test if succesful we need to observe the fan and the t
  
  We expect that, in order:
  <ol>
-	<li>The <tt>trolley</tt> state changes to "stopped".</li>
-	<li>The <tt>fan</tt> state changes to "on".</li> 
-	<li>The <tt>trolley</tt> state changes to "idle".</li>
-	<li>The <tt>fan</tt> state changes to "off".</li>
-	Also we can check that the trolley doesn't move while stopped, but moves when is started again.
+	<li>The <tt>trolley</tt> state changes to "<k>stopped</k>".</li>
+	<li>The <tt>fan</tt> state changes to "<k>on</k>".</li> 
+	<li>The <tt>trolley</tt> state changes to "<k>idle</k>".</li>
+	<li>The <tt>fan</tt> state changes to "<k>off</k>".</li>
+	Also we can check that the trolley doesn't move while stopped by sending parking request and checking that the state didn't change to <k>working</k>.
  </ol>
- <p>JUnit test: <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a>, <a href="../src/test/TestPlanUseCase1RobotPos.kt">TestPlanUseCase1RobotPos.kt</a>
+ <p>JUnit test: <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a>
  <br>
  <h4>Use-case <ks><tt>OUTDOOR-area</tt> is not free whithin <tt>DTFREE</tt></ks></h4>
   We can simulate to occupy the <tt>OUTDOOR</tt> and wait a time over <tt>DTFREE</tt>. 
@@ -757,8 +766,9 @@ In the project phase we chose to develop the application usign the <a href="http
 			<br><br>
 			For the <en>transporttrolley</en> we separted the logic and the entity, also we added <ia>trolleyintermediary</ia> which is used to maintain the logic of the trolley indipendent from the <fd>basicrobot</fd>.
 			<br><br>
-			Then, we need to define some adapters.
-			In the external circle there is the <fd>SpringBoot</fd> Web Framework.
+			If needed we have to define some adapters to convert our internal data to a format usable by the Graphic interface.
+			<br>
+			In the external circle there is the <fd>SpringBoot</fd> Web Framework used to develop the <fd>ParkManagerStatusGUI</fd>.
 		</td>
 		<td>
 			<img src="img\myCleanArch.png" width="100%" height="100%">
@@ -769,8 +779,8 @@ In the project phase we chose to develop the application usign the <a href="http
  <h4>weightsensor refactory</h4>
  <table style="width:100%" border="1">
 	<tr>
-		<td style="width:40%">
-			<img src="img\weightrefactory.png">
+		<td style="width:50%">
+			<img src="img\weightrefactory.png" width="100%">
 		</td>
 		<td>
 			<ol>
@@ -799,7 +809,7 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\sonarrefactory.png">
+			<img src="img\sonarrefactory.png" width="100%">
 		</td>
 		<td>
 			<ol>
@@ -828,7 +838,7 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\thermometerrefactory.png">
+			<img src="img\thermometerrefactory.png" width="100%">
 		</td>
 		<td>
 			<ol>
