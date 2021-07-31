@@ -26,6 +26,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 					}
 					 transition(edgeName="t014",targetState="updatestatus",cond=whenDispatch("trolleystatusupdate"))
+					transition(edgeName="t015",targetState="handleMsg",cond=whenDispatch("stop"))
 				}	 
 				state("updatestatus") { //this:State
 					action { //it:State
@@ -35,6 +36,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 												var STATE = payloadArg(0)
 								updateResourceRep( STATE  
 								)
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("handleMsg") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("stop(X)"), Term.createTerm("stop(CMD)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 
+												var CMD = payloadArg(0)
+								emit("localtrolleyupdate", "localtrolleyupdate($CMD)" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

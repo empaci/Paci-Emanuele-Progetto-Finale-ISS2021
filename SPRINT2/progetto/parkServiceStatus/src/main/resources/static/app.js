@@ -72,12 +72,17 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         //SUBSCRIBE to STOMP topic updated by the server
-        stompClient.subscribe('/topic/infodisplay', function (msg) {
+        stompClient.subscribe('/topic/info', function (msg) {
         //msg: {"content":"led(off):12"} or {"content":"sonarvalue(D)"}
              //alert(msg)
+
              var jsonMsg = JSON.parse(msg.body).content;
-             if( jsonMsg.includes("led")) showMsg( jsonMsg, "infodisplay" );
-             else showMsg( jsonMsg, "sonarvaldisplay" );
+             //if( jsonMsg.includes("led")) showMsg( jsonMsg, "fanstatval" );
+             //else showMsg( jsonMsg, "fanstatval" );
+             if (jsonMsg.includes("temperature")) showMsg( jsonMsg, "tempval" );
+             if (jsonMsg.includes("fan")) showMsg( jsonMsg, "fanstatval" );
+             if (jsonMsg.includes("trolley")) showMsg( jsonMsg, "trolleystatval" );
+
         });
 
     });

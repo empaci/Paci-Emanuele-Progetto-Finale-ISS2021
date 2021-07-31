@@ -24,6 +24,7 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				var y = ""
 				var DIST = ""
 				var PREV = "176"
+				var state = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -44,8 +45,8 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						 }
 						println("Waiting messages...")
 					}
-					 transition(edgeName="t015",targetState="handle",cond=whenDispatch("move"))
-					transition(edgeName="t016",targetState="stopped",cond=whenDispatch("stop"))
+					 transition(edgeName="t016",targetState="handle",cond=whenDispatch("move"))
+					transition(edgeName="t017",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -131,15 +132,27 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_checkStop", 
 							scope, context!!, "local_tout_trolleylogic_checkStop", 200.toLong() )
 					}
-					 transition(edgeName="t117",targetState="wait",cond=whenTimeout("local_tout_trolleylogic_checkStop"))   
-					transition(edgeName="t118",targetState="stopped",cond=whenDispatch("stop"))
+					 transition(edgeName="t118",targetState="wait",cond=whenTimeout("local_tout_trolleylogic_checkStop"))   
+					transition(edgeName="t119",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
-						println("STOPPED !!!!!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!")
 						forward("trolleystatusupdate", "trolleystatusupdate(stopped)" ,"transporttrolley" ) 
 					}
-					 transition(edgeName="t119",targetState="wait",cond=whenDispatch("start"))
+					 transition(edgeName="t120",targetState="checkStart",cond=whenEvent("localtrolleyupdate"))
+				}	 
+				state("checkStart") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("localtrolleyupdate(S)"), Term.createTerm("localtrolleyupdate(S)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 
+												state = payloadArg(0)
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({ state=="start"  
+					}) )
+					transition( edgeName="goto",targetState="stopped", cond=doswitchGuarded({! ( state=="start"  
+					) }) )
 				}	 
 			}
 		}

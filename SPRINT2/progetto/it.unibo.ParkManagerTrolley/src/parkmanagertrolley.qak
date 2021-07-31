@@ -11,11 +11,11 @@ Dispatch outTokenid : outTokenid(TOKENID)
 Dispatch move : move(X,Y)
 Dispatch moveok   : move( MOVESHORT )
 Dispatch stop : stop(X) //X=start/stop
-Dispatch start : start(X)  //Used to simplify transporttrolley
 
 Dispatch trolleystatusupdate : trolleystatusupdate(S)
-Event localeventmove : localeventmove(X,Y)
+//Event localeventmove : localeventmove(X,Y)
 Event localeventbasic : localeventbasic(CMD)
+Event localtrolleyupdate : localtrolleyupdate(S)
 
 Dispatch cmd       : cmd(MOVE)
 Request step       : step( TIME )	
@@ -100,7 +100,8 @@ QActor parkmanagerservice context ctxparkmanager {
 			[# y = getCurSol("Y").toString().toInt() #]
 
 			//forward transporttrolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+			//[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+			[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
 					
 			[# val TOKENID = "$SLOTNUM"+"$counter" #]
 			[# counter++ #]
@@ -136,7 +137,8 @@ QActor parkmanagerservice context ctxparkmanager {
 				[# y = getCurSol("Y").toString().toInt() #]
 					
 				//forward transporttrolley -m move : move($x,$y)
-				[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+				//[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+				[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
 					
 				solve( unoccupySlot( $SLOTNUM ) ) 
 			}
@@ -153,7 +155,8 @@ QActor parkmanagerservice context ctxparkmanager {
 		[# x = getCurSol("X").toString().toInt() #]
 		[# y = getCurSol("Y").toString().toInt() #]
 		//forward transporttrolley -m move : move($x,$y)
-		[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+		//[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
+		[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
 	}
 	Goto accept
 	 
@@ -162,17 +165,8 @@ QActor parkmanagerservice context ctxparkmanager {
 			[# val CMD = "${payloadArg(0)}" #]
 			//propaga il comando al trolley
 			
-			forward trolleylogic -m stop : stop($CMD)
-			/* 
-			if [# CMD == "stop" #] {
-				forward transporttrolley -m stop : stop($CMD)
-			} else { 
-				if [# CMD == "start" #] {
-					forward transporttrolley -m start : start($CMD)
-				}
-			}
-			* 
-			*/
+			//forward trolleylogic -m stop : stop($CMD)
+			forward transporttrolley -m stop : stop($CMD)
 		}
 	} Goto accept
 }
@@ -186,6 +180,7 @@ QActor transporttrolley context ctxparkmanager {
 	State wait {
 	}
 	Transition t0 whenMsg trolleystatusupdate -> updatestatus
+				  whenMsg stop -> handleMsg
 	
 	State updatestatus {
 		onMsg(trolleystatusupdate : trolleystatusupdate(S)) {
@@ -193,6 +188,18 @@ QActor transporttrolley context ctxparkmanager {
 				var STATE = payloadArg(0)
 			#]
 			updateResource [# STATE #]
+		}
+	}
+	Goto wait
+	
+	State handleMsg {
+		onMsg(stop : stop(CMD)) {
+			
+			[# 
+				var CMD = payloadArg(0)
+			#]
+			
+			emit localtrolleyupdate : localtrolleyupdate($CMD)
 		}
 	}
 	Goto wait
@@ -207,6 +214,7 @@ QActor trolleylogic context ctxparkmanager {
 		var y = ""
 		var DIST = ""
 		var PREV = "176"
+		var state = ""
 	#]
 	
 	State s0 initial {
@@ -228,7 +236,7 @@ QActor trolleylogic context ctxparkmanager {
 		println("Waiting messages...")
 	}
 	Transition t0 whenMsg move -> handle
-				  whenMsg stop -> stopped
+				  whenEvent localtrolleyupdate -> stopped
 	
 	State handle {
 		onMsg(move : move(X,Y)) {
@@ -303,14 +311,23 @@ QActor trolleylogic context ctxparkmanager {
  	State checkStop {
  	} 
  	Transition t1 	whenTime 200 -> wait
- 					whenMsg stop -> stopped
+ 					whenEvent localtrolleyupdate -> stopped
  	
  	State stopped {
- 		println("STOPPED !!!!!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!!!!!!! STOPPED !!!!!!!!!!!!!!")
- 		//updateResource [# "stopped" #]
+ 		
  		forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(stopped)
  	}
- 	Transition t1 whenMsg start -> wait
+ 	Transition t1 whenEvent localtrolleyupdate -> checkStart
+ 	
+ 	State checkStart {
+ 		onMsg(localtrolleyupdate : localtrolleyupdate(S)) {
+			[# 
+				state = payloadArg(0)
+			#]
+		}
+ 	}
+ 	Goto wait if [# state=="start" #] else stopped
+ 	
 }
 
 QActor trolleyintermediary context ctxparkmanager {

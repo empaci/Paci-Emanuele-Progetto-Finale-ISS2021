@@ -19,6 +19,7 @@ QActor client context ctxclient {
 	 var SLOTNUM = 0  #]
 	State s0 initial {
 		println("Starting Client.")
+		delay 10000
 	}
 	Goto requestIn
 	

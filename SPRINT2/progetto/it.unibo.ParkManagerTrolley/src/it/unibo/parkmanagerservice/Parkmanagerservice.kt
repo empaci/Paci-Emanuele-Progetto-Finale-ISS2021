@@ -85,7 +85,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transporttrolley" )  
+								 forward("move", "move($x,$y)" ,"trolleylogic" )  
 								 val TOKENID = "$SLOTNUM"+"$counter"  
 								 counter++  
 								updateResourceRep( "receipt("+TOKENID+")"  
@@ -119,7 +119,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								solve("outdoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transporttrolley" )  
+								 forward("move", "move($x,$y)" ,"trolleylogic" )  
 								solve("unoccupySlot($SLOTNUM)","") //set resVar	
 						}
 						}
@@ -140,7 +140,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						solve("home(X,Y)","") //set resVar	
 						 x = getCurSol("X").toString().toInt()  
 						 y = getCurSol("Y").toString().toInt()  
-						 forward("move", "move($x,$y)" ,"transporttrolley" )  
+						 forward("move", "move($x,$y)" ,"trolleylogic" )  
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 
@@ -149,7 +149,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("stop(X)"), Term.createTerm("stop(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val CMD = "${payloadArg(0)}"  
-								forward("stop", "stop($CMD)" ,"trolleylogic" ) 
+								forward("stop", "stop($CMD)" ,"transporttrolley" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )

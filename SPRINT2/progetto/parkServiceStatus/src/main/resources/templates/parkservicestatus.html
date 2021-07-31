@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>ParkServiceStatus</title>
+
+    <!-- SOCKET in SpringBoot -->
+    <!--
+    Imports the SockJS and STOMP javascript libraries that will be used
+    to communicate with our server through STOMP over websocket.
+    We also import app.js, which contains the logic of our client application.
+    -->
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <script src="/app.js"></script>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <script>
+    function myIp() {
+      var ip = location.host;
+    }
+
+    //myIp()
+    connect() //defined in app.js
+  </script>
+
+</head>
+
+<body>
+    <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+        enabled. Please enable
+        Javascript and reload this page!</h2>
+    </noscript>
+
+    <h1>ParkServiceStatus</h1>
+
+    <div style="background-color: #A2D4FE">
+        <p>Temperature:</p>             <span id="tempval"></span><br/>
+        <p>Fan status:</p>              <span id="fanstatval"></span><br/>
+        <p>State of the trolley:</p>    <span id="trolleystatval"></span>
+    </div>
+
+    <h4>Trolley commands:</h4>
+    <div style="background-color: #F2B4DE">
+        <form action="/trolleycmd" method="GET">   <!-- the form-data is sent to the page specified in the action attribute -->
+            <input type="submit" id="start" name="start" value="Start">
+            <input type="submit" id="stop" name="stop" value="Stop">
+        </form>
+    </div>
+
+</body>
+</html>
