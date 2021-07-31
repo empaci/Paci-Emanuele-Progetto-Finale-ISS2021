@@ -766,7 +766,7 @@ In the project phase we chose to develop the application usign the <a href="http
 			<br><br>
 			For the <en>transporttrolley</en> we separted the logic and the entity, also we added <ia>trolleyintermediary</ia> which is used to maintain the logic of the trolley indipendent from the <fd>basicrobot</fd>.
 			<br><br>
-			If needed we have to define some adapters to convert our internal data to a format usable by the Graphic interface.
+			<ia>StateAdapter</ia> is used con convert our internal state in a JSON format used by the wen graphic interface.
 			<br>
 			In the external circle there is the <fd>SpringBoot</fd> Web Framework used to develop the <fd>ParkManagerStatusGUI</fd>.
 		</td>
@@ -892,7 +892,7 @@ In the project phase we chose to develop the application usign the <a href="http
  <h3>Graphic interface</h3>
 
   The graphic interface was developed using <k>Springboot</k> usng the <ks>mvc pattern</ks>. Note that the model of our application is composed by the <tt>parkingState</tt> and the 
-  <en>entities</en>, while this model refers to the one used by the view.
+  <en>entities</en>, while this model refers to the one used by the view. We will call it viewmodel from now on.
   
 
 	<table style="width:100%" border="1">
@@ -908,13 +908,22 @@ In the project phase we chose to develop the application usign the <a href="http
 				<li><ks>HMIController</ks> after receiving the request to start or stop the trolley sends a Event to the <uc>trolleylogic</uc> because: insead of going through the <uc>parkmanagerservice</uc>
 				forces the change of the trolley state which stops the robot.
 				</li>
-				<li><a href="../../../progetto/parkServiceStatus/src/main/kotlin/it/unibo/parkservicestatus/StateAdapter.kt">StateAdapter</a> was used to convert the String in the internal format to a JSON.</li>
+				<li><a href="../../../progetto/parkServiceStatus/src/main/kotlin/it/unibo/parkservicestatus/StateAdapter.kt">StateAdapter</a> was used to convert the String in the application internal format to a JSON which is easier to manipulate.</li>
 			</ol> 
 		</td>
 	</tr>
 </table>
- <h4>Workflow</h4>
+ <h4>Controller</h4>
  
+ The html page hase 2 sections:
+ <ol>
+	<li>INPUT section that includes a form with 2 button to start and stop the trolley.</li>
+	<li>OUTPUT section that has 3 fields for the observed resoruces.</li>
+ </ol>
+ 
+ Every time <tt>parkinstate</tt> updates its state:
+ The change is observed by <ks>WebPageCoapHandler</ks> -> Use StateAdapter to transoform the data into a JSON -> calls simpleMessaginTemplate.convertAndSend(...) ->
+ HTMLPage in Broswers update the field
 <h2>Testing</h2> 
  
 
