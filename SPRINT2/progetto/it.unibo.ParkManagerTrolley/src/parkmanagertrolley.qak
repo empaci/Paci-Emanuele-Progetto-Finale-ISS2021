@@ -312,18 +312,15 @@ QActor trolleylogic context ctxparkmanager {
  					whenEvent localtrolleyupdate -> stopped
  	
  	State stopped {
- 		println("!!!!!!!!!!!!!!!!!!!! STOPPED")
  		forward transporttrolley -m trolleystatusupdate : trolleystatusupdate(stopped)
  	}
  	Transition t1 whenEvent localtrolleyupdate -> checkStart
  	
  	State checkStart {
- 		println("!!!!!!!!!!!!!!!!!!!! STARTED?!?!?!?!?!?!?!?!?!?!?!")
  		onMsg(localtrolleyupdate : localtrolleyupdate(S)) {
 			[# 
 				state = payloadArg(0)
 			#]
-			println("calzone $state")
 		}
  	}
  	Goto wait if [# state=="start" #] else stopped

@@ -75,21 +75,15 @@ QActor sonarlogic context ctxsonarsensor {
 		onMsg(localsonarupdate : localsonarupdate(D)) {
 			[# val DISTANCE = "${payloadArg(0)}" #]
 			
-			println("DISTANCE $DISTANCE")
-			
 			solve( modifyStatus($DISTANCE, RES) )
 			[# val RESULT = getCurSol("RES").toString() #]
 			
-			println("RESULT $RESULT")
-			
 			if [# RESULT=="true" #] {
-				println("Onanana")
 				solve(getStatus($DISTANCE,X))
 				[# 
 					prevState = STATUS
 					STATUS = getCurSol("X").toString()
 				#]
-				println("Obababa  $STATUS")
 				forward sonarsensor -m sonarstatusupdate : sonarstatusupdate($STATUS)
 			}
 		}
@@ -108,7 +102,7 @@ QActor sonarlogic context ctxsonarsensor {
 		if [# TIMER < 0 #] {
 			[# TIMER = 0 #]
 		}
-		println("Duration $Duration TIMER $TIMER UIUIIIIIIIIIIIIUUUUUUUUUUUIIIIIIIIIIIIIUUUUUUUUUUUUUUUUUUUUUUUUIU")
+		println("Duration $Duration TIMER $TIMER")
 	}
 	Transition t0 whenTimeVar TIMER -> timeout
 				  whenEvent localsonarupdate -> applylogic 

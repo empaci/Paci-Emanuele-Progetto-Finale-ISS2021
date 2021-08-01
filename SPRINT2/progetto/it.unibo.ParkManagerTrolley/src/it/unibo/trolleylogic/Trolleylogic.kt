@@ -137,19 +137,16 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
-						println("!!!!!!!!!!!!!!!!!!!! STOPPED")
 						forward("trolleystatusupdate", "trolleystatusupdate(stopped)" ,"transporttrolley" ) 
 					}
 					 transition(edgeName="t120",targetState="checkStart",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("checkStart") { //this:State
 					action { //it:State
-						println("!!!!!!!!!!!!!!!!!!!! STARTED?!?!?!?!?!?!?!?!?!?!?!")
 						if( checkMsgContent( Term.createTerm("localtrolleyupdate(S)"), Term.createTerm("localtrolleyupdate(S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
 												state = payloadArg(0)
-								println("calzone $state")
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({ state=="start"  

@@ -48,17 +48,13 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("localsonarupdate(D)"), Term.createTerm("localsonarupdate(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val DISTANCE = "${payloadArg(0)}"  
-								println("DISTANCE $DISTANCE")
 								solve("modifyStatus($DISTANCE,RES)","") //set resVar	
 								 val RESULT = getCurSol("RES").toString()  
-								println("RESULT $RESULT")
 								if(  RESULT=="true"  
-								 ){println("Onanana")
-								solve("getStatus($DISTANCE,X)","") //set resVar	
+								 ){solve("getStatus($DISTANCE,X)","") //set resVar	
 								 
 													prevState = STATUS
 													STATUS = getCurSol("X").toString()
-								println("Obababa  $STATUS")
 								forward("sonarstatusupdate", "sonarstatusupdate($STATUS)" ,"sonarsensor" ) 
 								}
 						}
@@ -82,7 +78,7 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if(  TIMER < 0  
 						 ){ TIMER = 0  
 						}
-						println("Duration $Duration TIMER $TIMER UIUIIIIIIIIIIIIUUUUUUUUUUUIIIIIIIIIIIIIUUUUUUUUUUUUUUUUUUUUUUUUIU")
+						println("Duration $Duration TIMER $TIMER")
 						stateTimer = TimerActor("timer_stateOccupied", 
 							scope, context!!, "local_tout_sonarlogic_stateOccupied", TIMER )
 					}

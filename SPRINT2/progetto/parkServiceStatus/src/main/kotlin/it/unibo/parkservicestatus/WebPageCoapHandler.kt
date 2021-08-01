@@ -21,7 +21,7 @@ An object of this class is registered as observer of the resource
             val jsonContent = JSONObject(content)
             if (jsonContent.has("thermometer")){
                 if (jsonContent.getString("thermometer").contains("warning")){ //add below to clear the area
-                    val critRep = ResourceRep(" Warnining " + HtmlUtils.htmlEscape( jsonContent.getString("thermometer").removePrefix("warning"))  )
+                    val critRep = ResourceRep(" temperature warnining " + HtmlUtils.htmlEscape( jsonContent.getString("thermometer").removePrefix("warning"))  )
                     sysUtil.colorPrint("WebPageCoapHandler | critic temp value=${critRep.content}", Color.BLUE)
                     controller.simpMessagingTemplate?.convertAndSend(WebSocketConfig.topicForClient, critRep)
                 } else {

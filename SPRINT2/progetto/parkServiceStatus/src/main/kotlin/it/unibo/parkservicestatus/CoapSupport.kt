@@ -50,7 +50,7 @@ class CoapSupport(address: String, path: String) {
     fun updateResourceWithValue(data: String): Boolean {
         val m = ApplMessage(
             "localtrolleyupdate", ApplMessageType.event.toString(),
-            "support", "none", "$data", "1"
+            "support", "none", "localtrolleyupdate($data)", "1"
         )
         return updateResource(m.toString())
     }

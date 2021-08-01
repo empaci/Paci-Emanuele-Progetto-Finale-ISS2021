@@ -32,7 +32,7 @@ QActor weightsensor context ctxweightsensor {
 		onMsg(weightstatusupdate : weightstatusupdate(S)) {
 			[# var status = "${payloadArg(0)}" #]
 			updateResource [# status #]
-			//println("$status")
+			println("$status")
 		}
 	}
 	Goto wait
@@ -61,8 +61,8 @@ QActor weightlogic context ctxweightsensor {
 		onMsg(localweightupdate : localweightupdate(W)) {
 			[# val WEIGHT = "${payloadArg(0)}" #]
 			
-			solve( modifyStatus($WEIGHT, RES) )
-			[# val RESULT = getCurSol("RES").toString() #]
+			solve( modifyStatus($WEIGHT, SOL) )
+			[# val RESULT = getCurSol("SOL").toString() #]
 			
 			if [# RESULT=="true" #] {
 			

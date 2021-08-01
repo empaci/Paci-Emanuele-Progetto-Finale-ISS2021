@@ -38,8 +38,8 @@ class Weightlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						if( checkMsgContent( Term.createTerm("localweightupdate(W)"), Term.createTerm("localweightupdate(W)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val WEIGHT = "${payloadArg(0)}"  
-								solve("modifyStatus($WEIGHT,RES)","") //set resVar	
-								 val RESULT = getCurSol("RES").toString()  
+								solve("modifyStatus($WEIGHT,SOL)","") //set resVar	
+								 val RESULT = getCurSol("SOL").toString()  
 								if(  RESULT=="true"  
 								 ){solve("getStatus($WEIGHT,X)","") //set resVar	
 								 var STATUS = getCurSol("X").toString()  

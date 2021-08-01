@@ -10,8 +10,11 @@ false(false).
 init(X) :- assert(prevDist(0)), statusFree(X).
 reassign(X) :- retract(prevDist(_)), assert(prevDist(X)).
 
+myabs(X,Y) :- X<0, Y is -X.
+myabs(X,X) :- X>=0.
+
 % X is true is the state needs to be updated
-modifyStatus(DISTANCE,X) :-  delta(DELTA), prevDist(PD), V is PD-DISTANCE, abs(V,RES), RES > DELTA,!, reassign(DISTANCE), true(X).
+modifyStatus(DISTANCE,X) :-  delta(DELTA), prevDist(PD), V is PD-DISTANCE, myabs(V,RES), RES > DELTA,!, reassign(DISTANCE), true(X).
 modifyStatus(_,X) :- false(X).
 
 % return the current status
