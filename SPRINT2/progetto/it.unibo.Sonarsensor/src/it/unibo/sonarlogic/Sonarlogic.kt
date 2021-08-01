@@ -86,13 +86,13 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						stateTimer = TimerActor("timer_stateOccupied", 
 							scope, context!!, "local_tout_sonarlogic_stateOccupied", TIMER )
 					}
-					 transition(edgeName="t03",targetState="sendEvent",cond=whenTimeout("local_tout_sonarlogic_stateOccupied"))   
+					 transition(edgeName="t03",targetState="timeout",cond=whenTimeout("local_tout_sonarlogic_stateOccupied"))   
 					transition(edgeName="t04",targetState="applylogic",cond=whenEvent("localsonarupdate"))
 				}	 
-				state("sendEvent") { //this:State
+				state("timeout") { //this:State
 					action { //it:State
-						println("Send Event")
-						emit("sonarevent", "sonarevent(timeout)" ) 
+						println("Update the state")
+						forward("sonarstatusupdate", "sonarstatusupdate(timeout)" ,"sonarsensor" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 

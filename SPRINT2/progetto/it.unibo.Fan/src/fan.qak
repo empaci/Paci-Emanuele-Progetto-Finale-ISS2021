@@ -1,8 +1,9 @@
-System -msglog model
+System -msglog fan
 
 Event thermometerevent : thermometerevent(X) //X=above/below
 
-Context ctxfan ip [host="127.0.0.1" port=8072]    
+Context ctxfan ip [host="127.0.0.1" port=8074]    
+
 
 QActor fan context ctxfan {
 	State s0 initial {
@@ -21,8 +22,10 @@ QActor fan context ctxfan {
 			[# var type = "${payloadArg(0)}" #]
 			if [# type == "above" #] {
 				updateResource [# "on" #]
+				println("on")
 			} else {
 				updateResource [# "off" #]
+				println("off")
 			}
 		}
 	}

@@ -110,12 +110,13 @@ QActor sonarlogic context ctxsonarsensor {
 		}
 		println("Duration $Duration TIMER $TIMER UIUIIIIIIIIIIIIUUUUUUUUUUUIIIIIIIIIIIIIUUUUUUUUUUUUUUUUUUUUUUUUIU")
 	}
-	Transition t0 whenTimeVar TIMER -> sendEvent
+	Transition t0 whenTimeVar TIMER -> timeout
 				  whenEvent localsonarupdate -> applylogic 
 				  
-	State sendEvent {
-		println("Send Event")
-		emit sonarevent : sonarevent(timeout)
+	State timeout {
+		println("Update the state")
+		//emit sonarevent : sonarevent(timeout)
+		forward sonarsensor -m sonarstatusupdate : sonarstatusupdate(timeout)
 	}
 	Goto wait
 }

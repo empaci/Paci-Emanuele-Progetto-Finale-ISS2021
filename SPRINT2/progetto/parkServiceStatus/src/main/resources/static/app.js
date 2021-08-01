@@ -77,12 +77,12 @@ function connect() {
              //alert(msg)
 
              var jsonMsg = JSON.parse(msg.body).content;
-             //if( jsonMsg.includes("led")) showMsg( jsonMsg, "fanstatval" );
-             //else showMsg( jsonMsg, "fanstatval" );
+
              if (jsonMsg.includes("temperature")) showMsg( jsonMsg, "tempval" );
              if (jsonMsg.includes("fan")) showMsg( jsonMsg, "fanstatval" );
              if (jsonMsg.includes("trolley")) showMsg( jsonMsg, "trolleystatval" );
-
+             if (jsonMsg.includes("sonar")) showMsg( jsonMsg, "outdoorstat" );
+             if (jsonMsg.includes("weight")) showMsg( jsonMsg, "indoorstat" );
         });
 
     });

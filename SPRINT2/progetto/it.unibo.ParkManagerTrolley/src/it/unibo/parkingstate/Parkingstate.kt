@@ -17,11 +17,11 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		
-				var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor")
-				var weightobs = coap.actorQakResourceCoapObserver("weightsensor")
-				var thermometerobs = coap.actorQakResourceCoapObserver("thermometer")
-				var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley")
-				var fanobs = coap.actorQakResourceCoapObserver("fan")
+				var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor","8071","ctxsonarsensor")
+				var weightobs = coap.actorQakResourceCoapObserver("weightsensor","8072","ctxweightsensor")
+				var thermometerobs = coap.actorQakResourceCoapObserver("thermometer","8073","ctxthermometer")
+				var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley","8070","ctxparkmanager")
+				var fanobs = coap.actorQakResourceCoapObserver("fan","8074","ctxfan")
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -41,7 +41,7 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						updateResourceRep( "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent() 
 						)
 						stateTimer = TimerActor("timer_wait", 
-							scope, context!!, "local_tout_parkingstate_wait", 100.toLong() )
+							scope, context!!, "local_tout_parkingstate_wait", 300.toLong() )
 					}
 					 transition(edgeName="t026",targetState="wait",cond=whenTimeout("local_tout_parkingstate_wait"))   
 				}	 

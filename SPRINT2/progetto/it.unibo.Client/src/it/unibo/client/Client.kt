@@ -22,7 +22,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				state("s0") { //this:State
 					action { //it:State
 						println("Starting Client.")
-						delay(10000) 
+						delay(5000) 
 					}
 					 transition( edgeName="goto",targetState="requestIn", cond=doswitch() )
 				}	 

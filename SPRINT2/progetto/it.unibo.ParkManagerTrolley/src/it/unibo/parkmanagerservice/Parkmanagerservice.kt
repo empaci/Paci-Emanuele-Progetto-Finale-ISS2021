@@ -26,12 +26,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						discardMessages = false
 						solve("consult('parking.pl')","") //set resVar	
 						solve("dynamic('freeSlot/1')","") //set resVar	
-						solve("unoccupySlot(1)","") //set resVar	
-						solve("unoccupySlot(2)","") //set resVar	
-						solve("unoccupySlot(3)","") //set resVar	
-						solve("unoccupySlot(4)","") //set resVar	
-						solve("unoccupySlot(5)","") //set resVar	
-						solve("unoccupySlot(6)","") //set resVar	
+						solve("init(X)","") //set resVar	
 						coap.actorQakStateCoapObserver.activate(myself)
 						println("Starting ParkManagerService.")
 					}
@@ -81,7 +76,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								solve("indoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transporttrolley" )  
+								 forward("move", "move($x,$y)" ,"trolleylogic" )  
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
@@ -107,7 +102,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("handleClientOut") { //this:State
 					action { //it:State
 						println("ParkManagerServing out.")
-						if(  coap.actorQakStateCoapObserver.readResponse()=="free"  
+						if(  coap.actorQakStateCoapObserver.readOutdoor()=="free"  
 						 ){if( checkMsgContent( Term.createTerm("outTokenid(TOKENID)"), Term.createTerm("outTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TOKENID = "${payloadArg(0)}"  
@@ -115,7 +110,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
-								 forward("move", "move($x,$y)" ,"transporttrolley" )  
+								 forward("move", "move($x,$y)" ,"trolleylogic" )  
 								solve("outdoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  

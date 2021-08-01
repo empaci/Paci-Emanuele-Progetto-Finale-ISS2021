@@ -35,8 +35,8 @@ class Thermometer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						println("Thermometer received data")
 						if( checkMsgContent( Term.createTerm("tempData(W)"), Term.createTerm("tempData(W)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 var WEIGHT = "${payloadArg(0)}"  
-								emit("localthermupdate", "localthermupdate($WEIGHT)" ) 
+								 var TEMP = "${payloadArg(0)}"  
+								emit("local_thermupdate", "local_thermupdate($TEMP)" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

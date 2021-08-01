@@ -16,6 +16,8 @@ class Trolleyintermediary ( name: String, scope: CoroutineScope  ) : ActorBasicF
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		
+				var CMD = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -25,21 +27,27 @@ class Trolleyintermediary ( name: String, scope: CoroutineScope  ) : ActorBasicF
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t021",targetState="handleEvent",cond=whenEvent("localeventbasic"))
+					 transition(edgeName="t021",targetState="handleCmd",cond=whenDispatch("basicmd"))
 				}	 
-				state("handleEvent") { //this:State
+				state("handleCmd") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("localeventbasic(CMD)"), Term.createTerm("localeventbasic(CMD)"), 
+						if( checkMsgContent( Term.createTerm("basicmd(CMD)"), Term.createTerm("basicmd(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
-												var CMD = payloadArg(0)
-								if(  CMD == "w"  
-								 ){request("step", "step(175)" ,"basicrobot" )  
+												CMD = payloadArg(0)
+								if(  CMD == "l" || CMD == "r"  
+								 ){forward("cmd", "cmd($CMD)" ,"basicrobot" ) 
 								}
-								else
-								 {forward("cmd", "cmd($CMD)" ,"basicrobot" ) 
-								 }
 						}
+					}
+					 transition( edgeName="goto",targetState="stepMove", cond=doswitchGuarded({ CMD == "w"  
+					}) )
+					transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({! ( CMD == "w"  
+					) }) )
+				}	 
+				state("stepMove") { //this:State
+					action { //it:State
+						request("step", "step(175)" ,"basicrobot" )  
 					}
 					 transition(edgeName="t022",targetState="wait",cond=whenReply("stepdone"))
 					transition(edgeName="t023",targetState="stepFailed",cond=whenReply("stepfail"))

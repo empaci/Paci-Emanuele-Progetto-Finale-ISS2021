@@ -31,11 +31,11 @@ class Thermometerlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t02",targetState="applylogic",cond=whenEvent("localthermupdate"))
+					 transition(edgeName="t02",targetState="applylogic",cond=whenEvent("local_thermupdate"))
 				}	 
 				state("applylogic") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("localthermupdate(W)"), Term.createTerm("localthermupdate(W)"), 
+						if( checkMsgContent( Term.createTerm("local_thermupdate(W)"), Term.createTerm("local_thermupdate(W)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TEMP = "${payloadArg(0)}"  
 								forward("thermstatusupdate", "thermstatusupdate($TEMP)" ,"thermometer" ) 
@@ -43,6 +43,8 @@ class Thermometerlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								 val RESULT = getCurSol("RES").toString()  
 								if(  RESULT=="above"  
 								 ){emit("thermometerevent", "thermometerevent(above)" ) 
+								 var W = "warning" + TEMP  
+								forward("thermstatusupdate", "thermstatusupdate($W)" ,"thermometer" ) 
 								}
 								else
 								 {if(  RESULT=="below"  

@@ -1,12 +1,13 @@
-System -msglog model
+System -msglog thermometer
 
 Dispatch tempData : tempData(W)
-Event    localthermupdate   : localthermupdate(W)
+Event    local_thermupdate   : local_thermupdate(W)
 Dispatch thermstatusupdate   : thermstatusupdate(S)
 
-Event thermometerevent : thermometerevent(X) //X=above/below
+Event thermometerevent : thermometerevent(X) //X=above/below 
 
-Context ctxthermometer ip [host="127.0.0.1" port=8073]    
+Context ctxthermometer ip [host="127.0.0.1" port=8073]
+Context ctxfan ip [host="localhost" port=8074]
 
 QActor thermometer context ctxthermometer {
 	State s0 initial {
@@ -23,8 +24,8 @@ QActor thermometer context ctxthermometer {
 	State handleData {
 		println("Thermometer received data")
 		onMsg(tempData : tempData(W)) {
-			[# var WEIGHT = "${payloadArg(0)}" #]
-			emit localthermupdate : localthermupdate($WEIGHT)
+			[# var TEMP = "${payloadArg(0)}" #]
+			emit local_thermupdate : local_thermupdate($TEMP)
 		}
 	}
 	Goto wait
@@ -56,10 +57,10 @@ QActor thermometerlogic context ctxthermometer {
 	
 	State wait {
 	}
-	Transition t0 whenEvent localthermupdate -> applylogic
+	Transition t0 whenEvent local_thermupdate -> applylogic
 	
 	State applylogic {
-		onMsg(localthermupdate : localthermupdate(W)) {
+		onMsg(local_thermupdate : local_thermupdate(W)) {
 			[# val TEMP = "${payloadArg(0)}" #]
 			
 			forward thermometer -m thermstatusupdate : thermstatusupdate($TEMP)
@@ -69,11 +70,14 @@ QActor thermometerlogic context ctxthermometer {
 			
 			if [# RESULT=="above" #] {
 				emit thermometerevent : thermometerevent(above)
+				[# var W = "warning" + TEMP #]
+				forward thermometer -m thermstatusupdate : thermstatusupdate($W)
 			} else {
 				if [# RESULT=="below" #] {
 					emit thermometerevent : thermometerevent(below)
 				}
 			}
+			//forward thermometer -m thermstatusupdate : thermstatusupdate($TEMP)
 		}
 	}
 	Goto wait

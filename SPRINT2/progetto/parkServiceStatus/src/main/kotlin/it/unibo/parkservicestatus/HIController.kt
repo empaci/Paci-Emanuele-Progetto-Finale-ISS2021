@@ -37,7 +37,7 @@ class HIController {
     var appName: String?    = null
 
     var coap    = CoapSupport("coap://localhost:8070", "ctxparkmanager/parkingstate")
-
+    //var coapTrolley    = CoapSupport("coap://localhost:8070", "ctxparkmanager/trolleylogic")
 
     /*
      * Update the page vie socket.io when the application-resource changes.
@@ -66,14 +66,14 @@ class HIController {
     @RequestMapping(value = [ "/trolleycmd" ], method = [RequestMethod.GET], params = ["start"])
     fun  handleTrolleyStart(viewmodel : Model,  @RequestParam(name="start")v : String) : String{
         sysUtil.colorPrint("HIController | trolley command $v", Color.RED)
-        coap.updateResourceWithValue("start")
+        //coapTrolley.updateResourceWithValue("start")
         return  "parkservicestatus"
     }
 
     @RequestMapping(value = [ "/trolleycmd" ], method = [RequestMethod.GET], params = ["stop"])
     fun  handleTrolleyStop(viewmodel : Model,  @RequestParam(name="stop")v : String) : String{
         sysUtil.colorPrint("HIController | trolley command $v", Color.RED)
-        coap.updateResourceWithValue("stop")
+        //coapTrolley.updateResourceWithValue("stop")
         return  "parkservicestatus"
     }
 

@@ -39,10 +39,12 @@ class Fan ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 								if(  type == "above"  
 								 ){updateResourceRep( "on"  
 								)
+								println("on")
 								}
 								else
 								 {updateResourceRep( "off"  
 								 )
+								 println("off")
 								 }
 						}
 					}

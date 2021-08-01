@@ -30,7 +30,7 @@ object actorQakStateCoapObserver {
        client.observe(object : CoapHandler {
             override fun onLoad(response: CoapResponse) {
 				content = response.responseText
-                println("actortQakStateCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
+                //println("actortQakStateCoapObserver | GET RESP-CODE= " + response.code + " content:" + content)
  				if(  owner!== null ) owner.scope.launch{
  					val event = MsgUtil.buildEvent( "observer","local_resrep","resrep('$content')")								
 					owner.emit( event, avatar=true ) //to avoid that auto-event will be discarded
@@ -46,7 +46,7 @@ object actorQakStateCoapObserver {
 		//var respGet = client.get( );
 		//System.out.println("CoapSupport | readResource sonar RESPONSE CODE: " + respGet.getCode());		
 		//return respGet.getResponseText();
-		System.out.println("CoapSupport | readResponse content: " + content);		
+		//System.out.println("CoapSupport | readResponse content: " + content);		
 		return content;
 	}
 	
