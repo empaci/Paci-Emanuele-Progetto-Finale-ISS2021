@@ -369,21 +369,6 @@ has not been cleaned within the <tt>DTFREE</tt> interval of time.</li>
  
 
 <h2>Requirement analysis</h2>
-Result of the previous <k>SPRINT</k> Analysis
-  <table style="width:100%" border="1">
-		<tr>
-			<td rowspan="2" style="width:80%">
-			 <img src="img\LogicalArchitecture.png" width="100%">
-			<td>
-				<a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/park_service_model_0.qak">Model SPRINT0</a>
-			</td>
-			<tr>
-				<td><a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
-			</tr>
-		</tr>
-  </table>
- <br>
- <br>
  In this <k>SPRINT</k> we will include the <em>outsonar</em> and we will expand the parking slots from one to six spots. We will not consider any other elements (<tt>ParkServiceGUI</tt>, <tt>ParkServiceStatusGUI</tt>, <tt>parking-manager</tt>, <tt>fan</tt>, <tt>thermometer</tt>).
  <br>
  We are updating the previous work (see the <a href="../../SPRINT0/it.unibo.ParkManagerService/uderDocs/parkManagerService_0_c">documentation</a>) to handle a higher amount of clients and to complete the <em>acceptOUT</em> requirement, 
@@ -427,7 +412,20 @@ Result of the previous <k>SPRINT</k> Analysis
  </ol>
 
 <h2>Problem analysis</h2>
-
+Result of the previous <k>SPRINT</k> Analysis
+  <table style="width:100%" border="1">
+		<tr>
+			<td rowspan="2" style="width:80%">
+			 <img src="img\LogicalArchitecture.png" width="100%">
+			<td>
+				<a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/park_service_model_0.qak">Model SPRINT0</a>
+			</td>
+			<tr>
+				<td><a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a></td>
+			</tr>
+		</tr>
+  </table>
+ <br>
 As stated in the previous <k>SPRINT</k>, this problem requires the communications of different components in a distributed environment, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#problemanalysis">SPRINT0 | problem analysis</a>. And, following the reasoning already made, we will add the <em>outsonar</em> as a QakActor to the already existing architecture.
 
 	<h3>A new component: <b><tt>Sonar-sensor resource</tt></b></h3>
