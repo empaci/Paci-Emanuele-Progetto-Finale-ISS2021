@@ -462,7 +462,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 							<li>State of the <tt>fan</tt> (on/off).</li>
 							<li>State of the <tt>trolley</tt> (<k>idle, working, or stopped</k>). </li>
 							<li>The start/stop botton should be active only if they can be used in that moment.</li>
-							<li><ks>Optionally</ks> other helpful information such as the current robot position or the map.</li>
+							<li><ks>Optionally</ks> other helpful information such as the current robot position or the map, or the the state of the <em>INDOOR-area</em> and <em>OUTDOOR-area</em>.</li>
 						</ul>
 					</li>
 					<li>Give the possibility to send a <ks>stop</ks> command to the <tt>trolley</tt> when <k>TA>TMAX</k>.</li>
@@ -480,6 +480,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 				The html page will incude a INPUT section (requirement: <em>manage</em>) and an OUTPUT section (requirement: <em>monitor</em>).
 			</td>
 			<td>
+				GUI example:
 				<center><img src="img\parkservicestatusGui_example.png" width="80%" height="80%"></center>
 			</td>
 		</tr>
@@ -540,7 +541,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
  <h4>ParkingState</h4>
  This component can observe every resource in our application a make that information available as a CoAp observable resource, as already observed the best way to realize it, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#weightsensor">SPRINT0 | Weight-sensor-resource</a>.
  <br>
- The string format used to represent this information should be chosen during the project phase since there is no need for anything particolar.
+ The choice of the format used to represent the state is left during the project phase. It would be preferred to use a simple and easy to use format.
   <br>
  <tt>ParkManagerService</tt> will be changed to observe this resource.
  <h4>ParkManagerStatusGUI</h4>
@@ -563,7 +564,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
  <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>Sonarresource</tt> sends an events after <tt>DTFREE</tt> time has passed and the state remained <ks>"occupied"</ks>
+			<tt>Sonarresource</tt> sends an event after <tt>DTFREE</tt> time has passed and the state remained <ks>"occupied"</ks>
 			</td>
 			<td>
 				<dl>
@@ -577,13 +578,28 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 		</tr>
 		<tr>
 			<td style="width:50%">
-			Adding an external actor with the logic
+			Adding an external actor with the logic to send an event after <tt>DTFREE</tt> time has passed and the state remained <ks>"occupied"</ks>
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>sonarresource</tt>.</dd>
 					<dd><tt>sonarresource</tt> can be reused unchanged in other applications.</dd>
+					<dt><k>Cons</k>:</dt> 
+					<dd>Not strictly needed.</dd>
+				</dl>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:50%">
+			Adding an external actor with the logic that changes the <tt>sonarresource</tt> in a new state e.g. <ks>timeout</ks> after <tt>DTFREE</tt> time has passed and the state remained <ks>"occupied"</ks>
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>sonarresource</tt>.</dd>
+					<dd><tt>sonarresource</tt> can be reused unchanged in other applications.</dd>
+					<dd>All observers will be able to know the change avoiding an extra message exchange.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Not strictly needed.</dd>
 				</dl>
@@ -606,30 +622,30 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	A mock of the thermometer is required to simulate the real sensor. The decision around the nature of the mock itself is left during the project phase.
  
  <h4>Fan</h4>
- CoAp observable object, mock of the real fan, can change the state to: "on" and "off".
+ CoAp observable object, mock of the real fan, can change the state to: "<k>on</k>" and "<k>off</k>".
  
  <h3>Other relevant aspects</h3>
 
   <h4>Trolley start and stop</h4>
   
-	To start/stop the trolley (requirement: <em>manage</em>) we chose that <tt>ParkServiceStatusGUI</tt> sends a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
+	To start/stop the trolley (requirement: <em>manage</em>) is preferred that <tt>ParkServiceStatusGUI</tt> sends a dispatch to the <tt>ParkManagerService</tt> that propagates it to the <tt>trolley</tt>.
 	<br>
 	<tt>ParkServiceStatusGUI</tt> sends the message to the <tt>ParkManagerService</tt> and not the trolley because the trolley is the logic adopted to move the robot. While <tt>ParkManagerService</tt>
 	is the application core logic used to interact with the other components.
 	<br>
-	We choose a dispatch instead of a request because the state of the trolley will change in the UI so the <em>park-manager</em> can see if it was successful.
-	We don't use an Event because we don't want it to be lost.
+	A dispatch is preferred over a request because the state of the trolley is visible in the User Interface (requirement: <em>monitor</em>) so the <em>park-manager</em> can see if it was successful.
+	Also, the dispatch is preferred over an Event because we don't want it to be lost.
 	<br>
 	<br>
 	When the trolley is asked to stop it moves until it finishes the current task, so if it was a <em>pick-up</em> or a <em>parking</em> request the client is not left waiting.
  
  <h4>Temperature check and fan activation</h4>
-	We need to introduce two new element: fan and thermometer. We need to activate the fan when TA>TMAX and give a notice to the <tt>park-manager</tt>.
+	We need to introduce two new element: <tt>fan</tt> and <tt>thermometer</tt>. We need to activate the fan when <k>TA>TMAX</k> and give a notice to the <tt>park-manager</tt>.
 	There are different methods:
   <table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			<tt>Thermometer</tt> send event when <k>TA</k> surpasses <k>TMAX</k> and when it goes below
+			<tt>Thermometer</tt> sends an event when <k>TA</k> surpasses <k>TMAX</k> and when it goes back below
 			</td>
 			<td>
 				<dl>
@@ -657,12 +673,27 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 		</tr>
 		<tr>
 			<td style="width:50%">
-			Actor with the logic
+			Actor with the logic that sends an event when <k>TA</k> surpasses <k>TMAX</k> and when it goes back below
 			</td>
 			<td>
 				<dl>
 					<dt><k><tt>Pro</tt></k>:</dt> 
 					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>thermometer resource</tt>.</dd>
+					<dd><tt>thermometer resource</tt> can be reused unchanged in other applications.</dd>
+					<dt><k>Cons</k>:</dt> 
+					<dd>Not strictly needed.</dd>
+				</dl>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:50%">
+			Actor with the logic that changes the <tt>Thermometer</tt> in a new state when the temperature is above <k>TMAX</k> to signal it
+			</td>
+			<td>
+				<dl>
+					<dt><k><tt>Pro</tt></k>:</dt> 
+					<dd>The logic is separated, meaning future requirements changes won't impact the <tt>thermometer resource</tt>.</dd>
+					<dd>The observer will know about the critic situation without containing the actual logic and avoiding the message exchange.</dd>
 					<dd><tt>thermometer resource</tt> can be reused unchanged in other applications.</dd>
 					<dt><k>Cons</k>:</dt> 
 					<dd>Not strictly needed.</dd>
@@ -745,13 +776,19 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
  <p>JUnit test: <a href="../src/test/TestPlanUseCase2.kt">TestPlanUseCase2.kt</a></p>
 
 <h2>Project</h2> 
-
+<h3>Architecture</h3>
 In the project phase we chose to develop the application usign the <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="web">clean code architecture</a>.
- <img src="img\cleanArch.jpg"  width="50%" height="50%">
+ <img src="img\cleanArch.jpg"  width="50%" height="50%" align="left">
  <br>
- <!-- D:\Scuola\Registrazioni\Ing\ultimeLezioni -> lezione 20210601 per clean architecture -->
  <br>
- That means we can't use the model as it is, but we need to refactor it to separte the entities and Use-cases, and to respect the <i>Dependecy Rule</i>.
+ That means we can't use the model as it is, but we need to refactor it.
+ <br>
+ <br>
+ <k>Main changes</k> from the model:
+ <ol>
+	<li>Separate <uc>Use-cases</uc> and <en>Entities</en></li>
+	<li>Respect the <i>Dependecy Rule</i></li>
+ </ol>
  
  <h3>Code refactor following the clean architecture</h3>
  
@@ -766,7 +803,7 @@ In the project phase we chose to develop the application usign the <a href="http
 			<br><br>
 			For the <en>transporttrolley</en> we separted the logic and the entity, also we added <ia>trolleyintermediary</ia> which is used to maintain the logic of the trolley indipendent from the <fd>basicrobot</fd>.
 			<br><br>
-			<ia>StateAdapter</ia> is used con convert our internal state in a JSON format used by the wen graphic interface.
+			<ia>StateAdapter</ia> is used con convert the state of the <en>parkingstate</en> build with a internal string format in a JSON format used by the web graphic interface.
 			<br>
 			In the external circle there is the <fd>SpringBoot</fd> Web Framework used to develop the <fd>ParkManagerStatusGUI</fd>.
 		</td>
@@ -924,6 +961,13 @@ In the project phase we chose to develop the application usign the <a href="http
  Every time <tt>parkinstate</tt> updates its state:
  The change is observed by <ks>WebPageCoapHandler</ks> -> Use StateAdapter to transoform the data into a JSON -> calls simpleMessaginTemplate.convertAndSend(...) ->
  HTMLPage in Broswers update the field
+ <h4>Trolley changes</h4>
+ In the Analysis the communication of the start/stop is done by a dispatch, in the project phase an Event was considered the best option. Instead of asking the 
+ <tt>parkmanagerservice</tt> we asked the trolleylgoic to change the state of the resource, which automatically stops also the trolley.
+ <h4>Themperature changes</h4>
+ New status with warning show
+ <h4>Sonar changes</h4>
+ Sonar change the state to timeout
 <h2>Testing</h2> 
  
 
