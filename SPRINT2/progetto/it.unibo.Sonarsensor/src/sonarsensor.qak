@@ -1,9 +1,8 @@
 System -msglog model
 
 Dispatch sonarData : sonarData(D) 
-Event    localsonarupdate   : localsonarupdate(D)
+Event    local_sonarupdate   : local_sonarupdate(D)
 Dispatch sonarstatusupdate   : sonarstatusupdate(S)
-Event sonarevent : sonarevent(X)
 
 Context ctxsonarsensor ip [host="localhost" port=8071]
 
@@ -23,7 +22,7 @@ QActor sonarsensor context ctxsonarsensor {
 		println("Weightsensor received data")
 		onMsg(sonarData : sonarData(D)) {
 			[# var DISTANCE = "${payloadArg(0)}" #]
-			emit localsonarupdate : localsonarupdate($DISTANCE)
+			emit local_sonarupdate : local_sonarupdate($DISTANCE)
 		}
 	}
 	Goto wait
@@ -69,10 +68,10 @@ QActor sonarlogic context ctxsonarsensor {
 	
 	State wait {
 	}
-	Transition t0 whenEvent localsonarupdate -> applylogic
+	Transition t0 whenEvent local_sonarupdate -> applylogic
 	
 	State applylogic {
-		onMsg(localsonarupdate : localsonarupdate(D)) {
+		onMsg(local_sonarupdate : local_sonarupdate(D)) {
 			[# val DISTANCE = "${payloadArg(0)}" #]
 			
 			solve( modifyStatus($DISTANCE, RES) )
@@ -105,7 +104,7 @@ QActor sonarlogic context ctxsonarsensor {
 		println("Duration $Duration TIMER $TIMER")
 	}
 	Transition t0 whenTimeVar TIMER -> timeout
-				  whenEvent localsonarupdate -> applylogic 
+				  whenEvent local_sonarupdate -> applylogic 
 				  
 	State timeout {
 		println("Update the state")

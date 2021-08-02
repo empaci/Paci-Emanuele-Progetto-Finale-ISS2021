@@ -541,6 +541,12 @@ QActor parkingstate context ctxparkmanager {
 		var thermometerobs = coap.actorQakResourceCoapObserver("thermometer")
 		var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley")
 		var fanobs = coap.actorQakResourceCoapObserver("fan")
+		
+		var prevsonar = ""
+		var prevweight = ""
+		var prevthermometer = ""
+		var prevtrolley = ""
+		var prevfan = ""
 	#]
 	
 	State s0 initial {
@@ -555,8 +561,16 @@ QActor parkingstate context ctxparkmanager {
 	Goto wait
 	
 	State wait {
-		//sostituire con JSON?
-		updateResource [# "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent()#]
+		if [# prevsonar != sonarobs.readContent() || prevweight !=  weightobs.readContent() || prevthermometer != thermometerobs.readContent() || prevtrolley != trolleyobs.readContent() || prevfan != fanobs.readContent() #] {
+			updateResource [# "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent()#]
+			[# 
+				prevsonar = sonarobs.readContent()
+				prevweight =  weightobs.readContent()
+				prevthermometer = thermometerobs.readContent()
+				prevtrolley = trolleyobs.readContent()
+				prevfan = fanobs.readContent()
+			#]
+		}
 	}
 	Transition t0 whenTime 1000 -> wait
 	//Goto wait

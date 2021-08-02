@@ -22,6 +22,12 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				var thermometerobs = coap.actorQakResourceCoapObserver("thermometer")
 				var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley")
 				var fanobs = coap.actorQakResourceCoapObserver("fan")
+				
+				var prevsonar = ""
+				var prevweight = ""
+				var prevthermometer = ""
+				var prevtrolley = ""
+				var prevfan = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -38,8 +44,16 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("wait") { //this:State
 					action { //it:State
-						updateResourceRep( "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent() 
+						if(  prevsonar != sonarobs.readContent() || prevweight !=  weightobs.readContent() || prevthermometer != thermometerobs.readContent() || prevtrolley != trolleyobs.readContent() || prevfan != fanobs.readContent()  
+						 ){updateResourceRep( "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent() 
 						)
+						 
+										prevsonar = sonarobs.readContent()
+										prevweight =  weightobs.readContent()
+										prevthermometer = thermometerobs.readContent()
+										prevtrolley = trolleyobs.readContent()
+										prevfan = fanobs.readContent()
+						}
 						stateTimer = TimerActor("timer_wait", 
 							scope, context!!, "local_tout_parkingstate_wait", 1000.toLong() )
 					}

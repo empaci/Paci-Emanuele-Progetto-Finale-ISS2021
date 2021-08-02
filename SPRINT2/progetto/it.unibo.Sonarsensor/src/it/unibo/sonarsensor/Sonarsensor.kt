@@ -36,7 +36,7 @@ class Sonarsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						if( checkMsgContent( Term.createTerm("sonarData(D)"), Term.createTerm("sonarData(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var DISTANCE = "${payloadArg(0)}"  
-								emit("localsonarupdate", "localsonarupdate($DISTANCE)" ) 
+								emit("local_sonarupdate", "local_sonarupdate($DISTANCE)" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

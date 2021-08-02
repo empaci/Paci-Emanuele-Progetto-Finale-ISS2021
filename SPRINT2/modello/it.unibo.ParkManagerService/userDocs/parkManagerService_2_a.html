@@ -492,7 +492,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 	<table style="width:100%" border="1">
 		<tr>
 			<td style="width:50%">
-			Add a new actor that stores the resources information as a CoAp Observable entity.
+			<ks>Add a new actor that stores the resources information as a CoAp Observable entity updated periodically if a resource state changes.</ks>
 			</td>
 			<td>
 				<dl>
@@ -508,7 +508,7 @@ And, following the reasoning already made, we will add the <em>thermometer</em> 
 		</tr>
 		<tr>
 			<td style="width:50%">
-			No new element is introduced, every components observe the resource they are interested in.
+			<ks>No new element is introduced, every components observe the resource they are interested in.</ks>
 			</td>
 			<td>
 				<dl>
@@ -781,31 +781,26 @@ In the project phase we chose to develop the application usign the <a href="http
  <img src="img\cleanArch.jpg"  width="50%" height="50%" align="left">
  <br>
  <br>
- That means we can't use the model as it is, but we need to refactor it.
+ That means we can't use the model as it is, but we need to refactor it to separate <uc>Use-cases</uc> and <en>Entities</en>.
  <br>
  <br>
- <k>Main changes</k> from the model:
- <ol>
-	<li>Separate <uc>Use-cases</uc> and <en>Entities</en></li>
-	<li>Respect the <i>Dependecy Rule</i></li>
- </ol>
  
  <h3>Code refactor following the clean architecture</h3>
  
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			The <k>Entities</k> do not depend on any operational change in the application, in our case are: <en>weightsensor</en>, <en>sonarsensor</en>, <en>thermometer</en>, <en>fan</en>.
+			The <k>Entities</k> that do not depend on any operational change in the application, in our case: <en>weightsensor</en>, <en>sonarsensor</en>, <en>thermometer</en>, <en>fan</en>, <en>transporttrolley</en> and <en>parkingstate</en>.
 			<br>
-			Which receives the respective sensor data and make it avaiable as a CoAp observable resource.
+			Which receives the respective sensor data and makes it available as a CoAp observable resource.
 			<br>
-			We can keep them as QaKActors, but we need to separate the logic in the <k>Use-cases</k>: <uc>weightlogic</uc>, <uc>sonarlogic</uc>, <uc>thermometerlogic</uc>.
+			We can keep them as QaKActors, but we need to separate the logic in the <k>Use-cases</k>: <uc>weightlogic</uc>, <uc>sonarlogic</uc>, <uc>thermometerlogic</uc> and <uc>trolleylogic</uc>.
 			<br><br>
-			For the <en>transporttrolley</en> we separted the logic and the entity, also we added <ia>trolleyintermediary</ia> which is used to maintain the logic of the trolley indipendent from the <fd>basicrobot</fd>.
+			We added <ia>trolleyintermediary</ia> to maintain <uc>trolleylogic</uc> independent from the <fd>basicrobot</fd>.
 			<br><br>
-			<ia>StateAdapter</ia> is used con convert the state of the <en>parkingstate</en> build with a internal string format in a JSON format used by the web graphic interface.
+			<ia>StateAdapter</ia> is used to convert the state of the <en>parkingstate</en> build with an internal string format in a JSON format used by the web graphic interface.
 			<br>
-			In the external circle there is the <fd>SpringBoot</fd> Web Framework used to develop the <fd>ParkManagerStatusGUI</fd>.
+			In the outermost circle, there is the <fd>SpringBoot</fd> Web Framework used to develop the <fd>ParkManagerStatusGUI</fd>.
 		</td>
 		<td>
 			<img src="img\myCleanArch.png" width="100%" height="100%">
@@ -817,7 +812,13 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\weightrefactory.png" width="100%">
+			<center><img src="img\weightrefactory.png" width="100%"></center>
+			<br>
+			<div class="remark">
+			As stated in the analysis the resource changes the CoAP-observable state with the String: "<b>free</b>" or "<b>occupied</b>".
+			<br><br>
+			The inital state is set to "<b>free</b>".
+			</div>
 		</td>
 		<td>
 			<ol>
@@ -833,10 +834,10 @@ In the project phase we chose to develop the application usign the <a href="http
 				we can't define the preWeight as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("preWeight/1")</a>, then we need to use the init predicate.
 				</li>
 				<li>
-				When <en>weightsensor</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>weightlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				When <en>weightsensor</en> receives data from the external sensor (1), sends a local event (2) caught by <uc>weightlogic</uc>, we use an event because, following the <i>Dependency Rule</i>, the <k>Entity</k>
 				can't know anything about a component on an outer circle. 
 				<br>
-				The <uc>weightlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				The <uc>weightlogic</uc> check with the lazy update if we need to change the CoAP observable state of the sensor and, if we do, sends a dispatch (2) with the new state.
 				</li>
 			</ol> 
 		</td>
@@ -846,7 +847,13 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\sonarrefactory.png" width="100%">
+			<center><img src="img\sonarrefactory.png" width="100%"></center>
+			<br>
+			<div class="remark">
+			As stated in the analysis the resource changes the CoAP-observable state with the String: "<b>free</b>", "<b>occupied</b>" or "<b>timeout</b>".
+			<br><br>
+			The inital state is set to "<b>free</b>".
+			</div>
 		</td>
 		<td>
 			<ol>
@@ -862,10 +869,13 @@ In the project phase we chose to develop the application usign the <a href="http
 				we can't define the preDist as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("preDist/1")</a>, then we need to use the init predicate.
 				</li>
 				<li>
-				When <en>sonarsensor</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>sonarlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				When <en>sonarsensor</en> receives data from the external sensor (1), sends a local event (2) caught by <uc>sonarlogic</uc>, we use an event because, following the <i>Dependency Rule</i>, the <k>Entity</k>
 				can't know anything about a component on an outer circle. 
 				<br>
-				The <uc>weightlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				The <uc>sonarlogic</uc> check with the lazy update if we need to change the CoAP observable state of the sensor and, if we do, sends a dispatch (2) with the new state.
+				</li>
+				<li>
+				As discussed in the Analysis we added a new state to signal that the <em>OUTDOOR-area</em> is occupied for a time above <tt>DTFREE</tt> with the state <ks>timeout</ks>.
 				</li>
 			</ol> 
 		</td>
@@ -875,7 +885,13 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\thermometerrefactory.png" width="100%">
+			<center><img src="img\thermometerrefactory.png" width="100%"></center>
+			<br>
+			<div class="remark">
+			As stated in the analysis the resource changes the CoAP-observable state with the temperature measured <k>TA</k> or if <k>TA>TMAX</k> by the String: "<b>warning</b>" + "<k><b>TA</b></k>".
+			<br><br>
+			The inital state is set to "<b>0</b>".
+			</div>
 		</td>
 		<td>
 			<ol>
@@ -890,12 +906,16 @@ In the project phase we chose to develop the application usign the <a href="http
 				we can't define the criticTemp as a static predicate, so we need to use at runtime <a href="https://www.swi-prolog.org/pldoc/man?predicate=dynamic/1" target="web">dynamic("criticTemp/1")</a>, then we need to use the init predicate.
 				</li>
 				<li>
-				When <en>thermometer</en> receives data from the external sensor (1), sends a local event (2) that is caught by <uc>thermometerlogic</uc>, we use an event because following the <i>Dependency Rule</i> the <k>Entity</k>
+				When <en>thermometer</en> receives data from the external sensor (1), sends a local event (2) caught by <uc>thermometerlogic</uc>, we use an event because, following the <i>Dependency Rule</i>, the <k>Entity</k>
 				can't know anything about a component on an outer circle. 
 				<br>
-				The <uc>thermometerlogic</uc> the check with the lazy update if we need to change the CoAP observable state of the sensor if we need to it sends a dispatch (2) with the new state.
+				The <uc>thermometerlogic</uc> sends a dispatch (3) with the new state.
 				<br>
 				Also, <uc>thermometerlogic</uc> send an event (4) that is caught by the <en>fan</en> that change its state. 
+				</li>
+				<li>
+				As stated in the Analysis when the temparature is above <k>TMAX</k> we add a "<ks>warning</ks>" in the CoAp observable state to notify any observer which can then act accordingly. 
+				Also this has the advantage to semplify the <fd>GUI</fd>, which is an observer of the <en>parkingstate</en>.
 				</li>
 			</ol> 
 		</td>
@@ -905,31 +925,46 @@ In the project phase we chose to develop the application usign the <a href="http
  <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-			<img src="img\trolleyrefactory.png" width="100%">
+			<center><img src="img\trolleyrefactory.png" width="100%"></center>
+			<br>
+			<div class="remark">
+			As stated in the analysis the resource changes the CoAP-observable state with the String: "<b>idle</b>", "<b>working</b>" or "<b>stopped</b>".
+			<br><br>
+			The inital state is set to "<b>idle</b>".
+			</div>
 		</td>
 		<td>
 			<ol>
 				<li>The logic was separated from the component, see <a href="../../../progetto/it.unibo.ParkManagerTrolley/src/parkamanagertrolley.qak">parkamanagertrolley.qak</a>.</li>
 				<li>
 				<en>transporttrolley</en> keeps the state of the <tt>trolley</tt>. <uc>trolleylogic</uc> contains the logic on how to move the <tt>trolley</tt> and how to update the state.
-				<ia>trolleyintermediary</ia> is used to maintain the logic indipendent from the <fd>basicrobot</fd>.
+				<ia>trolleyintermediary</ia> is used to maintain <uc>trolleylogic</uc> independent from the <fd>basicrobot</fd>.
 				</li>
 				<li>
-				When <en>transporttrolley</en> receives a stop command from the <tt>parkmanagerservice</tt> sends an event to the <uc>trolleylogic</uc>, the trolley logic send a dispatch to the <en>transporttrolley</en> to change the state if necessary.
-				When <en>parkmanagerservice</en> sends a move to the <uc>trolleylogic</uc>, which sends a event, because of the <i>Dependency Rule</i>, to the <ia>trolleyintermediary</ia>, and if during the logic to move the robot it changes the state (<k>idle</k< or <k>working</k>) send a dispatch to the <en>transporttrolley</en>.
+				When <en>transporttrolley</en> receives a stop command from the <tt>parkmanagerservice</tt> sends an event to the <uc>trolleylogic</uc>, the trolley logic sends a dispatch to the <en>transporttrolley</en> to change the state if necessary.
+				When <en>parkmanagerservice</en> sends a move to the <uc>trolleylogic</uc>, which sends an event, because of the <i>Dependency Rule</i>, to the <ia>trolleyintermediary</ia>.
 				<br>
+				Also if, while moving, the robot state needs to change (<k>idle</k> or <k>working</k>) <uc>trolleylogic</uc> sends a dispatch to the <en>transporttrolley</en>.
+				</li>
+				<li>
+				This start/stop was changed from the Analysis favoring the Event instead of the Dispatch to the <uc>trolleylogic</uc>. It was done to respect the <i>Dependency principle</i>. 
+				External components, instead of asking the <uc>parkmanagerservice</uc> to stop the robot, can use this configuration to force a state change of the <en>tranporttrolley</en>, which will modify automatically the behavior of the application.
 				</li>
 			</ol> 
 		</td>
 	</tr>
 </table>
+
+<h4>ParkingState and StateAdapter</h4>
+The <tt>parkingstate</tt> update the <k>CoAp</k> state with a String composed of <k>"name of the resource:"</k> + <ks>value</ks>. This internal format was chosen for simplicity.
+While in the web application is easier to work with JSON object, particolarly in javascript, we use <ia><a href="../../../progetto/parkServiceStatus/src/main/kotlin/it/unibo/parkservicestatus/StateAdapter.kt">StateAdapter</a></ia> to transform this String in a JSON object. 
  <h3>Concrete architecture</h3>
  <img src="img\ConcreteArchitecture_2.png" width="100%">
 
  <h3>Graphic interface</h3>
 
-  The graphic interface was developed using <k>Springboot</k> usng the <ks>mvc pattern</ks>. Note that the model of our application is composed by the <tt>parkingState</tt> and the 
-  <en>entities</en>, while this model refers to the one used by the view. We will call it viewmodel from now on.
+  The graphic interface was developed using <k>Springboot</k> and the <ks>mvc pattern</ks>. Note that the model of our application is composed by the <tt>parkingState</tt> and the 
+  <en>entities</en>, while this model refers to the one used by the front-end.
   
 
 	<table style="width:100%" border="1">
@@ -939,17 +974,20 @@ In the project phase we chose to develop the application usign the <a href="http
 		</td>
 		<td>
 			<ol>
-				<li>Trolley posisition has not been implemented, maybe in the future.</li>
+				<li>The trolley posisition has not yet been implemented.</li>
+				<li>The button start/stop are always active, the disactivation if they are can't be used has not yet been implemented.</li>
 				<li><ks><a href="../../../progetto/parkServiceStatus/src/main/kotlin/it/unibo/parkservicestatus/HIController.kt">HIController</a></ks> is a RESTFUL controller used to interface with humans, is a class annoted with <k>@Controller</k> </li>
 				<li>Use websocket with <k>STOMP</k> to exchange information between the controller and the webpage.</li>
-				<li><ks>HMIController</ks> after receiving the request to start or stop the trolley sends a Event to the <uc>trolleylogic</uc> because: insead of going through the <uc>parkmanagerservice</uc>
-				forces the change of the trolley state which stops the robot.
-				</li>
-				<li><a href="../../../progetto/parkServiceStatus/src/main/kotlin/it/unibo/parkservicestatus/StateAdapter.kt">StateAdapter</a> was used to convert the String in the application internal format to a JSON which is easier to manipulate.</li>
-			</ol> 
+				<li>The INPUT-section resolve the requirement <em>monitor</em>.</li>
+				<li>The OUTPUT-section resolve the requirement <em>manage</em>.</li>
+				<li><tt>parkservicestatus</tt> observes the <en>parkingstate</en>.</li>
+				<li>The <em>alarm</em> requirement was fulfilled just by showing the state of the resource, since the info is already included by the resource logic by updating the state.</li>
+				<li>When the park-manager press the start/stop button the <ks>HIController</ks> sends and event to the <uc>trolleylogic</uc> to change the <en>transporttrolley</en> status.</li>
+			</ol>
 		</td>
 	</tr>
 </table>
+<!--
  <h4>Controller</h4>
  
  The html page hase 2 sections:
@@ -960,16 +998,10 @@ In the project phase we chose to develop the application usign the <a href="http
  
  Every time <tt>parkinstate</tt> updates its state:
  The change is observed by <ks>WebPageCoapHandler</ks> -> Use StateAdapter to transoform the data into a JSON -> calls simpleMessaginTemplate.convertAndSend(...) ->
- HTMLPage in Broswers update the field
- <h4>Trolley changes</h4>
- In the Analysis the communication of the start/stop is done by a dispatch, in the project phase an Event was considered the best option. Instead of asking the 
- <tt>parkmanagerservice</tt> we asked the trolleylgoic to change the state of the resource, which automatically stops also the trolley.
- <h4>Themperature changes</h4>
- New status with warning show
- <h4>Sonar changes</h4>
- Sonar change the state to timeout
-<h2>Testing</h2> 
- 
+ HTMLPage in Broswers update the field 
+ -->
+<h2>Testing</h2>
+
 
 <h2>Deployment</h2> 
 

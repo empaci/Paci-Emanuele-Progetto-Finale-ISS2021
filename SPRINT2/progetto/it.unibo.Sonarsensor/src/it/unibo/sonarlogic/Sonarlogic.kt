@@ -41,11 +41,11 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t02",targetState="applylogic",cond=whenEvent("localsonarupdate"))
+					 transition(edgeName="t02",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
 				}	 
 				state("applylogic") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("localsonarupdate(D)"), Term.createTerm("localsonarupdate(D)"), 
+						if( checkMsgContent( Term.createTerm("local_sonarupdate(D)"), Term.createTerm("local_sonarupdate(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val DISTANCE = "${payloadArg(0)}"  
 								solve("modifyStatus($DISTANCE,RES)","") //set resVar	
@@ -83,7 +83,7 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 							scope, context!!, "local_tout_sonarlogic_stateOccupied", TIMER )
 					}
 					 transition(edgeName="t03",targetState="timeout",cond=whenTimeout("local_tout_sonarlogic_stateOccupied"))   
-					transition(edgeName="t04",targetState="applylogic",cond=whenEvent("localsonarupdate"))
+					transition(edgeName="t04",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
 				}	 
 				state("timeout") { //this:State
 					action { //it:State
