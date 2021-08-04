@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>ParkService</title>
+
+    <!-- SOCKET in SpringBoot -->
+    <!--
+    Imports the SockJS and STOMP javascript libraries that will be used
+    to communicate with our server through STOMP over websocket.
+    We also import app.js, which contains the logic of our client application.
+    -->
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <script src="/app.js"></script>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <script>
+    function myIp() {
+      var ip = location.host;
+    }
+
+    //myIp()
+    connect() //defined in app.js
+  </script>
+
+</head>
+
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2>
+</noscript>
+
+<h1>ParkService</h1>
+
+<h4>Trolley commands:</h4>
+<div style="background-color: #F2B4DE">
+    <form action="/clientrequest" method="GET">   <!-- the form-data is sent to the page specified in the action attribute -->
+        <input type="submit" id="requestin" name="requestin" value="requestin">
+        <p value="" th:text="'Response: ' + ${response}"/>
+        <input type="submit" id="carenter" name="carenter" value="carenter">
+        <br>
+        <input type="submit" id="requestout" name="requestout" value="requestout">
+        <p value="" th:text="'Response: ' + ${responseout}"/>
+    </form>
+</div>
+
+<div style="background-color: #A2D4FE">
+    <p value="" th:text="'Receipt: ' + ${receipt}"/>
+</div>
+
+</body>
+</html>

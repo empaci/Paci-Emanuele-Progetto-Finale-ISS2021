@@ -1,0 +1,23 @@
+package coap
+
+import it.unibo.kactor.*
+import alice.tuprolog.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.ActorBasicFsm
+
+object findActorInfo {
+	
+	fun findInfo(actorName : String) :String {
+		it.unibo.kactor.ActorBasicFsm.solve("consult('model.pl')","")		
+		solve("qactor($actorName,CTX,X)","")
+		val ctx = getCurSol("CTX")
+		solve("context($ctx,IP,X,PORT)","")
+		val ip = getCurSol("IP")
+		val port = getCurSol("PORT")
+		
+		return ctx+ip+port
+	}
+}

@@ -1,0 +1,77 @@
+System -msglog model
+
+Dispatch weightData : weightData(W)
+Event    localweightupdate   : localweightupdate(W)
+Dispatch weightstatusupdate   : weightstatusupdate(S)
+
+
+Context ctxweightsensor ip [host="127.0.0.1" port=8072]    
+
+QActor weightsensor context ctxweightsensor {
+	State s0 initial {
+		println("Starting Weight sensor.")
+	}
+	Goto wait
+	
+	State wait {
+		println("Weightsensor waiting for data...")
+	}
+	Transition t0 whenMsg weightData -> handleData
+				  whenMsg weightstatusupdate -> updateStatus	
+	
+	State handleData {
+		println("Weightsensor received data")
+		onMsg(weightData : weightData(W)) {
+			[# var WEIGHT = "${payloadArg(0)}" #]
+			emit localweightupdate : localweightupdate($WEIGHT)
+		}
+	}
+	Goto wait
+	
+	State updateStatus {
+		onMsg(weightstatusupdate : weightstatusupdate(S)) {
+			[# var status = "${payloadArg(0)}" #]
+			updateResource [# status #]
+			println("$status")
+		}
+	}
+	Goto wait
+	
+}
+
+QActor weightlogic context ctxweightsensor {
+	
+	State s0 initial {
+		println("Starting Weight logic.")
+		
+		solve( consult("weightapplogic.pl"))
+		solve( dynamic("prevWeight/1") )
+		solve( init(X) )
+		
+		[# val INITSTATUS = getCurSol("X").toString() #]
+		forward weightsensor -m weightstatusupdate : weightstatusupdate($INITSTATUS)
+	}
+	Goto wait
+	
+	State wait {
+	}
+	Transition t0 whenEvent localweightupdate -> applylogic
+	
+	State applylogic {
+		onMsg(localweightupdate : localweightupdate(W)) {
+			[# val WEIGHT = "${payloadArg(0)}" #]
+			
+			solve( modifyStatus($WEIGHT, SOL) )
+			[# val RESULT = getCurSol("SOL").toString() #]
+			
+			if [# RESULT=="true" #] {
+			
+				solve(getStatus($WEIGHT,X))
+				[# var STATUS = getCurSol("X").toString() #]
+			
+				forward weightsensor -m weightstatusupdate : weightstatusupdate($STATUS)
+			}
+		}
+	}
+	Goto wait
+}

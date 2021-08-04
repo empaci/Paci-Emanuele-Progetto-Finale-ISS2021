@@ -1,0 +1,115 @@
+System -msglog model
+
+Dispatch sonarData : sonarData(D) 
+Event    local_sonarupdate   : local_sonarupdate(D)
+Dispatch sonarstatusupdate   : sonarstatusupdate(S)
+
+Context ctxsonarsensor ip [host="localhost" port=8071]
+
+QActor sonarsensor context ctxsonarsensor {
+	State s0 initial {
+		println("Starting Sonar sensor.")
+	}
+	Goto wait
+	
+	State wait {
+		println("Sonarsensor waiting for data...")
+	}
+	Transition t0 whenMsg sonarData -> handleData
+				  whenMsg sonarstatusupdate -> updateStatus	
+	
+	State handleData {
+		println("Weightsensor received data")
+		onMsg(sonarData : sonarData(D)) {
+			[# var DISTANCE = "${payloadArg(0)}" #]
+			emit local_sonarupdate : local_sonarupdate($DISTANCE)
+		}
+	}
+	Goto wait
+	
+	State updateStatus {
+		onMsg(sonarstatusupdate : sonarstatusupdate(S)) {
+			[# var status = "${payloadArg(0)}" #]
+			updateResource [# status #]
+			println("$status")
+		}
+	}
+	Goto wait
+	
+}
+
+QActor sonarlogic context ctxsonarsensor {
+	[#
+		var STATUS=""
+		var DTFREE = 0L
+		var TIMER = 0L
+		var prevState = ""
+		var StartTime = 0L
+		var Duration = 0L
+	#]
+	
+	
+	State s0 initial {
+		println("Starting Sonar logic.")
+		
+		solve( consult("sonarapplogic.pl"))
+		solve( dynamic("prevDist/1") )
+		solve( init(X) )
+		
+		[# val INITSTATUS = getCurSol("X").toString() #]
+		[# prevState = INITSTATUS #]
+		
+		forward sonarsensor -m sonarstatusupdate : sonarstatusupdate($INITSTATUS)
+		
+		solve( dtfree(X) )
+		[# DTFREE = getCurSol("X").toString().toLong() #]
+	}
+	Goto wait
+	
+	State wait {
+	}
+	Transition t0 whenEvent local_sonarupdate -> applylogic
+	
+	State applylogic {
+		onMsg(local_sonarupdate : local_sonarupdate(D)) {
+			[# val DISTANCE = "${payloadArg(0)}" #]
+			
+			solve( modifyStatus($DISTANCE, RES) )
+			[# val RESULT = getCurSol("RES").toString() #]
+			
+			if [# RESULT=="true" #] {
+				solve(getStatus($DISTANCE,X))
+				[# 
+					prevState = STATUS
+					STATUS = getCurSol("X").toString()
+				#]
+				forward sonarsensor -m sonarstatusupdate : sonarstatusupdate($STATUS)
+			}
+		}
+	}
+	Goto stateOccupied if [# STATUS=="occupied"#] else wait
+	
+	State stateOccupied {
+		if [# prevState=="free" && STATUS=="occupied" #] {
+			memoCurrentTime StartTime
+		} else {
+			if [# prevState=="occupied" && STATUS=="occupied"#] {
+				setDuration Duration from StartTime
+			}
+		}
+		[# TIMER = DTFREE - Duration #]
+		if [# TIMER < 0 #] {
+			[# TIMER = 0 #]
+		}
+		println("Duration $Duration TIMER $TIMER")
+	}
+	Transition t0 whenTimeVar TIMER -> timeout
+				  whenEvent local_sonarupdate -> applylogic 
+				  
+	State timeout {
+		println("Update the state")
+		//emit sonarevent : sonarevent(timeout)
+		forward sonarsensor -m sonarstatusupdate : sonarstatusupdate(timeout)
+	}
+	Goto wait
+}
