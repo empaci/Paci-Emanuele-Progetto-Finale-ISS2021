@@ -40,7 +40,7 @@ class Weightsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("Weightsensor waiting for data...")
 					}
-					 transition(edgeName="data19",targetState="handleData",cond=whenDispatch("weightData"))
+					 transition(edgeName="data20",targetState="handleData",cond=whenDispatch("weightData"))
 				}	 
 				state("handleData") { //this:State
 					action { //it:State

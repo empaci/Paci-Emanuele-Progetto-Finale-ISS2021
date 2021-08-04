@@ -230,7 +230,7 @@ The <k>SPRINT 2</k> document document can be found <a href="../../../../SPRINT2/
 	<k>See here the <a href="img\legenda.png" target="img">Legenda</a>.</k>
 <h2>Requirement analysis</h2>
  
- In this <k>SPRINT</k> is considered the GUI client and every remaining apsect: optional responses, what to do if the client doen't park, Tokenid. 
+ In this <k>SPRINT</k> is considered the GUI client and every remaining aspect. 
 
 <h2>Problem analysis</h2>
 As stated in the <k>SPRINT 0</k> this problem requires the communications of different components in a distributed environment, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#problemanalysis">SPRINT0 | problem analysis</a>. 
@@ -265,20 +265,30 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
    <br>
  <h3>Other relevant aspects</h3>
  <h4>Client waiting</h4>
- The requirement state that we could optionally respond to the client when the <em>INDOOR-area</em> is occupied. Another olution could be to display a wait message after the client makes the request.
- This way the client knows that the message is succesfully reached the server and has wait anyway for the response.
+ The requirement state that we could optionally respond to the client when the <em>INDOOR-area</em> is occupied. Another solution could be to display a wait message after the client makes the request.
+ This way the client knows that the message is being elaborated and has to wait for the response.
  
  <h4>Client press a button more than once</h4>
- To avoid this problem we can deactivate the button, so the client can't send other request. Another way is to memorize the client in a certain way, for examplo applying an autorization method.
- Considering that the web is our riferiment we can use authentication or memorizing the cookie.
- so that we avoid duplicate request from the same client. this technique would also allowa us to distinguish between the requests of different clients.
- 
- 
- <!-- <h4>How to distinguish different clients</h4> -->
+ A client could press multiple time, or in the wrong order the button on the GUI. To avoid this problem we can deactivate the buttons while they couldm't be used. 
+ <br>
+ Another way to solve thie problem is tthat the system associate the client with the action alread performed, to do so we need a way to identify the client, 
+ for example applying an autorization method.
+ <br>
+ Considering that the web application is our method of reference we can use a username and password authentication which would also allowa us to distinguish 
+ between the requests of different clients.
  
  <h4>The client does a requestin but doesn't do a carenter</h4>
- We can put a time limit after a requestin, if not respected we free that slot, so that it cannot be used. 
+ Another problem is that a client could press a request to enter the parking slot, then change is mind and not press carenter.
+ The problem is based n the fact that the answer to the first request by requirements is the number of the parking slot, which then is sent back when the client does a carenter.
+ <br>
+ This method works weel to make sure that a client that did a request in, but not an immediate carenter can find the slot free, not occupied by another client.
+ <br>
+ To solve this problem we can modify the Prolog logic to include that: after a certain time <k>T</k> if the request was not finalized with a carenter we discard it and make the parking slot
+ available to the other clients.
  
+ For example we can memorize the time when the request enter the system, with a <tt>TOKENID</tt> set to 0 and the slot as if it was occupied, 
+ if the client does a carenter we set the <tt>TOKENID</tt> to the actual value.
+ Periodically we check if a requet has been there with a <tt>TOKENID</tt> still 0 for a time ovet <k>T</k>, in which case we elimate the request and free the parking slot.
  
  <h3>Logical Architecture</h3>
  
@@ -301,7 +311,30 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  <br>
  <h3>Expected Time</h3>
  Starting from the model, the client's graphic interface is expected to be developed in 1 day of work.
+
 <h2>Test plans</h2> 
+
+<h4>Test the new system </h4>
+ We simulate a <ks>N</ks> number of client, and we put a delay between two request to see if the previous request is discarded.
+<br> 
+ To check if the test is successful we need to observe the parkmanager responses.
+ <br><br>
+ <ks>Starting conditions:</ks>
+ <ul>
+	<li><em>INDOOR-area</em> is free.</li>
+	<li><em>OUTDOOR-area</em> is free.</li>
+	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
+	<li>The parking slots are not occupied.</li>
+ </ul>
+ We expect that:
+ <ol>
+	<li><tt>SLOTNUM</tt> value increases, except for the client with the delay between them, which should give the same value.</li>
+ </ol> 
+ 
+ </ol>
+ <p>JUnit test: <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a>
+ <br>
+
 
 <h2>Project</h2> 
  
@@ -324,8 +357,25 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
 				<li>The INPUT-section is used to do: <em>RequestIN</em>, <em>RequestOUT</em> and <em>carenter</em>.</li>
 				<li>The OUTPUT-section show the system message such as wait and the <em>receipt</em>.</li>
 				<li>No information about the state of the system is displayed.</li>
+			</ol>
+		</td>
+	</tr>
+</table>
+
+<h3>New Parkmanagerservice logic</h3>
+Prolog has been modified following the Analysis:
+<table style="width:100%" border="1">
+	<tr>
+		<td style="width:50%">
+		>
+			<ol>
+				<li>.</li>
+				<li>.</li>
 				<li>.</li>
 			</ol>
+		</td>
+		<td>
+			<img src="img\explProlog.png" width="100%">
 		</td>
 	</tr>
 </table>

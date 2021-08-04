@@ -9,7 +9,7 @@ import org.eclipse.californium.core.coap.CoAP
 
 class CoapObserverForTesting(val name: String      = "testingobs1",
 							 val context: String   = "ctxparkmanager",
-							 val observed : String = "fan",
+							 val observed : String = "parkmanagerservice",
 							 val port: String      = "8070") {
    //private val client  = CoapClient()
    private var handler : CoapHandler? = null

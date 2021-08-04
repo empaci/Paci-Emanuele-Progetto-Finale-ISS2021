@@ -57,7 +57,7 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_wait", 
 							scope, context!!, "local_tout_parkingstate_wait", 1000.toLong() )
 					}
-					 transition(edgeName="t036",targetState="wait",cond=whenTimeout("local_tout_parkingstate_wait"))   
+					 transition(edgeName="t037",targetState="wait",cond=whenTimeout("local_tout_parkingstate_wait"))   
 				}	 
 			}
 		}

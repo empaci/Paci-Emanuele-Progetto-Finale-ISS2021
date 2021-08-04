@@ -27,7 +27,6 @@ class TestPlanUseCase1 {
 		var systemStarted         = false
 		val channelSyncStart      = Channel<String>()
 		var testingObserver1       : CoapObserverForTesting? = null
-		var testingObserver2       : CoapObserverForTesting2? = null
 		var myactor               : ActorBasic? = null
 
 		@JvmStatic
@@ -45,10 +44,9 @@ class TestPlanUseCase1 {
 					delay(500)
 					myactor=QakContext.getActor("parkmanagerservice")
 				}				
-				//delay(1000)	//Give time to set up
+				delay(1000)	//Give time to set up
 				channelSyncStart.send("starttesting")
 				testingObserver1 = CoapObserverForTesting()
-				testingObserver2 = CoapObserverForTesting2()
 			}		 
 		}//init
 		
@@ -77,7 +75,6 @@ class TestPlanUseCase1 {
 	fun removeObs(){
 		println("+++++++++ AFTERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
 		testingObserver1!!.removeObserver()
-		testingObserver2!!.removeObserver()
 	}
 	
     @Test
@@ -85,50 +82,45 @@ class TestPlanUseCase1 {
 		var result  = ""
 		runBlocking{
  			val channelForObserverT = Channel<String>()
-			val channelForObserverF = Channel<String>()
-			testingObserver1!!.addObserver( channelForObserverF,"on")
-			testingObserver2!!.addObserver( channelForObserverT,"stopped")
-			
-			var temp = MsgUtil.buildDispatch("tester","tempData","tempData(40)","thermometer")
-			MsgUtil.sendMsg(temp, QakContext.getActor("thermometer")!!)
-			
-			result = channelForObserverF.receive()
-			assertEquals( result, "on")
-			
-			
-			//simulate the park-manager sending the stop
-			temp = MsgUtil.buildDispatch("tester","stop","stop(stop)","parkingservicestatusgui")
-			MsgUtil.sendMsg(temp, myactor!!)
+	
+			testingObserver1!!.addObserver( channelForObserverT,"park")
 			
 			val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
 			MsgUtil.sendMsg(reqin, myactor!!)
-				
+			result = channelForObserverT.receive()
+			assertEquals( result, "park(1)")
+			
+			
 			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen, myactor!!)
 			
-			result = channelForObserverT.receive()
-			assertEquals( result, "stopped")
-			
-			testingObserver1!!.removeObserver()
-			testingObserver2!!.removeObserver()
-			
-			testingObserver1!!.addObserver( channelForObserverF,"off")
-			testingObserver2!!.addObserver( channelForObserverT,"idle")
-			
-			temp = MsgUtil.buildDispatch("tester","tempData","tempData(15)","thermometer")
-			MsgUtil.sendMsg(temp, QakContext.getActor("thermometer")!!)
-			
-			result = channelForObserverF.receive()
-			assertEquals( result, "off")
-			
-			
-			//simulate the park-manager sending the stop
-			temp = MsgUtil.buildDispatch("tester","stop","stop(start)","parkingservicestatusgui")
-			MsgUtil.sendMsg(temp, myactor!!)
-			
 			
 			result = channelForObserverT.receive()
-			assertEquals( result, "idle")
+			assertEquals( result, "park(10)")
+			
+			
+			val reqin2 = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
+			MsgUtil.sendMsg(reqin2, myactor!!)
+			
+			result = channelForObserverT.receive()
+			assertEquals( result, "park(2)")
+			
+			delay(30000)
+			
+			val reqin3 = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
+			MsgUtil.sendMsg(reqin3, myactor!!)
+			
+			result = channelForObserverT.receive()
+			assertEquals( result, "park(2)") //senza delay dovrebbe essere 3
+			
+			val reqen2 = MsgUtil.buildRequest("tester","carenter","carenter(2)","parkmanagerservice")
+			MsgUtil.sendMsg(reqen2, myactor!!)
+			
+			result = channelForObserverT.receive()
+			assertEquals( result, "park(21)")
+			
+			
+			//testingObserver1!!.removeObserver()
 			
 		}
 	}

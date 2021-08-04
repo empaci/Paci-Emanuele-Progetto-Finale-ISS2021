@@ -46,7 +46,7 @@ class Sonarsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					action { //it:State
 						println("Sonarsensor waiting for data...")
 					}
-					 transition(edgeName="data29",targetState="handleData",cond=whenDispatch("sonarData"))
+					 transition(edgeName="data30",targetState="handleData",cond=whenDispatch("sonarData"))
 				}	 
 				state("handleData") { //this:State
 					action { //it:State
@@ -82,8 +82,8 @@ class Sonarsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						stateTimer = TimerActor("timer_stateOccupied", 
 							scope, context!!, "local_tout_sonarsensor_stateOccupied", TIMER )
 					}
-					 transition(edgeName="t030",targetState="sendEvent",cond=whenTimeout("local_tout_sonarsensor_stateOccupied"))   
-					transition(edgeName="t031",targetState="handleData",cond=whenDispatch("sonarData"))
+					 transition(edgeName="t031",targetState="sendEvent",cond=whenTimeout("local_tout_sonarsensor_stateOccupied"))   
+					transition(edgeName="t032",targetState="handleData",cond=whenDispatch("sonarData"))
 				}	 
 				state("sendEvent") { //this:State
 					action { //it:State

@@ -46,8 +46,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						 }
 						println("Waiting messages...")
 					}
-					 transition(edgeName="t020",targetState="handle",cond=whenDispatch("move"))
-					transition(edgeName="t021",targetState="stopped",cond=whenDispatch("stop"))
+					 transition(edgeName="t021",targetState="handle",cond=whenDispatch("move"))
+					transition(edgeName="t022",targetState="stopped",cond=whenDispatch("stop"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -87,8 +87,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						request("step", "step(175)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t022",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t023",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t023",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t024",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
@@ -141,16 +141,16 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								request("step", "step($DIST)" ,"basicrobot" )  
 						}
 					}
-					 transition(edgeName="t124",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t125",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t125",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t126",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("checkStop") { //this:State
 					action { //it:State
 						stateTimer = TimerActor("timer_checkStop", 
 							scope, context!!, "local_tout_transporttrolley_checkStop", 200.toLong() )
 					}
-					 transition(edgeName="t126",targetState="wait",cond=whenTimeout("local_tout_transporttrolley_checkStop"))   
-					transition(edgeName="t127",targetState="stopped",cond=whenDispatch("stop"))
+					 transition(edgeName="t127",targetState="wait",cond=whenTimeout("local_tout_transporttrolley_checkStop"))   
+					transition(edgeName="t128",targetState="stopped",cond=whenDispatch("stop"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
@@ -158,7 +158,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "stopped"  
 						)
 					}
-					 transition(edgeName="t228",targetState="wait",cond=whenDispatch("start"))
+					 transition(edgeName="t229",targetState="wait",cond=whenDispatch("start"))
 				}	 
 			}
 		}

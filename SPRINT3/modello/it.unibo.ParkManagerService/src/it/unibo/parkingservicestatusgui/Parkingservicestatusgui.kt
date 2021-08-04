@@ -28,8 +28,8 @@ class Parkingservicestatusgui ( name: String, scope: CoroutineScope  ) : ActorBa
 					action { //it:State
 						 println("Stato sistema:" + coap.actorQakStateCoapObserver.readResponse())  
 					}
-					 transition(edgeName="t037",targetState="eventReceived",cond=whenEvent("sonarevent"))
-					transition(edgeName="t038",targetState="thermEvent",cond=whenEvent("thermometerevent"))
+					 transition(edgeName="t038",targetState="eventReceived",cond=whenEvent("sonarevent"))
+					transition(edgeName="t039",targetState="thermEvent",cond=whenEvent("thermometerevent"))
 				}	 
 				state("eventReceived") { //this:State
 					action { //it:State

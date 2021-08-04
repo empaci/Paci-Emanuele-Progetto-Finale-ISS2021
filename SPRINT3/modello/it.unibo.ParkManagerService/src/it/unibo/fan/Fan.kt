@@ -29,7 +29,7 @@ class Fan ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 					action { //it:State
 						println("Fan waiting...")
 					}
-					 transition(edgeName="data35",targetState="handleEvent",cond=whenEvent("thermometerevent"))
+					 transition(edgeName="data36",targetState="handleEvent",cond=whenEvent("thermometerevent"))
 				}	 
 				state("handleEvent") { //this:State
 					action { //it:State
