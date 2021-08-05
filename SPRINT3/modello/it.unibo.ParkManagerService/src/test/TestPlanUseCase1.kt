@@ -83,6 +83,7 @@ class TestPlanUseCase1 {
 		runBlocking{
  			val channelForObserverT = Channel<String>()
 	
+			val weightactor : ActorBasic? = QakContext.getActor("weightsensor")
 			testingObserver1!!.addObserver( channelForObserverT,"park")
 			
 			val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
@@ -92,13 +93,17 @@ class TestPlanUseCase1 {
 			
 			
 			var wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
-			MsgUtil.sendMsg(wdata, myactor!!)
+			MsgUtil.sendMsg(wdata, weightactor!!)
+			
+			delay(1000)
 			
 			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen, myactor!!)
 			
+			delay(1000)
+			
 			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
-			MsgUtil.sendMsg(wdata, myactor!!)
+			MsgUtil.sendMsg(wdata, weightactor!!)
 			
 			result = channelForObserverT.receive()
 			assertEquals( result, "park(10)")
@@ -119,13 +124,17 @@ class TestPlanUseCase1 {
 			assertEquals( result, "park(2)") //senza delay dovrebbe essere 3
 			
 			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
-			MsgUtil.sendMsg(wdata, myactor!!)
+			MsgUtil.sendMsg(wdata, weightactor!!)
+			
+			delay(1000)
 			
 			val reqen2 = MsgUtil.buildRequest("tester","carenter","carenter(2)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen2, myactor!!)
 			
+			delay(1000)
+			
 			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
-			MsgUtil.sendMsg(wdata, myactor!!)
+			MsgUtil.sendMsg(wdata, weightactor!!)
 			
 			result = channelForObserverT.receive()
 			assertEquals( result, "park(21)")

@@ -267,29 +267,29 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  <h3>Other relevant aspects</h3>
  <h4>Client waiting</h4>
  The requirement state that we could optionally respond to the client when the <em>INDOOR-area</em> is occupied. Another solution could be to display a wait message after the client makes the request.
- This way the client knows that the message is being elaborated and has to wait for the response.
+ Which is the most simple way to let the client know that the message is being elaborated and has to wait for the response.
  
  <h4>Client press a button more than once</h4>
- A client could press multiple time, or in the wrong order the button on the GUI. To avoid this problem we can deactivate the buttons while they couldm't be used. 
+ A client could press multiple times or in the wrong order the buttons on the <ks>GUI</ks>. To avoid this we can deactivate the buttons when they can't be used. 
  <br>
- Another way to solve thie problem is tthat the system associate the client with the action alread performed, to do so we need a way to identify the client, 
- for example applying an autorization method.
+ Another way to solve this problem is that the system associates the client with the action already performed, so we need a way to identify the client, 
+ for example, we can apply an authorization method.
  <br>
- Considering that the web application is our method of reference we can use a username and password authentication which would also allowa us to distinguish 
- between the requests of different clients.
+ We can use a username and password authentication, which would also allow us to distinguish between the requests of different clients.
  
  <h4>The client does a requestin but doesn't do a carenter</h4>
- Another problem is that a client could press a request to enter the parking slot, then change is mind and not press carenter.
- The problem is based n the fact that the answer to the first request by requirements is the number of the parking slot, which then is sent back when the client does a carenter.
+ Another problem is that a client could press a request to enter the parking slot, then change their mind and doesn't press carenter.
+ The problem is based on the fact that the answer to the first request is, by requirements, the number of the parking slot. Which then is sent back when the client does a carenter.
  <br>
- This method works weel to make sure that a client that did a request in, but not an immediate carenter can find the slot free, not occupied by another client.
+ This method makes sure that a client that did a request in, but not an immediate carenter can still find the slot free, and not occupied by another client.
  <br>
  To solve this problem we can modify the Prolog logic to include that: after a certain time <k>T</k> if the request was not finalized with a carenter we discard it and make the parking slot
  available to the other clients.
- 
- For example we can memorize the time when the request enter the system, with a <tt>TOKENID</tt> set to 0 and the slot as if it was occupied, 
+ <br>
+ To do so we can memorize the time when the request enters the system, with a <tt>TOKENID</tt> set to 0 and set the slot as if it was occupied, 
  if the client does a carenter we set the <tt>TOKENID</tt> to the actual value.
- Periodically we check if a requet has been there with a <tt>TOKENID</tt> still 0 for a time ovet <k>T</k>, in which case we elimate the request and free the parking slot.
+ Periodically we check if a request has been there with a <tt>TOKENID</tt> still 0 for a time over <k>T</k>, in which case we eliminate the request and free the parking slot.
+ 
  <h4>The client does a carenter but the INDOOR-area is free</h4>
  A problem that we need to resolve is the client that does a carenter, but is not in the <em>INDOOR-area</em>. To avoid this we will process the carenter request only if the <tt>weightsensor</tt> 
  measure a weight in the <tt>INDOOR</tt>.

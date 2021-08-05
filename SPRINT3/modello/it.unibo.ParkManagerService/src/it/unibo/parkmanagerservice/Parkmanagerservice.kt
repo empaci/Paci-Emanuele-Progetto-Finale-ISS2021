@@ -53,7 +53,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="clientMsg5",targetState="checkTimeout",cond=whenTimeout("local_tout_parkmanagerservice_accept"))   
 					transition(edgeName="clientMsg6",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="clientMsg7",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="clientMsg7",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="clientMsg8",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
@@ -112,7 +112,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="t310",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleCarEnter"))   
 					transition(edgeName="t311",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t312",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t312",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="t313",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
@@ -143,7 +143,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="t415",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleClientOut"))   
 					transition(edgeName="t416",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t417",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t417",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="t418",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))

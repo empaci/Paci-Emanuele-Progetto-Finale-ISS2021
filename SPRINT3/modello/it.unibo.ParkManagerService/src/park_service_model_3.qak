@@ -116,7 +116,7 @@ QActor parkmanagerservice context ctxparkmanager {
 	}
 	Transition clientMsg whenTime 10000 -> checkTimeout
 						 whenRequest clientRequest and [# coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientRequest
-						 whenRequest carenter and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
+						 whenRequest carenter and [# coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
 						 whenMsg outTokenid and [# coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientOut
 						 whenMsg stop -> stoptrolley
 	
@@ -178,7 +178,7 @@ QActor parkmanagerservice context ctxparkmanager {
 	}
 	Transition t3 whenTime 1000 -> moveTrolleyHome
 						 whenRequest clientRequest and [# coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientRequest
-						 whenRequest carenter and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
+						 whenRequest carenter and [# coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
 						 whenMsg outTokenid and [# coap.actorQakStateCoapObserver.readOutdoor()=="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientOut
 						 whenMsg stop -> stoptrolley
 	
@@ -209,7 +209,7 @@ QActor parkmanagerservice context ctxparkmanager {
 	}
 	Transition t4 whenTime 1000 -> moveTrolleyHome
 				  whenRequest clientRequest and [# coap.actorQakStateCoapObserver.readWeight()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientRequest
-				  whenRequest carenter and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
+				  whenRequest carenter and [# coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
 				  whenMsg outTokenid and [# coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientOut
 				  whenMsg stop -> stoptrolley
 				  
