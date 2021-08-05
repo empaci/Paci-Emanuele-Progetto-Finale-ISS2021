@@ -202,13 +202,13 @@ div.imagedesc{
 <h2>Requirement</h2> 
 
 <div class="remark">
-	<a href="TFBO21ParkingISS.pdf">Link to the requirementìs file.</a>
+	<a href="TFBO21ParkingISS.pdf">Link to the requirements file.</a>
 </div>
 
 <h2>Summary of the previous SPRINT</h2>
 
-The <k>SPRINT 2</k> document document can be found <a href="../../../../SPRINT2/modello/it.unibo.ParkManagerService/UserDocs/parkManagerService_2_a.html">here</a>.
-
+The <k>SPRINT 2</k> document can be found <a href="../../../../SPRINT2/modello/it.unibo.ParkManagerService/UserDocs/parkManagerService_2_a.html">here</a>.
+<br>
 <h3>Logical architecture resulted from the Analysis of the <k>SPRINT 2</k></h3>
 <table style="width:100%" border="1">
 		<tr>
@@ -228,9 +228,10 @@ The <k>SPRINT 2</k> document document can be found <a href="../../../../SPRINT2/
   <img src="img\ConcreteArchitecture_2.png" width="80%">
 	<br>
 	<k>See here the <a href="img\legenda.png" target="img">Legenda</a>.</k>
+<h2>In this SPRINT</h2>
+In this <k>SPRINT</k> is considered the client's GUI client and every aspect about the communication between the application and the client that was not treated in the previous work.
 <h2>Requirement analysis</h2>
- 
- In this <k>SPRINT</k> is considered the GUI client and every remaining aspect. 
+ The client GUI should show only the <em>receipt</em> and no other information about the <em>current state</em> of the parking area. 
 
 <h2>Problem analysis</h2>
 As stated in the <k>SPRINT 0</k> this problem requires the communications of different components in a distributed environment, see <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/userDocs/parkManagerService_0_c.html#problemanalysis">SPRINT0 | problem analysis</a>. 
@@ -289,6 +290,9 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  For example we can memorize the time when the request enter the system, with a <tt>TOKENID</tt> set to 0 and the slot as if it was occupied, 
  if the client does a carenter we set the <tt>TOKENID</tt> to the actual value.
  Periodically we check if a requet has been there with a <tt>TOKENID</tt> still 0 for a time ovet <k>T</k>, in which case we elimate the request and free the parking slot.
+ <h4>The client does a carenter but the INDOOR-area is free</h4>
+ A problem that we need to resolve is the client that does a carenter, but is not in the <em>INDOOR-area</em>. To avoid this we will process the carenter request only if the <tt>weightsensor</tt> 
+ measure a weight in the <tt>INDOOR</tt>.
  
  <h3>Logical Architecture</h3>
  

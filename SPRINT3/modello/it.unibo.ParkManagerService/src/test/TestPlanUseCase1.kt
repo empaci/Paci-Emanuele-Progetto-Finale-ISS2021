@@ -91,9 +91,14 @@ class TestPlanUseCase1 {
 			assertEquals( result, "park(1)")
 			
 			
+			var wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
+			MsgUtil.sendMsg(wdata, myactor!!)
+			
 			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen, myactor!!)
 			
+			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
+			MsgUtil.sendMsg(wdata, myactor!!)
 			
 			result = channelForObserverT.receive()
 			assertEquals( result, "park(10)")
@@ -113,8 +118,14 @@ class TestPlanUseCase1 {
 			result = channelForObserverT.receive()
 			assertEquals( result, "park(2)") //senza delay dovrebbe essere 3
 			
+			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
+			MsgUtil.sendMsg(wdata, myactor!!)
+			
 			val reqen2 = MsgUtil.buildRequest("tester","carenter","carenter(2)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen2, myactor!!)
+			
+			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
+			MsgUtil.sendMsg(wdata, myactor!!)
 			
 			result = channelForObserverT.receive()
 			assertEquals( result, "park(21)")

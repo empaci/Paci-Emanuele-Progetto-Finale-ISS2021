@@ -222,10 +222,14 @@ div.imagedesc{
 <h2>Requirements</h2>
 
 <div class="remark">
-	<a href="TFBO21ParkingISS.pdf">Link to the requirementìs file.</a>
+	<a href="TFBO21ParkingISS.pdf">Link to the requirements file.</a>
 </div>
 
 <h2>Summary of the previous SPRINT</h2>
+
+The <k>SPRINT 1</k> document can be found <a href="../../../../SPRINT1/modello/it.unibo.ParkManagerService/UserDocs/parkManagerService_1.html">here</a>.
+<br>
+<br>
 Logical architecture resulted from the Analysis of the <k>SPRINT 1</k>:
 <table style="width:100%" border="1">
 		<tr>
@@ -239,26 +243,27 @@ Logical architecture resulted from the Analysis of the <k>SPRINT 1</k>:
 			</tr>
 		</tr>
   </table>
-
-<h2>Requirement analysis</h2> 
+<h2>In this SPRINT</h2>
  In this <k>SPRINT</k> we will add <em>parking-manager</em> to the application with the relative GUI, <em>fan</em>, and <em>thermometer</em>.
  Also, we will perform the analysis so that the <em>fan</em> is activated automatically. 
  <br>
  <br>
  At the end of this <k>SPRINT</k> the <tt>parking-manager</tt> will be able to interact with the <em>ParkServiceStatusGUI</em> complete in every aspect. 
  <br>
- The graphic interface should be able to notify the <tt>parking-manager</tt> if a <tt>client</tt> has not left the <em>OUTDOOR-area</em> within the <em>DTFREE</em> interval of time. 
+  The graphic interface should be able to notify the <tt>parking-manager</tt> if a <tt>client</tt> has not left the <em>OUTDOOR-area</em> within the <em>DTFREE</em> interval of time. 
  Also, the <tt>parking-manager</tt> can stop and resume the <tt>transport trolley</tt>.
  </div>
+<h2>Requirement analysis</h2> 
+ 
+ When the trolley is <k>stopped</k> the application continues to accept the client's request, but only after the re-start of the trolley they will be processed. 
  <br>
- Note: optional parts will not be discussed at this stage and will be implemented at the end.
  <br>
- <br>
- Another term to clarify:
+ Other terms to clarify:
  <ul>
 	<li><em>alarm</em>: a video notice in the graphic interface that signals the <tt>park-manager</tt> that after <tt>DTFREE</tt> the <tt>OUTDOOR</tt> is still occupied
 	 by a car.</li>
-	 <li><em>current state</em>: information relative to the application, can include the value of the temperature, state of the fan, state of the transport trolley, or other useful information such as: state of the INDOOR-area and OUTDOOR-area, trolley position, parking slot state.</li>
+	 <li><em>current state</em>: information relative to the application, can include the value of the temperature, state of the fan, state of the transport trolley, or other useful information such as: 
+	 state of the <tt>INDOOR</tt> and <tt>OUTDOOR</tt>, trolley position, parking slots state.</li>
  </ul>
  <br>
  In this <k>SPRINT</k> we will consider only the following use-cases:

@@ -202,12 +202,16 @@ div.imagedesc{
 <h2>Requirements</h2>
  
 <div class="remark">
-	<a href="TFBO21ParkingISS.pdf">Link to the requirementìs file.</a>
+	<a href="TFBO21ParkingISS.pdf">Link to the requirements file.</a>
 </div>
 
 </div>
 
 <h2>Summary of the previous SPRINT</h2>
+
+The <k>SPRINT 0</k> document can be found <a href="../../../../SPRINT0/modello/it.unibo.ParkManagerService/UserDocs/parkManagerService_0_c.html">here</a>.
+<br>
+<br>
 Logical architecture resulted from the Analysis of the <k>SPRINT 0</k>:
 <table style="width:100%" border="1">
 		<tr>
@@ -221,8 +225,7 @@ Logical architecture resulted from the Analysis of the <k>SPRINT 0</k>:
 			</tr>
 		</tr>
   </table>
-
-<h2>Requirement analysis</h2>
+<h2>In this SPRINT</h2>
  In this <k>SPRINT</k> we will include the <em>outsonar</em> and we will expand the parking slots from one to six spots. We will not consider any other elements (<tt>ParkServiceGUI</tt>, <tt>ParkServiceStatusGUI</tt>, <tt>parking-manager</tt>, <tt>fan</tt>, <tt>thermometer</tt>).
  <br>
  We are updating the previous work (see the <a href="../../SPRINT0/it.unibo.ParkManagerService/uderDocs/parkManagerService_0_c">documentation</a>) to handle a higher amount of clients and to complete the <em>acceptOUT</em> requirement, 
@@ -232,6 +235,11 @@ Logical architecture resulted from the Analysis of the <k>SPRINT 0</k>:
  At the end of the <k>SPRINT</k> at least six clients should be able to successfully park and exit. 
  Also, the system should be able to reject any client's parking request if every slot is occupied.
  </div>
+<h2>Requirement analysis</h2>
+ At the start of the application the parkingslot is always considered empty.
+ <br>
+ The client also clarified that we don't need to consider the direction that the trolley must face when it picks up a car.
+ <br>
  <br>
  Note: optional parts will not be discussed at this stage and will be implemented at the end.
  <br>
@@ -426,13 +434,7 @@ As stated in the previous <k>SPRINT</k>, this problem requires the communication
   </table>
  <br>
  <k>See here the <a href="img\legenda.png" target="img">Legenda</a>.</k>
- <!--
-	<li>(Currently an open point) How does the <tt>ParkManagerService</tt> makes sure that during the client interaction between the request to enter and the carenter message, the slot is given to the same client?
-	A client could receive the SLOTNUM, then not send a carenter. 
-	<br>
-	At the moment is assumed that the client always sends a carenter request, so the system keeps the slot occupied after the first request to park. 
-	</li>
- -->
+
  <br>
  <h3>Expected Time</h3>
  Starting from the model already built, the first protoype is expected to be developed in 1 day of work.

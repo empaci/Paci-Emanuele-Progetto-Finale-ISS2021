@@ -53,7 +53,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="clientMsg0",targetState="checkTimeout",cond=whenTimeout("local_tout_parkmanagerservice_accept"))   
 					transition(edgeName="clientMsg1",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="clientMsg2",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="clientMsg2",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="clientMsg3",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
@@ -108,7 +108,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="t35",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleCarEnter"))   
 					transition(edgeName="t36",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t37",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t37",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="t38",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
@@ -120,8 +120,9 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if(  coap.actorQakStateCoapObserver.readOutdoor()=="free"  
 						 ){if( checkMsgContent( Term.createTerm("outTokenid(TOKENID)"), Term.createTerm("outTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val TOKENID = "${payloadArg(0)}"  
-								 val SLOTNUM =  TOKENID.first()  
+								 TOKENID = "${payloadArg(0)}"  
+								if(  TOKENID != "0"  
+								 ){ val SLOTNUM =  TOKENID.first()  
 								solve("getCoordinates($SLOTNUM,X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
@@ -131,6 +132,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								 y = getCurSol("Y").toString().toInt()  
 								 forward("move", "move($x,$y)" ,"trolleylogic" )  
 								solve("pickup($TOKENID,$SLOTNUM)","") //set resVar	
+								}
 						}
 						}
 						stateTimer = TimerActor("timer_handleClientOut", 
@@ -139,7 +141,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					 transition(edgeName="t410",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleClientOut"))   
 					transition(edgeName="t411",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t412",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t412",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readWeight()!="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
 					transition(edgeName="t413",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
