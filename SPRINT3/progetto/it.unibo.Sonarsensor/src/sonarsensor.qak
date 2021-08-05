@@ -3,6 +3,7 @@ System -msglog model
 Dispatch sonarData : sonarData(D) 
 Event    local_sonarupdate   : local_sonarupdate(D)
 Dispatch sonarstatusupdate   : sonarstatusupdate(S)
+//Event    sonarrobot      : sonar( V ) 
 
 Context ctxsonarsensor ip [host="localhost" port=8071]
 
@@ -69,6 +70,17 @@ QActor sonarlogic context ctxsonarsensor {
 	State wait {
 	}
 	Transition t0 whenEvent local_sonarupdate -> applylogic
+				  //whenEvent sonarrobot -> outsonar 
+	/*
+	State outsonar {
+		printCurrentMessage
+		onMsg(sonarrobot : sonar( V ) ) {
+			[# val DISTANCE = "${payloadArg(0)}" #]
+		}
+	}
+	Goto wait
+	
+	*/
 	
 	State applylogic {
 		onMsg(local_sonarupdate : local_sonarupdate(D)) {
