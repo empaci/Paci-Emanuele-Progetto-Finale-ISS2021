@@ -25,8 +25,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t014",targetState="updatestatus",cond=whenDispatch("trolleystatusupdate"))
-					transition(edgeName="t015",targetState="handleMsg",cond=whenDispatch("stop"))
+					 transition(edgeName="t015",targetState="updatestatus",cond=whenDispatch("trolleystatusupdate"))
+					transition(edgeName="t016",targetState="handleMsg",cond=whenDispatch("stop"))
 				}	 
 				state("updatestatus") { //this:State
 					action { //it:State

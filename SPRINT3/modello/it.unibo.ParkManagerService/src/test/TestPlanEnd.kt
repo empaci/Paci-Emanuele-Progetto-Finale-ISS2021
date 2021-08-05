@@ -21,7 +21,7 @@ import org.junit.After
 import test.kotlin.CoapObserverForTesting
  
  
-class TestPlanUseCase1 {
+class TestPlanEnd {
 		
 	companion object{
 		var systemStarted         = false
@@ -125,3 +125,4 @@ class TestPlanUseCase1 {
 		}
 	}
 }
+

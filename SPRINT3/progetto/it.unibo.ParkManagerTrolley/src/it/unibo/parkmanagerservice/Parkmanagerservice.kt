@@ -20,29 +20,44 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				var counter=0 
 				var x = 0
 				var y = 0
+				var StartTime = 0L
+				var DURATION = 0L
+				var TOKENID = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = false
 						solve("consult('parking.pl')","") //set resVar	
 						solve("dynamic('freeSlot/1')","") //set resVar	
+						solve("dynamic('occupied/3')","") //set resVar	
 						solve("init(X)","") //set resVar	
+						StartTime = getCurrentTime()
 						coap.actorQakStateCoapObserver.activate(myself)
 						println("Starting ParkManagerService.")
+					}
+					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
+				}	 
+				state("checkTimeout") { //this:State
+					action { //it:State
+						DURATION = getDuration(StartTime)
+						solve("timedout($DURATION)","") //set resVar	
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 
 				state("accept") { //this:State
 					action { //it:State
 						println("ParkManagerServing accepting client requests...")
+						stateTimer = TimerActor("timer_accept", 
+							scope, context!!, "local_tout_parkmanagerservice_accept", 10000.toLong() )
 					}
-					 transition(edgeName="clientMsg0",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					 transition(edgeName="clientMsg0",targetState="checkTimeout",cond=whenTimeout("local_tout_parkmanagerservice_accept"))   
+					transition(edgeName="clientMsg1",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="clientMsg1",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="clientMsg2",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="clientMsg2",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="clientMsg3",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="clientMsg3",targetState="stoptrolley",cond=whenDispatch("stop"))
+					transition(edgeName="clientMsg4",targetState="stoptrolley",cond=whenDispatch("stop"))
 				}	 
 				state("handleClientRequest") { //this:State
 					action { //it:State
@@ -51,17 +66,11 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val requestType = "${payloadArg(0)}"  
 								if(  requestType == "in"  
-								 ){if(  coap.actorQakStateCoapObserver.readWeight()=="free"  
 								 ){solve("getFreeSlot(S)","") //set resVar	
 								 val SLOTNUM = getCurSol("S")  
-								updateResourceRep( "enter("+SLOTNUM+")"  
-								)
-								solve("occupySlot($SLOTNUM)","") //set resVar	
+								DURATION = getDuration(StartTime)
+								solve("occupySlot($SLOTNUM,0,$DURATION)","") //set resVar	
 								answer("clientRequest", "enter", "enter($SLOTNUM)"   )  
-								}
-								else
-								 {answer("clientRequest", "enter", "enter(0)"   )  
-								 }
 								}
 						}
 					}
@@ -73,7 +82,10 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("carenter(SLOTNUM)"), Term.createTerm("carenter(SLOTNUM)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val SLOTNUM = payloadArg(0).toInt()  
-								solve("indoor(X,Y)","") //set resVar	
+								solve("isFree($SLOTNUM,X)","") //set resVar	
+								 var FREE = getCurSol("X").toString()  
+								if(  FREE == "true"  
+								 ){solve("indoor(X,Y)","") //set resVar	
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
 								 forward("move", "move($x,$y)" ,"trolleylogic" )  
@@ -81,23 +93,26 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
 								 forward("move", "move($x,$y)" ,"trolleylogic" )  
-								 val TOKENID = "$SLOTNUM"+"$counter"  
+								 TOKENID = "$SLOTNUM"+"$counter"  
 								 counter++  
-								updateResourceRep( "receipt("+TOKENID+")"  
-								)
+								solve("assignToken($TOKENID,$SLOTNUM)","") //set resVar	
+								}
+								else
+								 { TOKENID = "0"  
+								 }
 								answer("carenter", "receipt", "receipt($TOKENID)"   )  
 						}
 						stateTimer = TimerActor("timer_handleCarEnter", 
 							scope, context!!, "local_tout_parkmanagerservice_handleCarEnter", 1000.toLong() )
 					}
-					 transition(edgeName="t34",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleCarEnter"))   
-					transition(edgeName="t35",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					 transition(edgeName="t35",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleCarEnter"))   
+					transition(edgeName="t36",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t36",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t37",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t37",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t38",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free"  && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t38",targetState="stoptrolley",cond=whenDispatch("stop"))
+					transition(edgeName="t39",targetState="stoptrolley",cond=whenDispatch("stop"))
 				}	 
 				state("handleClientOut") { //this:State
 					action { //it:State
@@ -115,20 +130,20 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								 x = getCurSol("X").toString().toInt()  
 								 y = getCurSol("Y").toString().toInt()  
 								 forward("move", "move($x,$y)" ,"trolleylogic" )  
-								solve("unoccupySlot($SLOTNUM)","") //set resVar	
+								solve("pickup($TOKENID,$SLOTNUM)","") //set resVar	
 						}
 						}
 						stateTimer = TimerActor("timer_handleClientOut", 
 							scope, context!!, "local_tout_parkmanagerservice_handleClientOut", 1000.toLong() )
 					}
-					 transition(edgeName="t49",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleClientOut"))   
-					transition(edgeName="t410",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					 transition(edgeName="t410",targetState="moveTrolleyHome",cond=whenTimeout("local_tout_parkmanagerservice_handleClientOut"))   
+					transition(edgeName="t411",targetState="handleClientRequest",cond=whenRequestGuarded("clientRequest",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t411",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t412",targetState="handleCarEnter",cond=whenRequestGuarded("carenter",{ coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t412",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
+					transition(edgeName="t413",targetState="handleClientOut",cond=whenDispatchGuarded("outTokenid",{ coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped"  
 					}))
-					transition(edgeName="t413",targetState="stoptrolley",cond=whenDispatch("stop"))
+					transition(edgeName="t414",targetState="stoptrolley",cond=whenDispatch("stop"))
 				}	 
 				state("moveTrolleyHome") { //this:State
 					action { //it:State

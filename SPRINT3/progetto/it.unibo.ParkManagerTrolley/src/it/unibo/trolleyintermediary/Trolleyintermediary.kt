@@ -27,7 +27,7 @@ class Trolleyintermediary ( name: String, scope: CoroutineScope  ) : ActorBasicF
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t021",targetState="handleCmd",cond=whenDispatch("basicmd"))
+					 transition(edgeName="t022",targetState="handleCmd",cond=whenDispatch("basicmd"))
 				}	 
 				state("handleCmd") { //this:State
 					action { //it:State
@@ -49,8 +49,8 @@ class Trolleyintermediary ( name: String, scope: CoroutineScope  ) : ActorBasicF
 					action { //it:State
 						request("step", "step(175)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t022",targetState="wait",cond=whenReply("stepdone"))
-					transition(edgeName="t023",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t023",targetState="wait",cond=whenReply("stepdone"))
+					transition(edgeName="t024",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepFailed") { //this:State
 					action { //it:State
@@ -62,8 +62,8 @@ class Trolleyintermediary ( name: String, scope: CoroutineScope  ) : ActorBasicF
 								request("step", "step($DIST)" ,"basicrobot" )  
 						}
 					}
-					 transition(edgeName="t124",targetState="wait",cond=whenReply("stepdone"))
-					transition(edgeName="t125",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t125",targetState="wait",cond=whenReply("stepdone"))
+					transition(edgeName="t126",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 			}
 		}

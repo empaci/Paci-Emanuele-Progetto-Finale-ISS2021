@@ -31,12 +31,12 @@ getFreeSlot(0). %solo se non si sono freeSlot liberi unfica con lo 0
 
 occupySlot(X,TOKEN,STARTIME) :- retract(freeSlot(X)), assert(occupied(TOKEN,STARTIME,X)).
 unoccupySlot(X) :- X>0, X<7, assert(freeSlot(X)).
-pickup(TOKEN,X) :- retract(occupied(TOKEN,_,X)).
+pickup(TOKEN,X) :- retract(occupied(TOKEN,_,X)), unoccupySlot(X).
 
 assignToken(TOKEN,X) :- retract(occupied(0,STARTIME,X)), assert(occupied(TOKEN,STARTIME,X)).
 
 timedout(CURRENTIME) :- findall(X,occupied(0,_,X),LIST), timedout(CURRENTIME,LIST).
-timedout(CURRENTIME,[H|T]) :- occupied(0,TIME,H), timemax(TMAX),  CURRENTIME > TIME + TMAX, pickup(0,TIME,H), unoccupySlot(H), timedout(CURRENTIME,T).
+timedout(CURRENTIME,[H|T]) :- occupied(0,TIME,H), timemax(TMAX),  CURRENTIME > TIME + TMAX, pickup(0,H), timedout(CURRENTIME,T).
 timedout(CURRENTIME, [_|T]) :- timedout(CURRENTIME,T).
 timedout(_,[]).
 

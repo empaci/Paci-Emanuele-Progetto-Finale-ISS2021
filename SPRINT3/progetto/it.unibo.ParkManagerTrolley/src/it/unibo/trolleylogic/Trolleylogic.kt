@@ -45,8 +45,8 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						 }
 						println("Waiting messages...")
 					}
-					 transition(edgeName="t016",targetState="handle",cond=whenDispatch("move"))
-					transition(edgeName="t017",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
+					 transition(edgeName="t017",targetState="handle",cond=whenDispatch("move"))
+					transition(edgeName="t018",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -132,14 +132,14 @@ class Trolleylogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_checkStop", 
 							scope, context!!, "local_tout_trolleylogic_checkStop", 200.toLong() )
 					}
-					 transition(edgeName="t118",targetState="wait",cond=whenTimeout("local_tout_trolleylogic_checkStop"))   
-					transition(edgeName="t119",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
+					 transition(edgeName="t119",targetState="wait",cond=whenTimeout("local_tout_trolleylogic_checkStop"))   
+					transition(edgeName="t120",targetState="stopped",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
 						forward("trolleystatusupdate", "trolleystatusupdate(stopped)" ,"transporttrolley" ) 
 					}
-					 transition(edgeName="t120",targetState="checkStart",cond=whenEvent("localtrolleyupdate"))
+					 transition(edgeName="t121",targetState="checkStart",cond=whenEvent("localtrolleyupdate"))
 				}	 
 				state("checkStart") { //this:State
 					action { //it:State

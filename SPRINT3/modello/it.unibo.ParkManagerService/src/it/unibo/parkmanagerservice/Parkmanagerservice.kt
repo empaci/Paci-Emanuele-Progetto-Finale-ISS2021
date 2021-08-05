@@ -29,6 +29,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						discardMessages = false
 						solve("consult('parking.pl')","") //set resVar	
 						solve("dynamic('freeSlot/1')","") //set resVar	
+						solve("dynamic('occupied/3')","") //set resVar	
 						solve("init(X)","") //set resVar	
 						StartTime = getCurrentTime()
 						coap.actorQakStateCoapObserver.activate(myself)
@@ -39,7 +40,6 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("checkTimeout") { //this:State
 					action { //it:State
 						DURATION = getDuration(StartTime)
-						println("--!-- DURATIONN $DURATION LETSGOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 						solve("timedout($DURATION)","") //set resVar	
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
@@ -121,7 +121,7 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("handleClientOut") { //this:State
 					action { //it:State
 						println("ParkManagerServing out.")
-						if(  coap.actorQakStateCoapObserver.readResponse()=="free"  
+						if(  coap.actorQakStateCoapObserver.readOutdoor()=="free"  
 						 ){if( checkMsgContent( Term.createTerm("outTokenid(TOKENID)"), Term.createTerm("outTokenid(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TOKENID = "${payloadArg(0)}"  
@@ -135,7 +135,6 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								 y = getCurSol("Y").toString().toInt()  
 								 forward("move", "move($x,$y)" ,"transporttrolley" )  
 								solve("pickup($TOKENID,$SLOTNUM)","") //set resVar	
-								solve("unoccupySlot($SLOTNUM)","") //set resVar	
 						}
 						}
 						stateTimer = TimerActor("timer_handleClientOut", 

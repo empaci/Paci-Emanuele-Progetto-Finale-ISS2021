@@ -314,7 +314,7 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
 
 <h2>Test plans</h2> 
 
-<h4>Test the new system </h4>
+<h4>Test the new timedout mechanism </h4>
  We simulate a <ks>N</ks> number of client, and we put a delay between two request to see if the previous request is discarded.
 <br> 
  To check if the test is successful we need to observe the parkmanager responses.
@@ -323,6 +323,7 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  <ul>
 	<li><em>INDOOR-area</em> is free.</li>
 	<li><em>OUTDOOR-area</em> is free.</li>
+	<li>Temperature <k>TA</k><<k>TMAX</k></li>
 	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
 	<li>The parking slots are not occupied.</li>
  </ul>
@@ -335,6 +336,27 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  <p>JUnit test: <a href="../src/test/TestPlanUseCase1.kt">TestPlanUseCase1.kt</a>
  <br>
 
+<h4>Test the complete system </h4>
+ We simulate a <ks>a)</ks> enterrequest, <ks>b)</ks> carenter and <ks>c)</ks> pickup request 2 seconds from each other.
+<br> 
+ To check if the test is successful we need to observe the parkmanager responses.
+ <br><br>
+ <ks>Starting conditions:</ks>
+ <ul>
+	<li><em>INDOOR-area</em> is free.</li>
+	<li><em>OUTDOOR-area</em> is free.</li>
+	<li>Temperature <k>TA</k><<k>TMAX</k></li>
+	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
+	<li>The parking slots are <ks>0&ltnfree&lt6</ks> free and <ks>0&ltnbusy&lt6</ks> occupied.</li>
+ </ul>
+ We expect that:
+ <ol>
+	
+ </ol> 
+ 
+ </ol>
+ <p>JUnit test: <a href="../src/test/TestPlanEnd.kt">TestPlanEnd.kt</a>
+ <br>
 
 <h2>Project</h2> 
  
@@ -367,11 +389,13 @@ Prolog has been modified following the Analysis:
 <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
-		>
 			<ol>
-				<li>.</li>
-				<li>.</li>
-				<li>.</li>
+				<li>After a <tt>requestin</tt> we find the best slot, according to the logic developed in the SPRINT 1, using <k>getFreeSlot(X)</k>. </li>
+				<li>Then we use <k>occupySlot(SLOTNUM,TOKENID,CURRENTIME)</k> which temporarily occupies the parking slot with <ks>TOKENID = 0</ks>.</li>
+				<li>If the client does a <tt>carenter</tt> we assign the new <tt>TOKENID</tt> with <k>assignToken(TOKENID,SLOTNUM)</k>.</li>
+				<li>After a pickup request we use <ks>pickup(TOKENID,SLOTNUM)</ks> to free the parking slot and remove the info about the occupied state.</li>
+				<li>Every 10 seconds our application calls <k>timedout(CURRENTIME)</k> which automatically get rid of the request that are stored more than <k>timemax</k> milliseconds ago with <ks>TOKENID=0</ks>, which means they are not really occupied by a car.</li>
+				<li>If a client does a <tt>carenter</tt> after a time above <k>timemax</k> if the parking slot is still free we procede normally, otherwise we responde with <tt>TOKENID</tt> = 0.</li>
 			</ol>
 		</td>
 		<td>

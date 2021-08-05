@@ -32,22 +32,35 @@ QActor parkmanagerservice context ctxparkmanager {
 		var counter=0 
 		var x = 0
 		var y = 0
+		var StartTime = 0L
+		var DURATION = 0L
+		var TOKENID = ""
 	#]
 	State s0 initial {
 		discardMsg Off
 		solve( consult("parking.pl"))
 		solve( dynamic("freeSlot/1") )
+		solve( dynamic("occupied/3") )
 		solve( init(X) )
+		
+		memoCurrentTime StartTime
 		
 		qrun coap.actorQakStateCoapObserver.activate( myself )
 		println("Starting ParkManagerService.")
 	}
 	Goto accept
 	
+	State checkTimeout {
+		setDuration DURATION from StartTime
+		solve ( timedout($DURATION) )
+	}
+	Goto accept
+	
 	State accept {
 		println("ParkManagerServing accepting client requests...")	
 	}
-	Transition clientMsg whenRequest clientRequest and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientRequest
+	Transition clientMsg  whenTime 10000 -> checkTimeout
+						 whenRequest clientRequest and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientRequest
 						 whenRequest carenter and [# coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleCarEnter
 						 whenMsg outTokenid and [# coap.actorQakStateCoapObserver.readOutdoor()=="free" && coap.actorQakStateCoapObserver.readTrolley()!="stopped" #] -> handleClientOut
 						 whenMsg stop -> stoptrolley
@@ -58,19 +71,14 @@ QActor parkmanagerservice context ctxparkmanager {
 			[# val requestType = "${payloadArg(0)}" #]
 			if [# requestType == "in" #] {
 				
-				if [# coap.actorQakStateCoapObserver.readWeight()=="free" #] {
-				
-					solve( getFreeSlot( S ) )
-					[# val SLOTNUM = getCurSol("S") #]
-					updateResource [# "enter("+SLOTNUM+")" #]
+				solve( getFreeSlot( S ) )
+				[# val SLOTNUM = getCurSol("S") #]
+				//updateResource [# "enter("+SLOTNUM+")" #]
 					
-					solve( occupySlot( $SLOTNUM ) ) // let's assume at the moment that the client is going to do carenter
+				setDuration DURATION from StartTime
+				solve( occupySlot( $SLOTNUM, 0, $DURATION) )
 				
-					replyTo clientRequest with  enter :  enter( $SLOTNUM )	
-				}
-				else {
-					replyTo clientRequest with  enter :  enter( 0 ) //at the moment the client is refused if the indoor area is occupied
-				}
+				replyTo clientRequest with  enter :  enter( $SLOTNUM )	
 			}
 		}
 	}
@@ -81,27 +89,33 @@ QActor parkmanagerservice context ctxparkmanager {
 		onMsg(carenter : carenter(SLOTNUM)) {
 			[# val SLOTNUM = payloadArg(0).toInt() #]
 			
-			solve( indoor(X,Y) )
-			[# x = getCurSol("X").toString().toInt() #]
-			[# y = getCurSol("Y").toString().toInt() #]
+			solve( isFree($SLOTNUM,X) )
+			[# var FREE = getCurSol("X").toString() #]
 			
-			//forward transporttrolley -m move : move($x,$y)
-			[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
+			if [# FREE == "true" #] {
 			
-			
-			solve( getCoordinates($SLOTNUM,X,Y) )
-			[# x = getCurSol("X").toString().toInt() #]
-			[# y = getCurSol("Y").toString().toInt() #]
-
-			//forward transporttrolley -m move : move($x,$y)
-			//[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
-			[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
-					
-			[# val TOKENID = "$SLOTNUM"+"$counter" #]
-			[# counter++ #]
-			
-			
-			updateResource [# "receipt("+TOKENID+")" #]
+				solve( indoor(X,Y) )
+				[# x = getCurSol("X").toString().toInt() #]
+				[# y = getCurSol("Y").toString().toInt() #]
+				
+				//forward transporttrolley -m move : move($x,$y)
+				[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
+				
+				
+				solve( getCoordinates($SLOTNUM,X,Y) )
+				[# x = getCurSol("X").toString().toInt() #]
+				[# y = getCurSol("Y").toString().toInt() #]
+	
+				//forward transporttrolley -m move : move($x,$y)
+				[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
+						
+				[# TOKENID = "$SLOTNUM"+"$counter" #]
+				[# counter++ #]
+				
+				solve( assignToken( $TOKENID, $SLOTNUM) )
+			} else {
+				[# TOKENID = "0" #]
+			}
 					
 			replyTo carenter with  receipt :  receipt( $TOKENID )
 		}
@@ -131,10 +145,9 @@ QActor parkmanagerservice context ctxparkmanager {
 				[# y = getCurSol("Y").toString().toInt() #]
 					
 				//forward transporttrolley -m move : move($x,$y)
-				//[# forward("move", "move($x,$y)" ,"transporttrolley" ) #]
 				[# forward("move", "move($x,$y)" ,"trolleylogic" ) #]
 					
-				solve( unoccupySlot( $SLOTNUM ) ) 
+				solve( pickup($TOKENID,$SLOTNUM) ) 
 			}
 		}
 	}
