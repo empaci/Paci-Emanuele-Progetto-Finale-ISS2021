@@ -341,7 +341,7 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
  <br>
 
 <h4>Test the complete system </h4>
- We simulate a <ks>a)</ks> enterrequest, <ks>b)</ks> carenter and <ks>c)</ks> pickup request 2 seconds from each other.
+ To test that the system parking element works correctely we can simulate a <ks>a)</ks> enterrequest, <ks>b)</ks> carenter and <ks>c)</ks> pickup request 2 seconds from each other.
 <br> 
  To check if the test is successful we need to observe the parkmanager responses.
  <br><br>
@@ -353,13 +353,36 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
 	<li><tt>Transport Trolley</tt> is <em>home</em> (not stopped).</li>
 	<li>The parking slots are <ks>0&ltnfree&lt6</ks> free and <ks>0&ltnbusy&lt6</ks> occupied.</li>
  </ul>
- We expect that:
- <ol>
-	
- </ol> 
- 
+ <ks>We expect the following operation from the system:</ks>
+ <ol style="PADDING-LEFT: 12px">
+	<li>After <ks>a)</ks> the system responds with the free parking slot numbered: <ks>nfree</ks>+1.</li>
+	<li>After <ks>b)</ks> the system responds with the token composed by: "'<ks>nfree</ks>+1<ks>'nfree</ks>".</li>
+	<li>The trolley moves to the <tt>INDOOR</tt>.</li>
+	<li>The trolley moves to the designed parking slot.</li>
+	<li>After <ks>c)</ks> the trolley moves to the <tt>OUTDOOR</tt>.</li>
+	<li>The trolley waits and moves <tt>home</tt>.</li>
  </ol>
- <p>JUnit test: <a href="../src/test/TestPlanEnd.kt">TestPlanEnd.kt</a>
+  <ks>We expect the following changes in the state of the system:</ks>
+ <ol style="PADDING-LEFT: 12px">
+	<li>Nothing changes after <ks>a)</ks>.</li>
+	<li>Before <ks>b)</ks> the <tt>weightensor</tt> changes state to <tt>occupied</tt>.</li>
+	<li>After <ks>b)</ks> the trolley state changes to <tt>working</tt>.</li>
+	<li>After the trolley moved to the <tt>INDOOR</tt> the <tt>weightsensor</tt> changes the state to <ks>free</ks>.</li>
+	<li>After <ks>c)</ks> and the trolley moved to the <tt>OUTDOOR</tt> the <tt>sonarsensor</tt> changes state to <ks>occupied</ks>.</li>
+	<li>The trolley arrives <tt>home</tt> and changes the state to <tt>idle</tt>.</li>
+ </ol>
+ <ks>We expect the parking-manager to observe all the changes in the resources.</ks>
+ <br>
+ <br>
+ <ks>We expect the client to observe:</ks>
+ <ol style="PADDING-LEFT: 12px">
+	<li>A wait message after <ks>a)</ks>.</li>
+	<li>An succesful message after receiveing the <tt>SLOTNUMBER</tt>.</li>
+	<li>The receipt after <ks>b)</ks>.</li>
+	<li>A wait message after <ks>d)</ks>.</li>
+ </ol>
+ <br>
+ <p>JUnit test: <a href="../src/test/TestPlanEnd.kt">TestPlanEnd.kt</a> (without showing the graphic interfaces)
  <br>
 
 <h2>Project</h2> 
@@ -389,7 +412,7 @@ As stated in the <k>SPRINT 0</k> this problem requires the communications of dif
 </table>
 
 <h3>New Parkmanagerservice logic</h3>
-Prolog has been modified following the Analysis:
+The prolog logic has been modified following the Analysis:
 <table style="width:100%" border="1">
 	<tr>
 		<td style="width:50%">
@@ -401,6 +424,7 @@ Prolog has been modified following the Analysis:
 				<li>Every 10 seconds our application calls <k>timedout(CURRENTIME)</k> which automatically get rid of the request that are stored more than <k>timemax</k> milliseconds ago with <ks>TOKENID=0</ks>, which means they are not really occupied by a car.</li>
 				<li>If a client does a <tt>carenter</tt> after a time above <k>timemax</k> if the parking slot is still free we procede normally, otherwise we responde with <tt>TOKENID</tt> = 0.</li>
 			</ol>
+			See <a href="../parking.pl">parking.pl</a>.
 		</td>
 		<td>
 			<img src="img\explProlog.png" width="100%">

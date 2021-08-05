@@ -28,6 +28,7 @@ class TestPlanEnd {
 		val channelSyncStart      = Channel<String>()
 		var testingObserver1       : CoapObserverForTesting? = null
 		var myactor               : ActorBasic? = null
+		val nfree				  = 3
 
 		@JvmStatic
         @BeforeClass
@@ -85,42 +86,64 @@ class TestPlanEnd {
 	
 			testingObserver1!!.addObserver( channelForObserverT,"park")
 			
-			val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
-			MsgUtil.sendMsg(reqin, myactor!!)
-			result = channelForObserverT.receive()
-			assertEquals( result, "park(1)")
+				val weightactor : ActorBasic? = QakContext.getActor("weightsensor")
+			//inizziaizzazione: occupa i primi nfree parcheggi
+			for (i in 1..nfree) {
+				val reqin = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
+				MsgUtil.sendMsg(reqin, myactor!!)
+				
+				var wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
+				MsgUtil.sendMsg(wdata, weightactor!!)
+				
+				delay(1000)
+				
+				val reqen = MsgUtil.buildRequest("tester","carenter","carenter($i)","parkmanagerservice")
+				MsgUtil.sendMsg(reqen, myactor!!)
+				
+				delay(1000)
+				
+				wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
+				MsgUtil.sendMsg(wdata, weightactor!!)
+			}
 			
-			
-			val reqen = MsgUtil.buildRequest("tester","carenter","carenter(1)","parkmanagerservice")
-			MsgUtil.sendMsg(reqen, myactor!!)
-			
-			
-			result = channelForObserverT.receive()
-			assertEquals( result, "park(10)")
-			
-			
-			val reqin2 = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
-			MsgUtil.sendMsg(reqin2, myactor!!)
-			
-			result = channelForObserverT.receive()
-			assertEquals( result, "park(2)")
-			
-			delay(40000)
 			
 			val reqin3 = MsgUtil.buildRequest("tester","clientRequest","clientRequest(in)","parkmanagerservice")
 			MsgUtil.sendMsg(reqin3, myactor!!)
 			
-			result = channelForObserverT.receive()
-			assertEquals( result, "park(2)") //senza delay dovrebbe essere 3
+			val expectedSlot = nfree+1
 			
-			val reqen2 = MsgUtil.buildRequest("tester","carenter","carenter(2)","parkmanagerservice")
+			result = channelForObserverT.receive()
+			assertEquals( result, "park($expectedSlot)") //senza delay dovrebbe essere 3
+			
+			delay(2000)
+			
+			var wdata = MsgUtil.buildDispatch("tester","weightData","weightData(100)","weightsensor")
+				MsgUtil.sendMsg(wdata, weightactor!!)
+				
+			delay(1000)
+			
+			val reqen2 = MsgUtil.buildRequest("tester","carenter","carenter($expectedSlot)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen2, myactor!!)
 			
+			delay(1000)
+				
+			wdata = MsgUtil.buildDispatch("tester","weightData","weightData(0)","weightsensor")
+			MsgUtil.sendMsg(wdata, weightactor!!)
+			
+			val expectedToken = "" + "$expectedSlot"+"$nfree"
+			
 			result = channelForObserverT.receive()
-			assertEquals( result, "park(21)")
+			assertEquals( result, "park($expectedToken)")
+			
+			delay(2000)
+			
+			val reqen3 = MsgUtil.buildRequest("tester","outTokenId","outTokenId($expectedToken)","parkmanagerservice")
+			MsgUtil.sendMsg(reqen3, myactor!!)
 			
 			
-			//testingObserver1!!.removeObserver()
+			//result = channelForObserverT.receive()
+			//assertEquals( result, "park($expectedNum)")
+			
 			
 		}
 	}
