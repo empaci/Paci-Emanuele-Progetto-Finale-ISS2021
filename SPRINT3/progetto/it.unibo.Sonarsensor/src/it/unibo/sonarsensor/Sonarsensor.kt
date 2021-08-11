@@ -25,17 +25,21 @@ class Sonarsensor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				}	 
 				state("wait") { //this:State
 					action { //it:State
-						println("Sonarsensor waiting for data...")
 					}
 					 transition(edgeName="t00",targetState="handleData",cond=whenDispatch("sonarData"))
 					transition(edgeName="t01",targetState="updateStatus",cond=whenDispatch("sonarstatusupdate"))
+					transition(edgeName="t02",targetState="handleData",cond=whenEvent("sonarrobot"))
 				}	 
 				state("handleData") { //this:State
 					action { //it:State
-						println("Weightsensor received data")
 						if( checkMsgContent( Term.createTerm("sonarData(D)"), Term.createTerm("sonarData(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var DISTANCE = "${payloadArg(0)}"  
+								emit("local_sonarupdate", "local_sonarupdate($DISTANCE)" ) 
+						}
+						if( checkMsgContent( Term.createTerm("sonar(V)"), Term.createTerm("sonar(V)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val DISTANCE = "${payloadArg(0)}"  
 								emit("local_sonarupdate", "local_sonarupdate($DISTANCE)" ) 
 						}
 					}

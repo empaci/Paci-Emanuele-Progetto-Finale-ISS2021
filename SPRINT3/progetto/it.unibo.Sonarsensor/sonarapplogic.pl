@@ -1,6 +1,6 @@
 % prevDist(0).
 delta(5).
-dtfree(5000).
+dtfree(10000).
 statusFree(free).
 statusOccupied(occupied).
 
@@ -18,5 +18,5 @@ modifyStatus(DISTANCE,X) :-  delta(DELTA), prevDist(PD), V is PD-DISTANCE, myabs
 modifyStatus(_,X) :- false(X).
 
 % return the current status
-getStatus(DISTANCE,X) :- DISTANCE == 0, !, statusFree(X).
+getStatus(DISTANCE,X) :- DISTANCE >= 50, !, statusFree(X).
 getStatus(_,X) :- statusOccupied(X).

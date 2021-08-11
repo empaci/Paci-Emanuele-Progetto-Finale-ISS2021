@@ -169,12 +169,12 @@ class TestPlanEnd {
 			result = channelForObserverW.receive()
 			assertEquals( result, "free")
 			
-			delay(2000)
+			delay(1000)
 			
-			val reqen3 = MsgUtil.buildDispatch("tester","outTokenId","outTokenId($expectedToken)","parkmanagerservice")
+			val reqen3 = MsgUtil.buildDispatch("tester","outTokenid","outTokenid($expectedToken)","parkmanagerservice")
 			MsgUtil.sendMsg(reqen3, myactor!!)
 			
-			delay(10000)
+			delay(30000)
 			
 		}
 	}

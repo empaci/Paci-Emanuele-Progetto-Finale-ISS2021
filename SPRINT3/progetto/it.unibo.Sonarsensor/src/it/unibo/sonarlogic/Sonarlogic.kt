@@ -17,12 +17,12 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		
-				var STATUS=""
+				var STATUS="free"
 				var DTFREE = 0L
 				var TIMER = 0L
-				var prevState = ""
+				var prevState = "free"
 				var StartTime = 0L
-				var Duration = 0L
+				var DURATION = 0L
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -41,7 +41,7 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("wait") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t02",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
+					 transition(edgeName="t03",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
 				}	 
 				state("applylogic") { //this:State
 					action { //it:State
@@ -59,9 +59,9 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 								}
 						}
 					}
-					 transition( edgeName="goto",targetState="stateOccupied", cond=doswitchGuarded({ STATUS=="occupied" 
+					 transition( edgeName="goto",targetState="stateOccupied", cond=doswitchGuarded({ STATUS=="occupied"  
 					}) )
-					transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({! ( STATUS=="occupied" 
+					transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({! ( STATUS=="occupied"  
 					) }) )
 				}	 
 				state("stateOccupied") { //this:State
@@ -69,25 +69,20 @@ class Sonarlogic ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if(  prevState=="free" && STATUS=="occupied"  
 						 ){StartTime = getCurrentTime()
 						}
-						else
-						 {if(  prevState=="occupied" && STATUS=="occupied" 
-						  ){Duration = getDuration(StartTime)
-						 }
-						 }
-						 TIMER = DTFREE - Duration  
+						DURATION = getDuration(StartTime)
+						 TIMER = DTFREE - DURATION  
 						if(  TIMER < 0  
 						 ){ TIMER = 0  
 						}
-						println("Duration $Duration TIMER $TIMER")
+						println("StartTime $StartTime Duration $DURATION TIMER $TIMER")
 						stateTimer = TimerActor("timer_stateOccupied", 
 							scope, context!!, "local_tout_sonarlogic_stateOccupied", TIMER )
 					}
-					 transition(edgeName="t03",targetState="timeout",cond=whenTimeout("local_tout_sonarlogic_stateOccupied"))   
-					transition(edgeName="t04",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
+					 transition(edgeName="t04",targetState="timeout",cond=whenTimeout("local_tout_sonarlogic_stateOccupied"))   
+					transition(edgeName="t05",targetState="applylogic",cond=whenEvent("local_sonarupdate"))
 				}	 
 				state("timeout") { //this:State
 					action { //it:State
-						println("Update the state")
 						forward("sonarstatusupdate", "sonarstatusupdate(timeout)" ,"sonarsensor" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

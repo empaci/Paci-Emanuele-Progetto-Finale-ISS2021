@@ -12,12 +12,12 @@ import org.eclipse.californium.core.CoapHandler
 import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch 
  
-class actorQakResourceCoapObserver(destactor : String, port : String, context : String) {
+class actorQakResourceCoapObserver(destactor : String, port : String, context : String, addr : String) {
 
     private val client = CoapClient()
 	
 	private var port 		= "8070"
-	private val ipaddr      = "localhost:" 
+	private var ipaddr      = "localhost" 
 	private var context     = "ctxparkmanager"
  	private var destactor   = "weightsensor"
 	private var content     = ""
@@ -27,12 +27,13 @@ class actorQakResourceCoapObserver(destactor : String, port : String, context : 
 		this.destactor = destactor
 		this.port = port
 		this.context = context
+		this.ipaddr = addr
 	}
 	
 @kotlinx.coroutines.ObsoleteCoroutinesApi
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 	 fun activate( owner: ActorBasic? = null){
-       val uriStr = "coap://$ipaddr$port/$context/$destactor"
+       val uriStr = "coap://$ipaddr:$port/$context/$destactor"
 	   println("actortQakCoapObserver | START uriStr: $uriStr")
        client.uri = uriStr
        client.observe(object : CoapHandler {

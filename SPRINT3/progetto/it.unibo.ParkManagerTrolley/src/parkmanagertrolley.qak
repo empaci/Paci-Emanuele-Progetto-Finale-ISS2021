@@ -392,11 +392,11 @@ QActor trolleyintermediary context ctxparkmanager {
 
 QActor parkingstate context ctxparkmanager {
 	[#
-		var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor","8071","ctxsonarsensor")
-		var weightobs = coap.actorQakResourceCoapObserver("weightsensor","8072","ctxweightsensor")
-		var thermometerobs = coap.actorQakResourceCoapObserver("thermometer","8073","ctxthermometer")
-		var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley","8070","ctxparkmanager")
-		var fanobs = coap.actorQakResourceCoapObserver("fan","8074","ctxfan")
+		var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor","8071","ctxsonarsensor","192.168.1.78")
+		var weightobs = coap.actorQakResourceCoapObserver("weightsensor","8072","ctxweightsensor","localhost")
+		var thermometerobs = coap.actorQakResourceCoapObserver("thermometer","8073","ctxthermometer","localhost")
+		var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley","8070","ctxparkmanager","localhost")
+		var fanobs = coap.actorQakResourceCoapObserver("fan","8074","ctxfan","localhost")
 		
 		var prevsonar = ""
 		var prevweight = ""
@@ -417,6 +417,7 @@ QActor parkingstate context ctxparkmanager {
 	Goto wait
 	
 	State wait {
+		
 		if [# prevsonar != sonarobs.readContent() || prevweight !=  weightobs.readContent() || prevthermometer != thermometerobs.readContent() || prevtrolley != trolleyobs.readContent() || prevfan != fanobs.readContent() #] {
 			updateResource [# "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent()#]
 			[# 
@@ -427,8 +428,9 @@ QActor parkingstate context ctxparkmanager {
 				prevfan = fanobs.readContent()
 			#]
 		}
+		
 		//updateResource [# "sonar:" + sonarobs.readContent() + "weight:" + weightobs.readContent() + "thermometer:" + thermometerobs.readContent() + "trolley:" + trolleyobs.readContent() + "fan:" + fanobs.readContent()#]
 	}
-	Transition t0 whenTime 300 -> wait
+	Transition t0 whenTime 500 -> wait
 	
 }
