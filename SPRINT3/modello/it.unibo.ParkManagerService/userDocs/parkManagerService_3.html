@@ -439,7 +439,7 @@ The prolog logic has been modified following the Analysis:
 <h3>Deployment-1a: on PC and raspberry</h3>
 <table style="width:100%" border="1">
 	<tr>
-		<td style="width:60%">
+		<td style="width:70%">
 			<center><img src="img\deployment1a.png" width="100%" height="100%"></center>
 			<ol>
 				<li>Launch <ks>basicrobot</ks>, <ks>weightsensor</ks>, <ks>sonarsensor</ks>, <ks>thermometer</ks>, <ks>fan</ks> and <ks>ParkmanagerTrolley</ks> on <k>PC</k>.</li>
@@ -451,7 +451,45 @@ The prolog logic has been modified following the Analysis:
 			</ol>
 		</td>
 		<td>
-		
+			Deployment <ks>it.unibo.SonarOnRasp</ks> on <k>raspberryPi</k>:
+			<ol>
+				<li>Inside <tt>it.unibo.SonarOnRasp</tt> run:</li> 
+				<pre>
+gradle  -b build2021.gradle distTar
+				</pre>
+				<li>Copy from <tt>build/distribuition</tt> <k>it.unibo.rasp2021-1.0.tar</k> on raspberry</li>
+				<li>Extract the content:</li>
+				<pre>
+tar -xvf it.unibo.rasp2021-1.0.tar
+				</pre>
+				<li>Copy in <tt>it.unibo.rasp2021-1.0/bin</tt>: <ks>sysRules.pl</ks>, <ks>sonaronrasp.pl</ks>, <ks>sonar2021ConfigKb.pl</ks></li>
+				<li>Copy from <tt>resources/rasp/sonar</tt> <k>SonarAlone.c</k> in <tt>it.unibo.rasp2021-1.0/bin</tt></li>
+				<li>Compile <k>SonarAlone.c</k></li>
+					<pre>
+g++  SonarAlone.c -l wiringPi -o  SonarAlone
+					</pre>
+				<li>Run:</li>
+				<pre>
+bash it.unibo.rasp2021
+				</pre>
+			</ol>
+			<pre>
+			<p style="font-size:10px">
+<tt>pi@raspberrypi</tt>:~/progetto/SPRINT3/it.unibo.rasp2021-1.0/bin $ <k>bash it.unibo.rasp2021</k>
+    %%% sysUtil | createTheContext ctxsonaronrasp FOR host=localhost
+    %%% CoapResourceCtx ctxsonaronrasp | created
+    %%% QakContext |  localhost:8068 INIT
+    %%%  ActorBasic  serverctxsonaronrasp |  msg= msg(start,dispatch,serverctxsonaronrasp,
+serverctxsonaronrasp,startQakContextServer,3)
+    %%% QakContextServer serverctxsonaronrasp | READY TO RECEIVE TCP CONNS on 8068
+    %%% QakContext ctxsonaronrasp |  serverCoap started on port: 8068
+    %%% sysUtil | createTheContext ctxsonarsensor for DIFFERENT host=127.0.0.1}
+    %%% CoapResourceCtx ctxsonarsensor | created
+    %%% sysUtil | FOR ACTIVATED CONTEXT ctxsonaronrasp: ADDING A PROXY to ctxsonarsensor
+    %%% QakContext ctxsonaronrasp | addCtxProxy ctxsonarsensor
+    %%% NodeProxy proxyctxsonarsensor | in ctxsonaronrasp PROXY DONE TO 127.0.0.1:8071
+	</p>
+			</pre>
 		</td>
 	</tr>
 </table>

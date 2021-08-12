@@ -17,7 +17,7 @@ class Parkingstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		
-				var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor","8071","ctxsonarsensor","192.168.1.78")
+				var sonarobs = coap.actorQakResourceCoapObserver("sonarsensor","8071","ctxsonarsensor","localhost")
 				var weightobs = coap.actorQakResourceCoapObserver("weightsensor","8072","ctxweightsensor","localhost")
 				var thermometerobs = coap.actorQakResourceCoapObserver("thermometer","8073","ctxthermometer","localhost")
 				var trolleyobs = coap.actorQakResourceCoapObserver("transporttrolley","8070","ctxparkmanager","localhost")
