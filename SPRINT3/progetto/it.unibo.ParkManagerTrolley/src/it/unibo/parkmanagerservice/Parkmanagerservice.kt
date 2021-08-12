@@ -41,7 +41,6 @@ class Parkmanagerservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					action { //it:State
 						DURATION = getDuration(StartTime)
 						solve("timedout($DURATION)","") //set resVar	
-						 println("O: " + coap.actorQakStateCoapObserver.readOutdoor())  
 					}
 					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 

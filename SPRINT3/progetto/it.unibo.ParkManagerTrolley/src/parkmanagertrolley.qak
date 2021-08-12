@@ -53,7 +53,6 @@ QActor parkmanagerservice context ctxparkmanager {
 	State checkTimeout {
 		setDuration DURATION from StartTime
 		solve ( timedout($DURATION) )
-		[# println("O: " + coap.actorQakStateCoapObserver.readOutdoor()) #]
 	}
 	Goto accept
 	

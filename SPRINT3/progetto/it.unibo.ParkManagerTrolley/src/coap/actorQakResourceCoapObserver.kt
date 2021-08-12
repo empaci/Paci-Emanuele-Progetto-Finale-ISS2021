@@ -57,7 +57,7 @@ class actorQakResourceCoapObserver(destactor : String, port : String, context : 
 	}
 	
 	fun readContent() : String {
-		System.out.println("CoapSupport $destactor | readResponse content: " + content);
+		//System.out.println("CoapSupport $destactor | readResponse content: " + content);
 		return content;
 	}
 	
