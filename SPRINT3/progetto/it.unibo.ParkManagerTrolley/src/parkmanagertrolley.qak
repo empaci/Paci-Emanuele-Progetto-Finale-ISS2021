@@ -22,7 +22,7 @@ Reply   stepdone   : stepdone(V)
 Reply   stepfail   : stepfail(DURATION, CAUSE)
 
 Context ctxparkmanager ip [host="localhost" port=8070]
-Context ctxclient ip [host="192.168.1.68" port=8069]
+//Context ctxclient ip [host="192.168.1.68" port=8069]
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020]    
 
 ExternalQActor basicrobot context ctxbasicrobot
@@ -53,6 +53,7 @@ QActor parkmanagerservice context ctxparkmanager {
 	State checkTimeout {
 		setDuration DURATION from StartTime
 		solve ( timedout($DURATION) )
+		[# println("O: " + coap.actorQakStateCoapObserver.readOutdoor()) #]
 	}
 	Goto accept
 	

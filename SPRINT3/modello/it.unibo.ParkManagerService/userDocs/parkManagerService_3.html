@@ -442,11 +442,29 @@ The prolog logic has been modified following the Analysis:
 		<td style="width:60%">
 			<center><img src="img\deployment1a.png" width="100%" height="100%"></center>
 			<ol>
-				<li>Launch <ks>weightsensor</ks>, <ks>thermometer</ks>, <ks>fan</ks> and <ks>ParkmanagerTrolley</ks> on <k>PC</k></li>
-				<li>Test with the <a href="../pythonMocks">Mocks</a></li>
-				<li>Launch <ks>basicrobot</ks> on <k>PC</k></li>
-				<li>Launch <ks><ks>sonarsensor</ks></ks> on <k>RaspberryPi</k></li>
-				<li>Laucnh <ks>parkmanagerstatus</ks></li>
+				<li>Launch <ks>basicrobot</ks>, <ks>weightsensor</ks>, <ks>sonarsensor</ks>, <ks>thermometer</ks>, <ks>fan</ks> and <ks>ParkmanagerTrolley</ks> on <k>PC</k>.</li>
+				<li>Test with the <a href="../pythonMocks">Mocks</a>.</li>
+				<li>Launch <ks>sonaronrasp</ks> on <k>RaspberryPi</k>.</li>
+				<li>Launch <ks>parkServiceStatus</ks>.</li>
+				<li>Go to: http://localhost:8083/manager</li>
+				<li>Go to: http://localhost:8083/client</li>
+			</ol>
+		</td>
+		<td>
+		
+		</td>
+	</tr>
+</table>
+<h3>Deployment-1b: on PC and raspberry</h3>
+<table style="width:100%" border="1">
+	<tr>
+		<td style="width:60%">
+			<center><img src="img\deployment1b.png" width="100%" height="100%"></center>
+			<ol>
+				<li>Launch <ks>basicrobot</ks>, <ks>weightsensor</ks>, <ks>sonarsensor</ks>, <ks>thermometer</ks>, <ks>fan</ks> and <ks>ParkmanagerTrolley</ks> on <k>PC</k>.</li>
+				<li>Test with the <a href="../pythonMocks">Mocks</a>.</li>
+				<li>Launch <ks>sonaronrasp</ks> and <ks>sonarsensor</ks> on <k>RaspberryPi</k>.</li>
+				<li>Launch <ks>parkServiceStatus</ks></li>
 				<li>Go to: http://localhost:8083/manager</li>
 				<li>Go to: http://localhost:8083/client</li>
 			</ol>
